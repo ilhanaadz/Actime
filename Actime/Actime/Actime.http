@@ -1,0 +1,6 @@
+@Actime_HostAddress = http://localhost:5171
+
+GET {{Actime_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
