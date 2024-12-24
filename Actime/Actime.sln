@@ -5,6 +5,10 @@ VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actime", "Actime\Actime.csproj", "{49DF2210-D402-4D6F-BDA4-E27F9B788BC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actime.Model", "Actime.Model\Actime.Model.csproj", "{6B9478F8-5E7F-47D1-8A4C-83B1FE7F9FBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actime.Services", "Actime.Services\Actime.Services.csproj", "{1C9BBB57-7AB1-4470-A2DE-11385E7E7461}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{49DF2210-D402-4D6F-BDA4-E27F9B788BC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49DF2210-D402-4D6F-BDA4-E27F9B788BC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49DF2210-D402-4D6F-BDA4-E27F9B788BC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B9478F8-5E7F-47D1-8A4C-83B1FE7F9FBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B9478F8-5E7F-47D1-8A4C-83B1FE7F9FBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B9478F8-5E7F-47D1-8A4C-83B1FE7F9FBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B9478F8-5E7F-47D1-8A4C-83B1FE7F9FBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C9BBB57-7AB1-4470-A2DE-11385E7E7461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C9BBB57-7AB1-4470-A2DE-11385E7E7461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C9BBB57-7AB1-4470-A2DE-11385E7E7461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C9BBB57-7AB1-4470-A2DE-11385E7E7461}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
