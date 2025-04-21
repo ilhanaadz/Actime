@@ -7,10 +7,10 @@
         public int OrganizationId { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;
         public DateTime? EndDate { get; set; }
-        public int MembershipStatusId { get; set; } //add table
-        public int RoleId { get; set; }
+        public int MembershipStatusId { get; set; }
        
         public virtual User User { get; set; } = null!;
         public virtual Organization Organization { get; set; } = null!;
+        public virtual MembershipStatus MembershipStatus { get; set; } = null!;
     }
 }

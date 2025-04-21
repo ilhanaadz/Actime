@@ -18,5 +18,7 @@ namespace Actime.Services.Database
         public int LocationId { get; set; }
         
         public virtual Organization Organization { get; set; } = null!;
+        public virtual ActivityType ActivityType { get; set; } = null!;
+        public virtual Location Location { get; set; } = null!;
     }
 }

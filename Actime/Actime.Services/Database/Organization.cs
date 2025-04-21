@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Actime.Services.Database
+﻿namespace Actime.Services.Database
 {
     public class Organization : SoftDeleteEntity
     {
@@ -14,7 +8,11 @@ namespace Actime.Services.Database
         public string? Description { get; set; }
         public string? LogoUrl { get; set; }
         public string? PhoneNumber { get; set; }
-        public int CategoryId { get; set; } //Add category obj
+        public int CategoryId { get; set; }
         public int AddressId { get; set; }
+
+        public virtual Category Category { get; set; } = null!;
+        public virtual Address Address { get; set; } = null!;
+        public virtual ICollection<Membership> Memberships { get; set; } = new HashSet<Membership>();
     }
 }

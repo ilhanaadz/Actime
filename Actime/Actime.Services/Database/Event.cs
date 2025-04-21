@@ -16,7 +16,9 @@
         public int ActivityTypeId { get; set; }
 
         public virtual Organization Organization { get; set; } = null!;
-
-
+        public virtual Location Location { get; set; } = null!;
+        public virtual EventStatus EventStatus { get; set; } = null!;
+        public virtual ActivityType ActivityType { get; set; } = null!;
+        public virtual ICollection<Participation> Participations { get; set; } = new HashSet<Participation>();
     }
 }
