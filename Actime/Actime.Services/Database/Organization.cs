@@ -14,5 +14,6 @@
         public virtual Category Category { get; set; } = null!;
         public virtual Address Address { get; set; } = null!;
         public virtual ICollection<Membership> Memberships { get; set; } = new HashSet<Membership>();
+        public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
     }
 }

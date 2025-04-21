@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Actime.Services.Database
+﻿namespace Actime.Services.Database
 {
     public class Schedule
     {
@@ -13,7 +7,7 @@ namespace Actime.Services.Database
         public required string DayOfWeek { get; set; }
         public TimeOnly? StartTime { get; set; }
         public TimeOnly? EndTime { get; set; }
-        public int ActivityTypeId { get; set; } //NOTE: Add activity type table and object
+        public int ActivityTypeId { get; set; }
         public string? Description { get; set; }
         public int LocationId { get; set; }
         
