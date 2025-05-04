@@ -20,6 +20,48 @@ namespace Actime.Services.Database
             modelBuilder.Entity<Report>().HasQueryFilter(r => !r.IsDeleted);
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
 
+            modelBuilder.Entity<Event>()
+                .HasOne(e => e.Organization)
+                .WithMany(o => o.Events)
+                .HasForeignKey(e => e.OrganizationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Membership>()
+                .HasOne(m => m.Organization)
+                .WithMany(o => o.Memberships)
+                .HasForeignKey(m => m.OrganizationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Organization)
+                .WithMany(o => o.Reviews)
+                .HasForeignKey(r => r.OrganizationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Participation>()
+                .HasOne(p => p.Event)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(p => p.EventId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Schedule>()
+                .HasOne(s => s.Organization)
+                .WithMany()
+                .HasForeignKey(s => s.OrganizationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Schedule>()
+                .HasOne(s => s.ActivityType)
+                .WithMany()
+                .HasForeignKey(s => s.ActivityTypeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Schedule>()
+                .HasOne(s => s.Location)
+                .WithMany()
+                .HasForeignKey(s => s.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             base.OnModelCreating(modelBuilder);
         }
 
