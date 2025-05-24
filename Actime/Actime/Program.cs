@@ -1,3 +1,4 @@
+using Actime;
 using Actime.Services.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<ActimeContext>();
+    await db.Database.MigrateAsync();
+
+    await SeedData.Initialize(db, services);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
