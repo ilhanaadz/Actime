@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Actime.Services.Migrations
 {
     [DbContext(typeof(ActimeContext))]
-    [Migration("20250525133644_InitialCreate")]
+    [Migration("20250525140638_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -649,23 +649,6 @@ namespace Actime.Services.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("Actime.Services.Database.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("Actime.Services.Database.Schedule", b =>
                 {
                     b.Property<int>("Id")
@@ -779,9 +762,6 @@ namespace Actime.Services.Migrations
                     b.Property<string>("ProfileImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -801,8 +781,6 @@ namespace Actime.Services.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -1178,17 +1156,6 @@ namespace Actime.Services.Migrations
                     b.Navigation("Location");
 
                     b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("Actime.Services.Database.User", b =>
-                {
-                    b.HasOne("Actime.Services.Database.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

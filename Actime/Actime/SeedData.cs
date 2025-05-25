@@ -1,4 +1,5 @@
 ﻿using Actime.Services.Database;
+using Microsoft.AspNetCore.Identity;
 
 namespace Actime
 {
@@ -33,25 +34,15 @@ namespace Actime
                 await context.SaveChangesAsync();
             }
 
-            if (!context.Roles.Any())
-            {
-                await context.Roles.AddRangeAsync(
-                  new Role { Name = "Admin" },
-                          new Role { Name = "User" }
-                );
-
-                await context.SaveChangesAsync();
-            }
-
             if (!context.AttendanceStatuses.Any())
             {
                 await context.AttendanceStatuses.AddRangeAsync(
                    new AttendanceStatus { Name = "PendingResponse" },
-                    new AttendanceStatus { Name = "Going" },  
-                    new AttendanceStatus { Name = "Maybe" },   
-                    new AttendanceStatus { Name = "NotGoing" },       
-                    new AttendanceStatus { Name = "Attended" }, 
-                    new AttendanceStatus { Name = "Missed" } 
+                    new AttendanceStatus { Name = "Going" },
+                    new AttendanceStatus { Name = "Maybe" },
+                    new AttendanceStatus { Name = "NotGoing" },
+                    new AttendanceStatus { Name = "Attended" },
+                    new AttendanceStatus { Name = "Missed" }
                 );
 
                 await context.SaveChangesAsync();
@@ -146,25 +137,6 @@ namespace Actime
                 await context.SaveChangesAsync();
             }
 
-            if (!context.Categories.Any())
-            {
-                await context.Categories.AddRangeAsync(
-                   new Category { Name = "Hiking" },
-                    new Category { Name = "Football" },
-                    new Category { Name = "Volleyball" },
-                    new Category { Name = "Fitness" },
-                    new Category { Name = "Basketball" },
-                    new Category { Name = "Tennis" },
-                    new Category { Name = "Alpinism" },
-                    new Category { Name = "Skiing" },
-                    new Category { Name = "Running" },
-                    new Category { Name = "Boxing" },
-                    new Category { Name = "Other" }
-                );
-
-                await context.SaveChangesAsync();
-            }
-
             if (!context.Countries.Any())
             {
                 await context.Countries.AddRangeAsync(
@@ -188,6 +160,46 @@ namespace Actime
                 await context.SaveChangesAsync();
             }
 
+            //Seed roles and admin user using UserManager and RoleManager
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+            var userManager = services.GetRequiredService<UserManager<User>>();
+
+            string[] roles = new[] { "Admin", "User" };
+            foreach (var roleName in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    var role = new IdentityRole<int>(roleName);
+                    await roleManager.CreateAsync(role);
+                }
+            }
+
+            string adminEmail = "admin@actime.com";
+            string adminPassword = "Actime123!"; //Koristi config?
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    FirstName = "John",
+                    LastName = "Doe",
+                    CreatedAt = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+                else
+                {
+                    throw new Exception("Seed admin user creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
+            }
 
             //TODO: Create admin user, multiple basic users, organizations, events, etc. (check what is required)
             //TODO: Use ASP.NET Core Identity for user management.

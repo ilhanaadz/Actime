@@ -87,8 +87,6 @@ namespace Actime.Services.Database
         public DbSet<Report> Reports { get; set; }
         public DbSet<ReportType> ReportTypes { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
-        public DbSet<User> Users { get; set; }
     }
 }

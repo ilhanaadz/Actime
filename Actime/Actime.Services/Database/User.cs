@@ -8,13 +8,10 @@ namespace Actime.Services.Database
         public string? LastName { get; set; }
         public string? ProfileImageUrl { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public int RoleId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? LastModifiedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
         public bool IsDeleted { get; set; } = false;
-
-        public virtual Role Role { get; set; } = null!;
     }
 }
