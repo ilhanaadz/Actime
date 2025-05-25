@@ -7,51 +7,48 @@ namespace Actime
     {
         public static async Task Initialize(ActimeContext context, IServiceProvider services)
         {
-            // Ensure the database is created
-            await context.Database.EnsureCreatedAsync();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+            var userManager = services.GetRequiredService<UserManager<User>>();
 
             if (!context.ActivityTypes.Any())
             {
                 await context.ActivityTypes.AddRangeAsync(
-                new ActivityType { Name = "SingleDayTrip" },
-                        new ActivityType { Name = "MultiDayTrip" },
-                        new ActivityType { Name = "Training" },
-                        new ActivityType { Name = "Match" },
-                        new ActivityType { Name = "Meeting" },
-                        new ActivityType { Name = "Volunteering" },
-                        new ActivityType { Name = "Fundraising" },
-                        new ActivityType { Name = "AidCampaign" },
-                        new ActivityType { Name = "TeamBuilding" },
-                        new ActivityType { Name = "Promotion" },
-                        new ActivityType { Name = "Competition" },
-                        new ActivityType { Name = "Celebration" },
-                        new ActivityType { Name = "Workshop" },
-                        new ActivityType { Name = "RecruitmentEvent" },
-                        new ActivityType { Name = "Camp" }
+                    new ActivityType { Name = "SingleDayTrip" },
+                    new ActivityType { Name = "MultiDayTrip" },
+                    new ActivityType { Name = "Training" },
+                    new ActivityType { Name = "Match" },
+                    new ActivityType { Name = "Meeting" },
+                    new ActivityType { Name = "Volunteering" },
+                    new ActivityType { Name = "Fundraising" },
+                    new ActivityType { Name = "AidCampaign" },
+                    new ActivityType { Name = "TeamBuilding" },
+                    new ActivityType { Name = "Promotion" },
+                    new ActivityType { Name = "Competition" },
+                    new ActivityType { Name = "Celebration" },
+                    new ActivityType { Name = "Workshop" },
+                    new ActivityType { Name = "RecruitmentEvent" },
+                    new ActivityType { Name = "Camp" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.AttendanceStatuses.Any())
             {
                 await context.AttendanceStatuses.AddRangeAsync(
-                   new AttendanceStatus { Name = "PendingResponse" },
+                    new AttendanceStatus { Name = "PendingResponse" },
                     new AttendanceStatus { Name = "Going" },
                     new AttendanceStatus { Name = "Maybe" },
                     new AttendanceStatus { Name = "NotGoing" },
                     new AttendanceStatus { Name = "Attended" },
                     new AttendanceStatus { Name = "Missed" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.EventStatuses.Any())
             {
-                //TODO: Use await here or not?
                 await context.EventStatuses.AddRangeAsync(
-                new EventStatus { Name = "Pending" },
+                    new EventStatus { Name = "Pending" },
                     new EventStatus { Name = "Upcoming" },
                     new EventStatus { Name = "InProgress" },
                     new EventStatus { Name = "Completed" },
@@ -59,7 +56,6 @@ namespace Actime
                     new EventStatus { Name = "Postponed" },
                     new EventStatus { Name = "Rescheduled" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
@@ -73,7 +69,6 @@ namespace Actime
                     new MembershipStatus { Name = "Expired" },
                     new MembershipStatus { Name = "Rejected" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
@@ -87,7 +82,6 @@ namespace Actime
                     new PaymentMethod { Name = "Invoice" },
                     new PaymentMethod { Name = "Other" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
@@ -99,28 +93,26 @@ namespace Actime
                     new PaymentStatus { Name = "Failed" },
                     new PaymentStatus { Name = "Refunded" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.ReportTypes.Any())
             {
                 await context.ReportTypes.AddRangeAsync(
-                   new ReportType { Name = "Activity" },
+                    new ReportType { Name = "Activity" },
                     new ReportType { Name = "Memberships" },
                     new ReportType { Name = "Participations" },
                     new ReportType { Name = "Fundraising" },
                     new ReportType { Name = "Feedback" },
                     new ReportType { Name = "Events" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.Categories.Any())
             {
                 await context.Categories.AddRangeAsync(
-                   new Category { Name = "Hiking" },
+                    new Category { Name = "Hiking" },
                     new Category { Name = "Football" },
                     new Category { Name = "Volleyball" },
                     new Category { Name = "Fitness" },
@@ -132,43 +124,36 @@ namespace Actime
                     new Category { Name = "Boxing" },
                     new Category { Name = "Other" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.Countries.Any())
             {
                 await context.Countries.AddRangeAsync(
-                   new Country { Name = "Bosnia and Herzegovina" },
-                    new Country { Name = "Croatia" },
-                    new Country { Name = "Serbia" }
+                    new Country { Id = 1, Name = "Bosnia and Herzegovina" },
+                    new Country { Id = 2, Name = "Croatia" },
+                    new Country { Id = 3, Name = "Serbia" }
                 );
-
                 await context.SaveChangesAsync();
             }
 
             if (!context.Cities.Any())
             {
                 await context.Cities.AddRangeAsync(
-                   new City { Name = "Sarajevo", CountryId = 1 },
+                    new City { Name = "Sarajevo", CountryId = 1 },
                     new City { Name = "Mostar", CountryId = 1 },
                     new City { Name = "Zagreb", CountryId = 2 },
                     new City { Name = "Belgrade", CountryId = 3 }
                 );
-
                 await context.SaveChangesAsync();
             }
-
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
-            var userManager = services.GetRequiredService<UserManager<User>>();
 
             string[] roles = new[] { "Admin", "User" };
             foreach (var roleName in roles)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
-                    var role = new IdentityRole<int>(roleName);
-                    await roleManager.CreateAsync(role);
+                    await roleManager.CreateAsync(new IdentityRole<int>(roleName));
                 }
             }
 
@@ -346,7 +331,17 @@ namespace Actime
 
             if (!context.Schedules.Any())
             {
-                context.Schedules.Add(new Schedule { OrganizationId = 1, DayOfWeek = "Monday", StartTime = TimeOnly.Parse("08:00"), EndTime = TimeOnly.Parse("16:00"), ActivityTypeId = 1, LocationId = 1, Description = "Weekly hike." });
+                context.Schedules.Add(new Schedule
+                {
+                    OrganizationId = 1,
+                    DayOfWeek = "Monday",
+                    StartTime = TimeOnly.Parse("08:00"),
+                    EndTime = TimeOnly.Parse("16:00"),
+                    ActivityTypeId = 1,
+                    LocationId = 1,
+                    Description = "Weekly hike."
+                });
+
                 await context.SaveChangesAsync();
             }
         }
