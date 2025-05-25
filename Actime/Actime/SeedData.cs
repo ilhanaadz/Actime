@@ -10,7 +10,6 @@ namespace Actime
             // Ensure the database is created
             await context.Database.EnsureCreatedAsync();
 
-            // Seed initial data if necessary
             if (!context.ActivityTypes.Any())
             {
                 await context.ActivityTypes.AddRangeAsync(
@@ -140,9 +139,9 @@ namespace Actime
             if (!context.Countries.Any())
             {
                 await context.Countries.AddRangeAsync(
-                   new Country { Id = 1, Name = "Bosnia and Herzegovina" },
-                    new Country { Id = 2, Name = "Croatia" },
-                    new Country { Id = 3, Name = "Serbia" }
+                   new Country { Name = "Bosnia and Herzegovina" },
+                    new Country { Name = "Croatia" },
+                    new Country { Name = "Serbia" }
                 );
 
                 await context.SaveChangesAsync();
@@ -160,7 +159,6 @@ namespace Actime
                 await context.SaveChangesAsync();
             }
 
-            //Seed roles and admin user using UserManager and RoleManager
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
             var userManager = services.GetRequiredService<UserManager<User>>();
 
@@ -174,35 +172,183 @@ namespace Actime
                 }
             }
 
-            string adminEmail = "admin@actime.com";
-            string adminPassword = "Actime123!"; //Koristi config?
-
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            if (adminUser == null)
+            if (!context.Users.Any())
             {
-                adminUser = new User
+                var admin = new User
                 {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true,
+                    UserName = "john.doe",
+                    Email = "admin@actime.com",
                     FirstName = "John",
                     LastName = "Doe",
-                    CreatedAt = DateTime.Now
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    DateOfBirth = new DateTime(1990, 1, 1)
                 };
 
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
+                var result = await userManager.CreateAsync(admin, "Admin123!");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(admin, "Admin");
                 }
-                else
+
+                string[] firstNames = { "Jane", "Mia", "Joe", "Jack", "Michael", "Lea", "Sara", "Dino", "Ema", "Una" };
+                string[] lastNames = { "Khan", "Connor", "Garcia", "Tanaka", "Popov", "Muller", "Zahra", "Silva", "Patel", "Andersson" };
+
+                for (int i = 0; i < 10; i++)
                 {
-                    throw new Exception("Seed admin user creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                    var user = new User
+                    {
+                        UserName = $"{firstNames[i].ToLower()}.{lastNames[i].ToLower()}",
+                        Email = $"{firstNames[i].ToLower()}.{lastNames[i].ToLower()}@actime.com",
+                        FirstName = firstNames[i],
+                        LastName = lastNames[i],
+                        EmailConfirmed = true,
+                        PhoneNumberConfirmed = true,
+                        DateOfBirth = new DateTime(1995 + i % 5, 1, (i % 28) + 1)
+                    };
+
+                    var userResult = await userManager.CreateAsync(user, "Actime123!");
+                    if (userResult.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(user, "User");
+                    }
                 }
             }
 
-            //TODO: Create admin user, multiple basic users, organizations, events, etc. (check what is required)
-            //TODO: Use ASP.NET Core Identity for user management.
+            if (!context.Addresses.Any())
+            {
+                var streetNames = new[]
+                {
+                    "Baker Street", "Elm Street", "Fifth Avenue", "Main Street", "Sunset Boulevard",
+                    "High Street", "Maple Avenue", "Park Lane", "Oxford Street", "King Street"
+                };
+
+                var postalCodes = new[]
+                {
+                    "10000", "71000", "75000", "88000", "11000", "20000", "51000", "31000", "18000", "34000"
+                };
+
+                var random = new Random();
+
+                var addresses = new List<Address>();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    addresses.Add(new Address
+                    {
+                        Street = streetNames[i],
+                        PostalCode = postalCodes[i],
+                        Coordinates = $"{random.NextDouble() * 180 - 90},{random.NextDouble() * 360 - 180}",
+                        CityId = random.Next(1, 5)
+                    });
+                }
+
+                await context.Addresses.AddRangeAsync(addresses);
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Organizations.Any())
+            {
+                context.Organizations.AddRange(
+                    new Organization
+                    {
+                        Name = "Global Hiking Club",
+                        Email = "info@globalhiking.com",
+                        Description = "A community of nature lovers and adventure seekers.",
+                        LogoUrl = "globalhiking.png",
+                        PhoneNumber = "+12345678901",
+                        CategoryId = 1,
+                        AddressId = 1
+                    },
+                    new Organization
+                    {
+                        Name = "Sport for All Association",
+                        Email = "contact@sportforall.org",
+                        Description = "Promoting sports and healthy lifestyles worldwide.",
+                        LogoUrl = "sportforall.png",
+                        PhoneNumber = "+19876543210",
+                        CategoryId = 2,
+                        AddressId = 2
+                    },
+                    new Organization
+                    {
+                        Name = "FitLife Gym",
+                        Email = "contact@fitlifegym.com",
+                        Description = "Fitness center welcoming all ages and levels.",
+                        LogoUrl = "fitlife.png",
+                        PhoneNumber = "+10987654321",
+                        CategoryId = 3,
+                        AddressId = 3
+                    }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Locations.Any())
+            {
+                context.Locations.AddRange(
+                    new Location { AddressId = 1, Capacity = 100, Description = "Main hall", ContactInfo = "info@venue1.com" },
+                    new Location { AddressId = 2, Capacity = 50, Description = "Cental stadium", ContactInfo = "contact@venue2.com" },
+                    new Location { AddressId = 3, Capacity = 200, Description = "Outdoor stage", ContactInfo = "events@venue3.com" }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Events.Any())
+            {
+                context.Events.Add(
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Annual Hiking Trip",
+                        Description = "Explore nature with us.",
+                        Start = DateTime.Now.AddDays(10),
+                        End = DateTime.Now.AddDays(12),
+                        LocationId = 1,
+                        MaxParticipants = 50,
+                        IsFree = false,
+                        Price = 100,
+                        EventStatusId = 2,
+                        ActivityTypeId = 1
+                    }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Memberships.Any())
+            {
+                context.Memberships.Add(new Membership { UserId = 2, OrganizationId = 1, MembershipStatusId = 2 });
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Participations.Any())
+            {
+                context.Participations.Add(new Participation { UserId = 2, EventId = 1, AttendanceStatusId = 2 });
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Reviews.Any())
+            {
+                context.Reviews.Add(new Review
+                {
+                    UserId = 2,
+                    OrganizationId = 1,
+                    Score = 5,
+                    Text = "Great organization with amazing events!",
+                    CreatedAt = DateTime.Now
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Schedules.Any())
+            {
+                context.Schedules.Add(new Schedule { OrganizationId = 1, DayOfWeek = "Monday", StartTime = TimeOnly.Parse("08:00"), EndTime = TimeOnly.Parse("16:00"), ActivityTypeId = 1, LocationId = 1, Description = "Weekly hike." });
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
