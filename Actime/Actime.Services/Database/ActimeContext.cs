@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Actime.Services.Database
 {
-    public class ActimeContext : DbContext
+    public class ActimeContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public ActimeContext(DbContextOptions<ActimeContext> options) : base(options)
         {
