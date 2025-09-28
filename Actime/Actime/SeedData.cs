@@ -130,9 +130,9 @@ namespace Actime
             if (!context.Countries.Any())
             {
                 await context.Countries.AddRangeAsync(
-                    new Country { Id = 1, Name = "Bosnia and Herzegovina" },
-                    new Country { Id = 2, Name = "Croatia" },
-                    new Country { Id = 3, Name = "Serbia" }
+                    new Country { Name = "Bosnia and Herzegovina" },
+                    new Country { Name = "Croatia" },
+                    new Country { Name = "Serbia" }
                 );
                 await context.SaveChangesAsync();
             }
