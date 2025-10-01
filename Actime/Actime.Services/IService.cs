@@ -3,9 +3,11 @@ using Actime.Model.SearchObjects;
 
 namespace Actime.Services
 {
-    public interface IService<T, TSearch> where T : class where TSearch : BaseSearchObject
+    public interface IService<T, TSearch>
+        where T : class
+        where TSearch : BaseSearchObject
     {
-        Task<PagedResult<T>> Get(TSearch search);
-        Task<T> GetById(int id);
+        Task<PagedResult<T>> GetAsync(TSearch search);
+        Task<T?> GetByIdAsync(int id);
     }
 }
