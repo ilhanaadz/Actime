@@ -1,7 +1,7 @@
-﻿using Actime.Model;
+﻿using Actime.Model.Common;
 using Actime.Model.SearchObjects;
 
-namespace Actime.Services
+namespace Actime.Services.Interfaces
 {
     public interface IService<T, TSearch>
         where T : class

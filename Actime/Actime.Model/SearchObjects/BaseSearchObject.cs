@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Actime.Model.SearchObjects
+﻿namespace Actime.Model.SearchObjects
 {
     public class BaseSearchObject
     {
@@ -12,5 +6,7 @@ namespace Actime.Model.SearchObjects
         public int? PageSize { get; set; }
         public bool IncludeTotalCount { get; set; }
         public bool RetrieveAll { get; set; }
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; }
     }
 }

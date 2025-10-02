@@ -1,4 +1,4 @@
-﻿namespace Actime.Model
+﻿namespace Actime.Model.Common
 {
     public class PagedResult<T>
     {

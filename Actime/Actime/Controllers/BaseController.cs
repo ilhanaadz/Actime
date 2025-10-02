@@ -1,11 +1,12 @@
-﻿using Actime.Model;
+﻿using Actime.Model.Common;
 using Actime.Model.SearchObjects;
-using Actime.Services;
+using Actime.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
 {
+    //NOTE: Pay attention to ApiController attribute, it enables automatic model validation and other features. Also, make reasearch if Authorize attribute is needed here or should be applied on derived controllers.
     [ApiController]
     [Route("[controller]")]
     [Authorize]

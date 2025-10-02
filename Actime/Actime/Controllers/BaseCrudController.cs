@@ -1,5 +1,5 @@
 ﻿using Actime.Model.SearchObjects;
-using Actime.Services;
+using Actime.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers

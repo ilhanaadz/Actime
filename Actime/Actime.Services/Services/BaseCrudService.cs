@@ -1,8 +1,9 @@
 ﻿using Actime.Model.SearchObjects;
 using Actime.Services.Database;
+using Actime.Services.Interfaces;
 using MapsterMapper;
 
-namespace Actime.Services
+namespace Actime.Services.Services
 {
     public class BaseCrudService<T, TSearch, TEntity, TInsert, TUpdate> : BaseService<T, TSearch, TEntity>, ICrudService<T, TSearch, TInsert, TUpdate>
         where T : class

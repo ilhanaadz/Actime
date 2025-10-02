@@ -1,6 +1,6 @@
 ﻿using Actime.Model.SearchObjects;
 
-namespace Actime.Services
+namespace Actime.Services.Interfaces
 {
     public interface ICrudService<T, TSearch, TInsert, TUpdate> : IService<T, TSearch>
         where T : class
