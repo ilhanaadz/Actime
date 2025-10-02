@@ -7,7 +7,7 @@ namespace Actime.Services.Services
 {
     public class BaseCrudService<T, TSearch, TEntity, TInsert, TUpdate> : BaseService<T, TSearch, TEntity>, ICrudService<T, TSearch, TInsert, TUpdate>
         where T : class
-        where TSearch : BaseSearchObject
+        where TSearch : BaseSearchObject, new()
         where TEntity : class
         where TInsert : class
         where TUpdate : class

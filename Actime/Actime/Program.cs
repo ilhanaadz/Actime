@@ -10,6 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//NOTE: Explore lifetimes: https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes
 builder.Services.AddTransient<ICityService, CityService>();
 
 builder.Services.AddDbContext<ActimeContext>(options =>
