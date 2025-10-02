@@ -1,5 +1,7 @@
 using Actime;
+using Actime.Services;
 using Actime.Services.Database;
+using Actime.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-//builder.Services.AddTransient<IWeatherForecastService, WeatherForecastService>();
+builder.Services.AddTransient<ICityService, CityService>();
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
