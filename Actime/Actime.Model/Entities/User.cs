@@ -1,4 +1,4 @@
-﻿namespace Actime.Model
+﻿namespace Actime.Model.Entities
 {
     public class User
     {

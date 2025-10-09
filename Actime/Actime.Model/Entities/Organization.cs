@@ -1,4 +1,4 @@
-﻿namespace Actime.Model
+﻿namespace Actime.Model.Entities
 {
     public class Organization
     {
@@ -12,7 +12,5 @@
         public int AddressId { get; set; }
         public DateTime CreatedAt { get; init; } = DateTime.Now;
         public DateTime? LastModifiedAt { get; set; }
-
-        //NOTE: Can have a schedule list, should I add it as virtual?
     }
 }

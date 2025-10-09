@@ -1,6 +1,7 @@
 ﻿using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Database;
+using Actime.Services.Interfaces;
 using MapsterMapper;
 
 namespace Actime.Services.Services
