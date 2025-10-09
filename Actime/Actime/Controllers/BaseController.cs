@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
 {
-    //NOTE: Pay attention to ApiController attribute, it enables automatic model validation and other features. Also, make reasearch if Authorize attribute is needed here or should be applied on derived controllers.
+    //NOTE: Pay attention to ApiController attribute, it enables automatic model validation and other features.
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
+    //[Authorize]
     public class BaseController<T, TSearch> : ControllerBase where T : class where TSearch : BaseSearchObject, new()
     {
         protected readonly IService<T, TSearch> _service;

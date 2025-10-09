@@ -1,6 +1,7 @@
 using Actime;
 using Actime.Services;
 using Actime.Services.Database;
+using Actime.Services.Interfaces;
 using Actime.Services.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 //NOTE: Explore lifetimes: https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes
 builder.Services.AddMapster();
 builder.Services.AddTransient<ICityService, CityService>();
+builder.Services.AddTransient<ICountryService, CountryService>(); //NOTE: Check lifetime if it's base service.
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
