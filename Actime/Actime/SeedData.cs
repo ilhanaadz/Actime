@@ -27,7 +27,8 @@ namespace Actime
                     new ActivityType { Name = "Celebration" },
                     new ActivityType { Name = "Workshop" },
                     new ActivityType { Name = "RecruitmentEvent" },
-                    new ActivityType { Name = "Camp" }
+                    new ActivityType { Name = "Camp" },
+                    new ActivityType { Name = "Other" }
                 );
                 await context.SaveChangesAsync();
             }

@@ -16,6 +16,7 @@
         Celebration,
         Workshop,
         RecruitmentEvent,
-        Camp
+        Camp,
+        Other
     }
 }

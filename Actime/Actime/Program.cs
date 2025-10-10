@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMapster();
 builder.Services.AddTransient<ICityService, CityService>();
 builder.Services.AddTransient<ICountryService, CountryService>(); //NOTE: Check lifetime if it's base service.
+builder.Services.AddTransient<ICategoryService, CategoryService>();
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
