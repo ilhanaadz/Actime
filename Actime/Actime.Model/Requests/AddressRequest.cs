@@ -12,8 +12,10 @@ namespace Actime.Model.Requests
         [StringLength(20, MinimumLength = 1, ErrorMessage = "Check postal code length")]
         public required string PostalCode { get; set; }
 
-        [Required(ErrorMessage = "City ID is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "City ID must be greater than 0")]
+        [Required(ErrorMessage = "City is required")]
+        [Range(1, int.MaxValue)]
         public int CityId { get; set; }
+
+        public string? Coordinates { get; set; }
     }
 }
