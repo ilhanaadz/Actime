@@ -34,6 +34,18 @@ namespace Actime.Services.Database
                 .HasForeignKey(m => m.OrganizationId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Organization>()
+                .HasOne(o => o.User)
+                .WithOne()
+                .HasForeignKey<Organization>(o => o.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Organization)
                 .WithMany(o => o.Reviews)
@@ -84,6 +96,7 @@ namespace Actime.Services.Database
         public DbSet<Participation> Participations { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<PaymentStatus> PaymentStatuses { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<ReportType> ReportTypes { get; set; }
         public DbSet<Review> Reviews { get; set; }

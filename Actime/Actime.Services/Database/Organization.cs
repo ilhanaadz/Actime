@@ -11,6 +11,9 @@
         public int CategoryId { get; set; }
         public int AddressId { get; set; }
 
+        public int UserId { get; set; }
+        public virtual User User { get; set; } = null!;
+
         public virtual Category Category { get; set; } = null!;
         public virtual Address Address { get; set; } = null!;
         public virtual ICollection<Membership> Memberships { get; set; } = new HashSet<Membership>();

@@ -149,7 +149,7 @@ namespace Actime
                 await context.SaveChangesAsync();
             }
 
-            string[] roles = new[] { "Admin", "User" };
+            string[] roles = ["Admin", "User", "Organization"];
             foreach (var roleName in roles)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
@@ -235,6 +235,33 @@ namespace Actime
 
             if (!context.Organizations.Any())
             {
+                var organizationUserA = new User
+                {
+                    UserName = "globalhiking",
+                    Email = "info@globalhiking.com",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserA, "Org123!");
+                await userManager.AddToRoleAsync(organizationUserA, "Organization");
+
+                var organizationUserB = new User
+                {
+                    UserName = "sportforall",
+                    Email = "contact@sportforall.org",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserB, "Org123!");
+                await userManager.AddToRoleAsync(organizationUserB, "Organization");
+
+                var organizationUserC = new User
+                {
+                    UserName = "fitlifegym",
+                    Email = "contact@fitlifegym.com",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserC, "Org123!");
+                await userManager.AddToRoleAsync(organizationUserC, "Organization");
+
                 context.Organizations.AddRange(
                     new Organization
                     {
@@ -244,7 +271,8 @@ namespace Actime
                         LogoUrl = "globalhiking.png",
                         PhoneNumber = "+12345678901",
                         CategoryId = 1,
-                        AddressId = 1
+                        AddressId = 1,
+                        UserId = organizationUserA.Id
                     },
                     new Organization
                     {
@@ -254,7 +282,8 @@ namespace Actime
                         LogoUrl = "sportforall.png",
                         PhoneNumber = "+19876543210",
                         CategoryId = 2,
-                        AddressId = 2
+                        AddressId = 2,
+                        UserId = organizationUserB.Id
                     },
                     new Organization
                     {
@@ -264,7 +293,8 @@ namespace Actime
                         LogoUrl = "fitlife.png",
                         PhoneNumber = "+10987654321",
                         CategoryId = 3,
-                        AddressId = 3
+                        AddressId = 3,
+                        UserId = organizationUserC.Id
                     }
                 );
 

@@ -11,7 +11,9 @@ namespace Actime.Services.Database
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? LastModifiedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
-        public string? DeletedBy { get; set; }
+        public int? DeletedBy { get; set; }
         public bool IsDeleted { get; set; } = false;
+
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
     }
 }
