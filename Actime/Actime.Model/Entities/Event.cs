@@ -1,7 +1,8 @@
-﻿namespace Actime.Services.Database
+﻿namespace Actime.Model.Entities
 {
-    public class Event : SoftDeleteEntity
+    public class Event
     {
+        public int Id { get; set; }
         public int OrganizationId { get; set; }
         public required string Title { get; set; }
         public string? Description { get; set; }
@@ -13,11 +14,7 @@
         public decimal Price { get; set; }
         public int EventStatusId { get; set; }
         public int ActivityTypeId { get; set; }
-
-        public virtual Organization Organization { get; set; } = null!;
-        public virtual Location Location { get; set; } = null!;
-        public virtual EventStatus EventStatus { get; set; } = null!;
-        public virtual ActivityType ActivityType { get; set; } = null!;
-        public virtual ICollection<Participation> Participations { get; set; } = new HashSet<Participation>();
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime LastModifiedAt { get; set; }
     }
 }
