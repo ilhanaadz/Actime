@@ -7,9 +7,6 @@ using System.Security.Claims;
 
 namespace Actime.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -19,13 +16,7 @@ namespace Actime.Controllers
             _authService = authService;
         }
 
-        // ============================================================
-        // LOGIN / REGISTER / LOGOUT
-        // ============================================================
-
         [HttpPost("login")]
-        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
         {
             var response = await _authService.LoginAsync(request);
@@ -34,9 +25,6 @@ namespace Actime.Controllers
         }
 
         [HttpPost("register")]
-        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
         {
             var response = await _authService.RegisterAsync(request);
@@ -45,7 +33,6 @@ namespace Actime.Controllers
         }
 
         [HttpPost("logout")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Logout()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -57,15 +44,8 @@ namespace Actime.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
-        // ============================================================
-        // ORGANIZATION SETUP
-        // ============================================================
-
         [HttpPost("complete-organization")]
         [Authorize(Roles = "Organization")]
-        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<AuthResponse>> CompleteOrganization([FromBody] CompleteOrganizationRequest request)
         {
             var userId = GetCurrentUserId();
@@ -73,13 +53,7 @@ namespace Actime.Controllers
             return Ok(response);
         }
 
-        // ============================================================
-        // TOKEN MANAGEMENT
-        // ============================================================
-
         [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthResponse>> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -94,8 +68,6 @@ namespace Actime.Controllers
 
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthResponse>> GetCurrentUser()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -108,21 +80,14 @@ namespace Actime.Controllers
             return Ok(response);
         }
 
-        // ============================================================
-        // EMAIL CONFIRMATION
-        // ============================================================
-
         /// <summary>
-        /// Potvrdi email adresu
+        /// Confirm email address
         /// </summary>
         /// <remarks>
-        /// Poziva se kada korisnik klikne na link u emailu.
-        /// Frontend treba parsirati userId i token iz URL-a.
+        /// This is called when the user clicks the link in the email.
+        /// The frontend needs to parse userId and token from the URL.
         /// </remarks>
         [HttpPost("confirm-email")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
         {
             await _authService.ConfirmEmailAsync(request);
@@ -130,30 +95,23 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Ponovno pošalji confirmation email
+        /// Resend confirmation email
         /// </summary>
         [HttpPost("resend-confirmation-email")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
         {
             await _authService.ResendConfirmationEmailAsync(request);
             return Ok(new { message = "If your email exists and is not confirmed, you will receive a confirmation link." });
         }
 
-        // ============================================================
-        // PASSWORD MANAGEMENT
-        // ============================================================
-
         /// <summary>
-        /// Zatraži reset lozinke (forgot password)
+        /// Request password reset (forgot password)
         /// </summary>
         /// <remarks>
-        /// Šalje email sa linkom za reset. 
-        /// Uvijek vraća success (security - ne otkrivamo postoji li email).
+        /// Sends an email with a reset link.
+        /// Always returns success (security - we do not disclose whether the email exists).
         /// </remarks>
         [HttpPost("forgot-password")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             await _authService.ForgotPasswordAsync(request);
@@ -161,15 +119,13 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Resetuj lozinku sa tokenom
+        /// Reset password with token
         /// </summary>
         /// <remarks>
-        /// Poziva se kada korisnik popuni formu za novu lozinku.
-        /// Token dolazi iz URL-a (email linka).
+        /// This is called when the user fills out the new password form.
+        /// The token comes from the URL (email link).
         /// </remarks>
         [HttpPost("reset-password")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             await _authService.ResetPasswordAsync(request);
@@ -177,22 +133,16 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Promijeni lozinku (za ulogirane korisnike)
+        /// Change password (for logged-in users)
         /// </summary>
         [HttpPost("change-password")]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var userId = GetCurrentUserId();
             await _authService.ChangePasswordAsync(userId, request);
             return Ok(new { message = "Password changed successfully." });
         }
-
-        // ============================================================
-        // PRIVATE HELPERS
-        // ============================================================
 
         private void SetRefreshTokenCookie(string token)
         {

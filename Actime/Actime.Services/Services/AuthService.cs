@@ -7,13 +7,8 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Actime.Services.Services
 {
@@ -45,9 +40,6 @@ namespace Actime.Services.Services
             _emailSettings = emailSettings.Value;
         }
 
-        // ============================================================
-        // REGISTER (UPDATED - šalje confirmation email)
-        // ============================================================
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
@@ -297,8 +289,6 @@ namespace Actime.Services.Services
                 user.FirstName ?? "User",
                 confirmationLink);
         }
-
-        // ... ostale postojeće metode (GenerateAuthResponseAsync, RefreshTokenAsync, RevokeTokenAsync)
 
         private async Task<AuthResponse> GenerateAuthResponseAsync(User user)
         {

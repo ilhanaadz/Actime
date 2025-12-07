@@ -8,9 +8,6 @@ using System.Security.Claims;
 
 namespace Actime.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
     [Authorize]
     public class UserController : BaseController<User, TextSearchObject>
     {
@@ -22,8 +19,6 @@ namespace Actime.Controllers
         }
 
         [HttpPut("profile")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<User>> UpdateProfile([FromBody] UserUpdateRequest request)
         {
             var userId = GetCurrentUserId();
@@ -33,8 +28,6 @@ namespace Actime.Controllers
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<User>> Update(int id, [FromBody] UserUpdateRequest request)
         {
             var user = await _userService.UpdateAsync(id, request);
@@ -62,5 +55,4 @@ namespace Actime.Controllers
             return userId;
         }
     }
-
 }

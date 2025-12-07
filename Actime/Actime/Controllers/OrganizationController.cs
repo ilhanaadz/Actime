@@ -8,9 +8,6 @@ using System.Security.Claims;
 
 namespace Actime.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
     public class OrganizationController : BaseController<Organization, TextSearchObject>
     {
         private readonly IOrganizationService _organizationService;
@@ -22,9 +19,6 @@ namespace Actime.Controllers
 
         [HttpPut("my")]
         [Authorize(Roles = "Organization")]
-        [ProducesResponseType(typeof(Organization), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Organization>> UpdateMyOrganization([FromBody] OrganizationUpdateRequest request)
         {
             var userId = GetCurrentUserId();
@@ -39,8 +33,6 @@ namespace Actime.Controllers
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(Organization), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Organization>> Update(int id, [FromBody] OrganizationUpdateRequest request)
         {
             var organization = await _organizationService.GetByIdAsync(id);
@@ -53,8 +45,6 @@ namespace Actime.Controllers
 
         [HttpDelete("{id:int}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(int id)
         {
             var organization = await _organizationService.GetByIdAsync(id);
@@ -67,8 +57,6 @@ namespace Actime.Controllers
 
         [HttpDelete("my")]
         [Authorize(Roles = "Organization")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteMyOrganization()
         {
             var userId = GetCurrentUserId();
