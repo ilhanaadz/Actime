@@ -8,7 +8,7 @@ namespace Actime.Services.Services
 {
     public class EventService : BaseCrudService<Model.Entities.Event, TextSearchObject, Event, EventInsertRequest, EventUpdateRequest>, IEventService
     {
-        public EventService(ActimeContext context, Mapper mapper) : base(context, mapper)
+        public EventService(ActimeContext context, IMapper mapper) : base(context, mapper)
         {
         }
     }
