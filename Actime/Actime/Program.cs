@@ -29,6 +29,7 @@ builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IParticipationService, ParticipationService>();
 builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
+builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();  // Check scope
 builder.Services.AddScoped<IAuthService, AuthService>();
 
