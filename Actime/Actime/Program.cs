@@ -1,5 +1,4 @@
 using Actime;
-using Actime.Model.Mapping;
 using Actime.Model.Settings;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
@@ -23,7 +22,10 @@ builder.Services.AddTransient<ILocationService, LocationService>();
 builder.Services.AddTransient<IJwtService, JwtService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IOrganizationService, OrganizationService>();
-builder.Services.AddScoped<IEmailService, EmailService>();  // NOVO
+builder.Services.AddTransient<IEventService, EventService>();
+builder.Services.AddTransient<IFavoriteService, FavoriteService>();
+builder.Services.AddTransient<IMembershipService, MembershipService>();
+builder.Services.AddScoped<IEmailService, EmailService>();  // Check scope
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));

@@ -5,7 +5,7 @@ using Actime.Services.Interfaces;
 
 namespace Actime.Controllers
 {
-    public class FavoriteController : BaseCrudController<Favorite, TextSearchObject, FavoriteInsertRequest, FavoriteUpdateRequest>
+    public class FavoriteController : BaseCrudController<Favorite, FavoriteSearchObject, FavoriteInsertRequest, FavoriteUpdateRequest>
     {
         public FavoriteController(IFavoriteService favoriteService) : base(favoriteService)
         {

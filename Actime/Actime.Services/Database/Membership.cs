@@ -2,7 +2,6 @@
 {
     public class Membership : SoftDeleteEntity
     {
-        public int Id { get; set; }
         public int UserId { get; set; }
         public int OrganizationId { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;

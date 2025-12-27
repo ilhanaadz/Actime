@@ -4,7 +4,7 @@ using Actime.Model.SearchObjects;
 
 namespace Actime.Services.Interfaces
 {
-    public interface IFavoriteService : ICrudService<Favorite, FavoriteSearchObject, FavoriteInsertRequest, FavoriteUpdateRequest>
+    public interface IMembershipService : ICrudService<Membership, MembershipSearchObject, MembershipInsertRequest, MembershipUpdateRequest>
     {
     }
 }
