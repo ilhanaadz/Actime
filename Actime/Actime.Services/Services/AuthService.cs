@@ -55,7 +55,7 @@ namespace Actime.Services.Services
                 FirstName = nameParts[0],
                 LastName = nameParts.Length > 1 ? nameParts[1] : null,
                 CreatedAt = DateTime.UtcNow,
-                EmailConfirmed = false, // Mora potvrditi email
+                EmailConfirmed = false,
                 DateOfBirth = request.DateOfBirth ?? DateTime.UtcNow
             };
 
@@ -69,7 +69,6 @@ namespace Actime.Services.Services
             var role = request.IsOrganization ? "Organization" : "User";
             await _userManager.AddToRoleAsync(user, role);
 
-            // Pošalji confirmation email
             await SendConfirmationEmailAsync(user);
 
             var response = await GenerateAuthResponseAsync(user);
@@ -78,9 +77,6 @@ namespace Actime.Services.Services
             return response;
         }
 
-        // ============================================================
-        // LOGIN (UPDATED - provjera email confirmed)
-        // ============================================================
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -91,16 +87,12 @@ namespace Actime.Services.Services
             if (!validPassword)
                 throw new Exception("Invalid email or password");
 
-            // Provjeri je li email potvrđen
             if (!user.EmailConfirmed)
                 throw new Exception("Please confirm your email before logging in");
 
             return await GenerateAuthResponseAsync(user);
         }
 
-        // ============================================================
-        // EMAIL CONFIRMATION
-        // ============================================================
         public async Task<string> GenerateEmailConfirmationTokenAsync(int userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -129,7 +121,6 @@ namespace Actime.Services.Services
                 throw new ValidationException(string.Join(", ", errors));
             }
 
-            // Pošalji welcome email
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains("Organization"))
             {
@@ -151,7 +142,6 @@ namespace Actime.Services.Services
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
 
-            // Silent fail - ne otkrivamo postoji li email
             if (user == null || user.IsDeleted)
                 return;
 
@@ -161,9 +151,6 @@ namespace Actime.Services.Services
             await SendConfirmationEmailAsync(user);
         }
 
-        // ============================================================
-        // PASSWORD RESET
-        // ============================================================
         public async Task ForgotPasswordAsync(ForgotPasswordRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -212,9 +199,6 @@ namespace Actime.Services.Services
             }
         }
 
-        // ============================================================
-        // COMPLETE ORGANIZATION (UPDATED - šalje email)
-        // ============================================================
         public async Task<AuthResponse> CompleteOrganizationSetupAsync(int userId, CompleteOrganizationRequest request)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -256,7 +240,6 @@ namespace Actime.Services.Services
 
                 await transaction.CommitAsync();
 
-                // Pošalji organization welcome email ako je email već potvrđen
                 if (user.EmailConfirmed)
                 {
                     await _emailService.SendOrganizationWelcomeEmailAsync(
@@ -274,9 +257,8 @@ namespace Actime.Services.Services
             }
         }
 
-        // ============================================================
-        // PRIVATE HELPERS
-        // ============================================================
+        #region Helpers
+
         private async Task SendConfirmationEmailAsync(User user)
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -373,5 +355,7 @@ namespace Actime.Services.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        #endregion
     }
 }
