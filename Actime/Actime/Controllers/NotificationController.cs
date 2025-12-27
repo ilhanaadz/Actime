@@ -2,7 +2,6 @@
 using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Interfaces;
-using Actime.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
