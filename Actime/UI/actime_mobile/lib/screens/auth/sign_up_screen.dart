@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../organization/complete_signup_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -180,6 +181,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               print('Name: ${_nameController.text}');
                               print('Email: ${_emailController.text}');
                               print('Is Organization: $_isOrganization');
+                              
+                              // If organization, go to complete signup
+                              if (_isOrganization) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const CompleteSignUpScreen(),
+                                  ),
+                                );
+                              }
                             } else {
                               print('Passwords do not match!');
                             }
