@@ -1,3 +1,4 @@
+import 'package:actime_mobile/screens/organization/organization_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class LandingPageLogged extends StatelessWidget {
@@ -26,8 +27,10 @@ class LandingPageLogged extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.person_outline, color: Color(0xFF0D7C8C)),
             onPressed: () {
-              // Navigate to profile
-              print('Navigate to Profile');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OrganizationProfileScreen()),
+              );
             },
           ),
         ],
@@ -50,13 +53,16 @@ class LandingPageLogged extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
+                    icon: const Icon(
+                      Icons.arrow_forward,
+                      color: Color(0xFF0D7C8C),
+                    ),
                     onPressed: () {},
                   ),
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
@@ -83,9 +89,9 @@ class LandingPageLogged extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -100,13 +106,16 @@ class LandingPageLogged extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
+                    icon: const Icon(
+                      Icons.arrow_forward,
+                      color: Color(0xFF0D7C8C),
+                    ),
                     onPressed: () {},
                   ),
                 ],
               ),
             ),
-            
+
             _buildEventCard(
               'Bjelašnica hiking trip',
               'Free',
@@ -139,7 +148,13 @@ class LandingPageLogged extends StatelessWidget {
     );
   }
 
-  Widget _buildClubCard(String name, String sport, String members, IconData icon, Color iconColor) {
+  Widget _buildClubCard(
+    String name,
+    String sport,
+    String members,
+    IconData icon,
+    Color iconColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -163,7 +178,11 @@ class LandingPageLogged extends StatelessWidget {
               Positioned(
                 top: 0,
                 right: 0,
-                child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
+                child: Icon(
+                  Icons.favorite_border,
+                  size: 16,
+                  color: Colors.grey.shade400,
+                ),
               ),
             ],
           ),
@@ -177,15 +196,15 @@ class LandingPageLogged extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            sport,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
+          Text(sport, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(members, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                members,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
               const SizedBox(width: 4),
               const Icon(Icons.person_outline, size: 14, color: Colors.grey),
             ],
@@ -195,7 +214,14 @@ class LandingPageLogged extends StatelessWidget {
     );
   }
 
-  Widget _buildEventCard(String title, String price, String date, String location, String participants, IconData icon) {
+  Widget _buildEventCard(
+    String title,
+    String price,
+    String date,
+    String location,
+    String participants,
+    IconData icon,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -223,23 +249,43 @@ class LandingPageLogged extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF0D7C8C),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                      child: Text(
+                        price,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.favorite_border, size: 20, color: Color(0xFF0D7C8C)),
+                    const Icon(
+                      Icons.favorite_border,
+                      size: 20,
+                      color: Color(0xFF0D7C8C),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                    const Icon(
+                      Icons.person_outline,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 4),
-                    Text(participants, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(
+                      participants,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -260,17 +306,31 @@ class LandingPageLogged extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    date,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 12,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Text(location, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                  Text(
+                    location,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 12,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
             ],

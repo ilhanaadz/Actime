@@ -40,7 +40,10 @@ class EventsListScreen extends StatelessWidget {
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Search events...',
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF0D7C8C)),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF0D7C8C),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -58,13 +61,16 @@ class EventsListScreen extends StatelessWidget {
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: const Icon(Icons.calendar_today, color: Color(0xFF0D7C8C)),
+                  icon: const Icon(
+                    Icons.calendar_today,
+                    color: Color(0xFF0D7C8C),
+                  ),
                   onPressed: () {},
                 ),
               ],
             ),
           ),
-          
+
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,7 +129,15 @@ class EventsListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEventCard(BuildContext context, String title, String price, String date, String location, String participants, IconData icon) {
+  Widget _buildEventCard(
+    BuildContext context,
+    String title,
+    String price,
+    String date,
+    String location,
+    String participants,
+    IconData icon,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -158,23 +172,46 @@ class EventsListScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF0D7C8C),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                        child: Text(
+                          price,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.favorite_border, size: 20, color: Color(0xFF0D7C8C)),
+                      const Icon(
+                        Icons.favorite_border,
+                        size: 20,
+                        color: Color(0xFF0D7C8C),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                      const Icon(
+                        Icons.person_outline,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 4),
-                      Text(participants, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text(
+                        participants,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -195,17 +232,31 @@ class EventsListScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(
+                      date,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(location, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    Text(
+                      location,
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
               ],

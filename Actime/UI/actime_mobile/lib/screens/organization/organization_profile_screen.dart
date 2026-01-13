@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'edit_organization_profile_screen.dart';
+import '../events/events_list_screen.dart';
 
 class OrganizationProfileScreen extends StatelessWidget {
   const OrganizationProfileScreen({super.key});
@@ -60,34 +61,39 @@ class OrganizationProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Name
-            _buildProfileField('Name', 'Student', hasEdit: true, onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EditOrganizationProfileScreen(),
-                ),
-              );
-            }),
+            _buildProfileField(
+              'Name',
+              'Student',
+              hasEdit: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditOrganizationProfileScreen(),
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 16),
-            
+
             // Category
             _buildProfileField('Category', 'Volleyball'),
             const SizedBox(height: 16),
-            
+
             // Phone
             _buildProfileField('Phone', '+12027953213'),
             const SizedBox(height: 16),
-            
+
             // Address
             _buildProfileField('Address', '1894 Arlington Avenue'),
             const SizedBox(height: 16),
-            
+
             // E-mail
             _buildProfileField('E-mail', 'club@volleyball.com'),
             const SizedBox(height: 16),
-            
+
             // About us
             _buildProfileField(
               'About us',
@@ -95,12 +101,23 @@ class OrganizationProfileScreen extends StatelessWidget {
               isMultiline: true,
             ),
             const SizedBox(height: 32),
-            
+
             // Bottom Navigation
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(Icons.event_outlined, 'My events'),
+                _buildNavItem(
+                  Icons.event_outlined,
+                  'My events',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventsListScreen(),
+                      ),
+                    );
+                  },
+                ),
                 _buildNavItem(Icons.photo_library_outlined, 'Gallery'),
                 _buildNavItem(Icons.people_outline, 'People'),
               ],
@@ -111,7 +128,13 @@ class OrganizationProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileField(String label, String value, {bool hasEdit = false, bool isMultiline = false, VoidCallback? onTap}) {
+  Widget _buildProfileField(
+    String label,
+    String value, {
+    bool hasEdit = false,
+    bool isMultiline = false,
+    VoidCallback? onTap,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -120,10 +143,7 @@ class OrganizationProfileScreen extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             if (hasEdit)
               GestureDetector(
@@ -149,19 +169,20 @@ class OrganizationProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label) {
-    return Column(
-      children: [
-        Icon(icon, color: const Color(0xFF0D7C8C), size: 28),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF0D7C8C),
+  Widget _buildNavItem(IconData icon, String label, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF0D7C8C)),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(color: Color(0xFF0D7C8C), fontSize: 12),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
