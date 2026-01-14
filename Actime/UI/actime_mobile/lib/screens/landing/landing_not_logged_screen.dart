@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
+import '../auth/sign_in_screen.dart';
 
 class LandingPageNotLogged extends StatelessWidget {
   const LandingPageNotLogged({super.key});
@@ -11,8 +12,10 @@ class LandingPageNotLogged extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: ActimeAppBar(
         onProfileTap: () {
-          // Navigate to SignIn
-          print('Navigate to Sign In');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SignInScreen()),
+          );
         },
       ),
       body: SingleChildScrollView(
@@ -117,12 +120,7 @@ class LandingPageNotLogged extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 0,
-        onTap: (index) {
-          print('Navigate to tab: $index');
-        },
-      ),
+      bottomNavigationBar: const BottomNav(currentIndex: 0),
     );
   }
 

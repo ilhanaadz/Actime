@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
-import '../screens/events/events_list_screen.dart';
-import '../screens/clubs/clubs_list_screen.dart';
+import '../screens/organization/my_events_org_screen.dart';
+import '../screens/organization/enrollment_applications_screen.dart';
+import '../screens/user/people_screen.dart';
 
-class BottomNav extends StatelessWidget {
+class BottomNavOrg extends StatelessWidget {
   final int currentIndex;
 
-  const BottomNav({
+  const BottomNavOrg({
     super.key,
     required this.currentIndex,
   });
 
   void _onTap(BuildContext context, int index) {
-    // Avoid navigating to the same page
     if (index == currentIndex) return;
 
     switch (index) {
       case 0:
-        // Navigate to Events
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const EventsListScreen()),
+          MaterialPageRoute(builder: (context) => const MyEventsOrgScreen()),
         );
         break;
       case 1:
-        // Navigate to Clubs
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ClubsListScreen()),
+          MaterialPageRoute(builder: (context) => const EnrollmentApplicationsScreen()),
         );
         break;
       case 2:
-        // Navigate to History (placeholder)
-        print('Navigate to History');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const PeopleScreen()),
+        );
         break;
     }
   }
@@ -46,15 +46,15 @@ class BottomNav extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.event),
-          label: 'Events',
+          label: 'My Events',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.assignment),
+          label: 'Applications',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.people),
-          label: 'Clubs',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'History',
+          label: 'Members',
         ),
       ],
     );

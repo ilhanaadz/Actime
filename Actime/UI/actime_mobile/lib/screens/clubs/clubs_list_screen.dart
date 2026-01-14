@@ -69,12 +69,7 @@ class ClubsListScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 1,
-        onTap: (index) {
-          print('Navigate to tab: $index');
-        },
-      ),
+      bottomNavigationBar: const BottomNav(currentIndex: 1),
     );
   }
 

@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 import '../screens/events/events_list_screen.dart';
 import '../screens/clubs/clubs_list_screen.dart';
+import '../screens/user/my_events_screen.dart';
 
-class BottomNav extends StatelessWidget {
+class BottomNavUser extends StatelessWidget {
   final int currentIndex;
 
-  const BottomNav({
+  const BottomNavUser({
     super.key,
     required this.currentIndex,
   });
 
   void _onTap(BuildContext context, int index) {
-    // Avoid navigating to the same page
     if (index == currentIndex) return;
 
     switch (index) {
       case 0:
-        // Navigate to Events
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const EventsListScreen()),
         );
         break;
       case 1:
-        // Navigate to Clubs
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const ClubsListScreen()),
         );
         break;
       case 2:
-        // Navigate to History (placeholder)
-        print('Navigate to History');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MyEventsScreen()),
+        );
         break;
     }
   }
@@ -54,7 +54,7 @@ class BottomNav extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.history),
-          label: 'History',
+          label: 'My Events',
         ),
       ],
     );

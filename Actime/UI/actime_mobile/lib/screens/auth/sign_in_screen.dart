@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'sign_up_screen.dart';
+import '../landing/landing_logged_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -17,6 +18,21 @@ class _SignInScreenState extends State<SignInScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _handleSignIn() {
+    // Simulate login
+    if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+      // Navigate to Landing Logged screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter email and password')),
+      );
+    }
   }
 
   @override
@@ -77,7 +93,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
                     ],
                   ),
@@ -119,10 +137,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            print('Email: ${_emailController.text}');
-                            print('Password: ${_passwordController.text}');
-                          },
+                          onPressed: _handleSignIn,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0D7C8C),
                             shape: RoundedRectangleBorder(

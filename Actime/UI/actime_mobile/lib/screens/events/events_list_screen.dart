@@ -99,12 +99,7 @@ class EventsListScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 0,
-        onTap: (index) {
-          print('Navigate to tab: $index');
-        },
-      ),
+      bottomNavigationBar: const BottomNav(currentIndex: 0),
     );
   }
 
