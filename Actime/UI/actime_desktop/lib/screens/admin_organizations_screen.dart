@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../components/admin_sidebar.dart';
 import '../components/pagination_widget.dart';
+import '../components/search_sort_header.dart';
+import '../components/delete_confirmation_dialog.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_users_screen.dart';
 import 'admin_events_screen.dart';
@@ -19,8 +21,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   int? _selectedOrgIndex;
   int _currentPage = 1;
   final int _totalPages = 4;
-  String _sortBy = 'name'; // name, members, events
-  bool _showSearch = false;
+  String _sortBy = 'name';
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -83,87 +84,45 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   Widget _buildOrganizationsList() {
     return Column(
       children: [
-        // Search Header
-        Container(
-          padding: const EdgeInsets.all(24),
-          color: Colors.white,
-          child: Row(
-            children: [
-              const Text(
-                'Organizations',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const Spacer(),
-              
-              // Search TextField
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF0D7C8C)),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Sort Dropdown
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
-                tooltip: 'Sort',
-                offset: const Offset(0, 45),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                onSelected: (value) {
-                  setState(() => _sortBy = value);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'name',
-                    child: Row(
-                      children: [
-                        Icon(Icons.sort_by_alpha, size: 18),
-                        SizedBox(width: 12),
-                        Text('Sort by Name'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'members',
-                    child: Row(
-                      children: [
-                        Icon(Icons.people, size: 18),
-                        SizedBox(width: 12),
-                        Text('Sort by Members'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'events',
-                    child: Row(
-                      children: [
-                        Icon(Icons.event, size: 18),
-                        SizedBox(width: 12),
-                        Text('Sort by Events'),
-                      ],
-                    ),
-                  ),
+        // Header with Search and Sort
+        SearchSortHeader(
+          title: 'Organizations',
+          searchController: _searchController,
+          sortItems: [
+            const PopupMenuItem(
+              value: 'name',
+              child: Row(
+                children: [
+                  Icon(Icons.sort_by_alpha, size: 18),
+                  SizedBox(width: 12),
+                  Text('Sort by Name'),
                 ],
               ),
-            ],
-          ),
+            ),
+            const PopupMenuItem(
+              value: 'members',
+              child: Row(
+                children: [
+                  Icon(Icons.people, size: 18),
+                  SizedBox(width: 12),
+                  Text('Sort by Members'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'events',
+              child: Row(
+                children: [
+                  Icon(Icons.event, size: 18),
+                  SizedBox(width: 12),
+                  Text('Sort by Events'),
+                ],
+              ),
+            ),
+          ],
+          onSortSelected: (value) {
+            setState(() => _sortBy = value);
+          },
         ),
         
         // Organizations List
@@ -364,286 +323,15 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Info Card
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        // Main Logo
-                        Container(
-                          width: 120,
-                          height: 120,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.orange[50],
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.sports_volleyball,
-                            color: Colors.orange,
-                            size: 70,
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Organization Name
-                        const Text(
-                          'Student',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0D7C8C),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        Text(
-                          'Volleyball',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Contact Info Cards
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildContactCard('+12027953213', Icons.phone),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildContactCard('1894 Arlington Avenue', Icons.location_on),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        _buildContactCard('club@volleyball.com', Icons.email),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Stats
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildStatItem(Icons.event, '13 events'),
-                            const SizedBox(width: 32),
-                            _buildStatItem(Icons.people, '89 members'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
+                  _buildDetailSection(),
                   const SizedBox(height: 24),
-                  
-                  // About Section
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'About',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Volleyball is a team sport in which two teams of six players are separated by a net. Each team tries to score points by grounding a ball on the other team\'s court under organized rules.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                            height: 1.6,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
+                  _buildAboutSection(),
                   const SizedBox(height: 24),
-                  
-                  // Gallery Section
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Gallery',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: AspectRatio(
-                                aspectRatio: 1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(Icons.image, color: Colors.grey[400], size: 60),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(Icons.image, color: Colors.grey[400], size: 30),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(Icons.image, color: Colors.grey[400], size: 30),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(Icons.image, color: Colors.grey[400], size: 30),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  AspectRatio(
-                                    aspectRatio: 1,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(Icons.image, color: Colors.grey[400], size: 30),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
+                  _buildGallerySection(),
                   const SizedBox(height: 24),
-                  
-                  // Events Section
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Events',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildEventItem('Bjelašnica hiking trip', '11.10.2022', '205 participants'),
-                        _buildEventItem('Volleyball tournament', '21.12.2022', '31 participants'),
-                        _buildEventItem('Training session', '15.11.2022', '45 participants'),
-                      ],
-                    ),
-                  ),
-                  
+                  _buildEventsSection(),
                   const SizedBox(height: 24),
-                  
-                  // Delete Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        _showDeleteDialog(context);
-                      },
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('Delete Organization'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                  ),
+                  _buildDeleteButton(),
                 ],
               ),
             ),
@@ -653,46 +341,130 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
     );
   }
 
-  Widget _buildContactCard(String text, IconData icon) {
+  Widget _buildDetailSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(icon, color: Colors.grey[600], size: 18),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[700],
-              ),
+          Container(
+            width: 120,
+            height: 120,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange[50],
+              shape: BoxShape.circle,
             ),
+            child: const Icon(
+              Icons.sports_volleyball,
+              color: Colors.orange,
+              size: 70,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Student',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0D7C8C),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Volleyball',
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[700],
-            fontWeight: FontWeight.w500,
-          ),
+  Widget _buildAboutSection() {
+    return _buildSection(
+      'About',
+      Text(
+        'Volleyball is a team sport in which two teams of six players are separated by a net.',
+        style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.6),
+      ),
+    );
+  }
+
+  Widget _buildGallerySection() {
+    return _buildSection(
+      'Gallery',
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
         ),
-      ],
+        itemCount: 8,
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.image, color: Colors.grey[400], size: 40),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEventsSection() {
+    return _buildSection(
+      'Events',
+      Column(
+        children: [
+          _buildEventItem('Bjelašnica hiking trip', '11.10.2022', '205 participants'),
+          _buildEventItem('Volleyball tournament', '21.12.2022', '31 participants'),
+          _buildEventItem('Training session', '15.11.2022', '45 participants'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, Widget content) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 16),
+          content,
+        ],
+      ),
     );
   }
 
@@ -738,30 +510,32 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Delete Organization'),
-        content: const Text('Are you sure you want to delete this organization? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() => _selectedOrgIndex = null);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Organization deleted')),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
+  Widget _buildDeleteButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () async {
+          final result = await DeleteConfirmationDialog.show(
+            context: context,
+            title: 'Delete Organization',
+            message: 'Are you sure you want to delete this organization? This action cannot be undone.',
+          );
+          
+          if (result == true && mounted) {
+            setState(() => _selectedOrgIndex = null);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Organization deleted successfully')),
+            );
+          }
+        },
+        icon: const Icon(Icons.delete_outline, size: 18),
+        label: const Text('Delete Organization'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red,
+          side: const BorderSide(color: Colors.red),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
       ),
     );
   }

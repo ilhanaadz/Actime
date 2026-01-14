@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../components/admin_sidebar.dart';
 import '../components/pagination_widget.dart';
+import '../components/search_sort_header.dart';
+import '../components/delete_confirmation_dialog.dart';
+import '../components/input_dialog.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_organizations_screen.dart';
 import 'admin_events_screen.dart';
@@ -18,7 +21,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   final _searchController = TextEditingController();
   int _currentPage = 1;
   final int _totalPages = 4;
-  String _sortBy = 'name'; // name, organizations
+  String _sortBy = 'name';
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -70,77 +73,35 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           Expanded(
             child: Column(
               children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  color: Colors.white,
-                  child: Row(
-                    children: [
-                      const Text(
-                        'Categories',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      
-                      // Search TextField
-                      SizedBox(
-                        width: 300,
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            prefixIcon: const Icon(Icons.search, color: Color(0xFF0D7C8C)),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 12),
-                      
-                      // Sort Dropdown
-                      PopupMenuButton<String>(
-                        icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
-                        tooltip: 'Sort',
-                        offset: const Offset(0, 45),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        onSelected: (value) {
-                          setState(() => _sortBy = value);
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'name',
-                            child: Row(
-                              children: [
-                                Icon(Icons.sort_by_alpha, size: 18),
-                                SizedBox(width: 12),
-                                Text('Sort by Name'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'organizations',
-                            child: Row(
-                              children: [
-                                Icon(Icons.apartment, size: 18),
-                                SizedBox(width: 12),
-                                Text('Sort by Organizations'),
-                              ],
-                            ),
-                          ),
+                // Header with Search and Sort
+                SearchSortHeader(
+                  title: 'Categories',
+                  searchController: _searchController,
+                  sortItems: [
+                    const PopupMenuItem(
+                      value: 'name',
+                      child: Row(
+                        children: [
+                          Icon(Icons.sort_by_alpha, size: 18),
+                          SizedBox(width: 12),
+                          Text('Sort by Name'),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'organizations',
+                      child: Row(
+                        children: [
+                          Icon(Icons.apartment, size: 18),
+                          SizedBox(width: 12),
+                          Text('Sort by Organizations'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSortSelected: (value) {
+                    setState(() => _sortBy = value);
+                  },
                 ),
 
                 // Categories Table
@@ -216,7 +177,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                         Center(
                           child: FloatingActionButton(
                             onPressed: () {
-                              _showAddCategoryDialog(context);
+                              _showAddCategoryDialog();
                             },
                             backgroundColor: const Color(0xFF0D7C8C),
                             child: const Icon(Icons.add, color: Colors.white),
@@ -256,7 +217,6 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       ),
       child: Row(
         children: [
-          // Name
           Expanded(
             flex: 3,
             child: Text(
@@ -268,8 +228,6 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               ),
             ),
           ),
-
-          // Organizations
           Expanded(
             flex: 2,
             child: Row(
@@ -286,22 +244,14 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               ],
             ),
           ),
-
-          // Edit Icon
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: () {
-              _showEditCategoryDialog(context, name);
-            },
+            onPressed: () => _showEditCategoryDialog(name),
             color: Colors.grey[600],
           ),
-          
-          // Delete Icon
           IconButton(
             icon: const Icon(Icons.delete_outline, size: 20),
-            onPressed: () {
-              _showDeleteCategoryDialog(context, name);
-            },
+            onPressed: () => _showDeleteCategoryDialog(name),
             color: Colors.red[400],
           ),
         ],
@@ -309,146 +259,54 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     );
   }
 
+  Future<void> _showAddCategoryDialog() async {
+    final categoryName = await InputDialog.show(
+      context: context,
+      title: 'Add Category',
+      label: 'Category Name',
+      confirmText: 'Add',
+    );
+    
+    if (categoryName != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Category "$categoryName" added successfully')),
+      );
+    }
+  }
+
+  Future<void> _showEditCategoryDialog(String currentName) async {
+    final categoryName = await InputDialog.show(
+      context: context,
+      title: 'Edit Category',
+      label: 'Category Name',
+      initialValue: currentName,
+      confirmText: 'Save',
+    );
+    
+    if (categoryName != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Category updated to "$categoryName"')),
+      );
+    }
+  }
+
+  Future<void> _showDeleteCategoryDialog(String categoryName) async {
+    final result = await DeleteConfirmationDialog.show(
+      context: context,
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete "$categoryName"? This action cannot be undone.',
+    );
+    
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Category "$categoryName" deleted successfully')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _showAddCategoryDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Add Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Category Name',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                hintText: 'Enter category name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Category "${nameController.text}" added successfully')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D7C8C)),
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditCategoryDialog(BuildContext context, String currentName) {
-    final nameController = TextEditingController(text: currentName);
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Edit Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Category Name',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                hintText: 'Enter category name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Category updated to "${nameController.text}"')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D7C8C)),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteCategoryDialog(BuildContext context, String categoryName) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Delete Category'),
-        content: Text('Are you sure you want to delete "$categoryName"? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Category "$categoryName" deleted successfully')),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
   }
 }
