@@ -19,6 +19,8 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   int? _selectedOrgIndex;
   int _currentPage = 1;
   final int _totalPages = 4;
+  String _sortBy = 'name'; // name, members, events
+  bool _showSearch = false;
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -96,8 +98,10 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                 ),
               ),
               const Spacer(),
+              
+              // Search TextField
               SizedBox(
-                width: 350,
+                width: 300,
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -112,6 +116,51 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                 ),
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // Sort Dropdown
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
+                tooltip: 'Sort',
+                offset: const Offset(0, 45),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onSelected: (value) {
+                  setState(() => _sortBy = value);
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'name',
+                    child: Row(
+                      children: [
+                        Icon(Icons.sort_by_alpha, size: 18),
+                        SizedBox(width: 12),
+                        Text('Sort by Name'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'members',
+                    child: Row(
+                      children: [
+                        Icon(Icons.people, size: 18),
+                        SizedBox(width: 12),
+                        Text('Sort by Members'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'events',
+                    child: Row(
+                      children: [
+                        Icon(Icons.event, size: 18),
+                        SizedBox(width: 12),
+                        Text('Sort by Events'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

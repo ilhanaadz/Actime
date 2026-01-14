@@ -18,6 +18,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   final _searchController = TextEditingController();
   int _currentPage = 1;
   final int _totalPages = 4;
+  String _sortBy = 'name'; // name, email, organizations
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -84,8 +85,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                         ),
                       ),
                       const Spacer(),
+                      
+                      // Search TextField
                       SizedBox(
-                        width: 350,
+                        width: 300,
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
@@ -100,6 +103,51 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           ),
                         ),
+                      ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      // Sort Dropdown
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
+                        tooltip: 'Sort',
+                        offset: const Offset(0, 45),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        onSelected: (value) {
+                          setState(() => _sortBy = value);
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'name',
+                            child: Row(
+                              children: [
+                                Icon(Icons.sort_by_alpha, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Name'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'email',
+                            child: Row(
+                              children: [
+                                Icon(Icons.email, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Email'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'organizations',
+                            child: Row(
+                              children: [
+                                Icon(Icons.apartment, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Organizations'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -311,11 +359,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             ),
           ),
 
-          // More Icon
+          // Delete Icon
           IconButton(
-            icon: const Icon(Icons.more_vert, size: 20),
-            onPressed: () {},
-            color: Colors.grey[400],
+            icon: const Icon(Icons.delete_outline, size: 20),
+            onPressed: () {
+              _showDeleteUserDialog(context, name);
+            },
+            color: Colors.red[400],
+            tooltip: 'Delete user',
           ),
         ],
       ),
@@ -326,5 +377,32 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showDeleteUserDialog(BuildContext context, String userName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Delete User'),
+        content: Text('Are you sure you want to delete $userName? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$userName deleted successfully')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 }

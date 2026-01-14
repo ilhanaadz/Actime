@@ -18,6 +18,8 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
   final _searchController = TextEditingController();
   int _currentPage = 1;
   final int _totalPages = 4;
+  String _selectedFilter = 'All'; // All, Active, Closed
+  String _sortBy = 'date'; // date, name, participants
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -84,8 +86,10 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                         ),
                       ),
                       const Spacer(),
+                      
+                      // Search TextField
                       SizedBox(
-                        width: 350,
+                        width: 300,
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
@@ -101,6 +105,78 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                           ),
                         ),
                       ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      // Sort Dropdown
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
+                        tooltip: 'Sort',
+                        offset: const Offset(0, 45),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        onSelected: (value) {
+                          setState(() => _sortBy = value);
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'date',
+                            child: Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Date'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'name',
+                            child: Row(
+                              children: [
+                                Icon(Icons.sort_by_alpha, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Name'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'participants',
+                            child: Row(
+                              children: [
+                                Icon(Icons.people, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Participants'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(width: 8),
+                      
+                      // Calendar Icon
+                      IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () {
+                          _showCompactDatePicker(context);
+                        },
+                        color: const Color(0xFF0D7C8C),
+                        tooltip: 'Filter by date',
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Filter Tabs
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      _buildFilterTab('All'),
+                      const SizedBox(width: 8),
+                      _buildFilterTab('Active'),
+                      const SizedBox(width: 8),
+                      _buildFilterTab('Closed'),
                     ],
                   ),
                 ),
@@ -261,11 +337,14 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
 
           const SizedBox(width: 16),
 
-          // More Icon
+          // Delete Icon
           IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-            color: Colors.grey[400],
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              _showDeleteEventDialog(context, 'Bjelašnica hiking trip');
+            },
+            color: Colors.red[400],
+            tooltip: 'Delete event',
           ),
         ],
       ),
@@ -292,5 +371,119 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showDeleteEventDialog(BuildContext context, String eventName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Delete Event'),
+        content: Text('Are you sure you want to delete "$eventName"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Event "$eventName" deleted successfully')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterTab(String label) {
+    final isSelected = _selectedFilter == label;
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = label),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF0D7C8C) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0D7C8C) : Colors.grey[300]!,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            color: isSelected ? Colors.white : Colors.grey[700],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCompactDatePicker(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF0D7C8C),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Filtered for ${picked.day}/${picked.month}/${picked.year}'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _showDateRangePicker(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF0D7C8C),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Filtered from ${picked.start.day}/${picked.start.month}/${picked.start.year} to ${picked.end.day}/${picked.end.month}/${picked.end.year}',
+          ),
+        ),
+      );
+    }
   }
 }

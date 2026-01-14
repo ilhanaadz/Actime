@@ -18,6 +18,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   final _searchController = TextEditingController();
   int _currentPage = 1;
   final int _totalPages = 4;
+  String _sortBy = 'name'; // name, organizations
 
   void _handleNavigation(String route) {
     if (route == 'logout') {
@@ -84,18 +85,59 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                         ),
                       ),
                       const Spacer(),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Add Category'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0D7C8C),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      
+                      // Search TextField
+                      SizedBox(
+                        width: 300,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search...',
+                            prefixIcon: const Icon(Icons.search, color: Color(0xFF0D7C8C)),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           ),
                         ),
+                      ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      // Sort Dropdown
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.sort, color: Color(0xFF0D7C8C)),
+                        tooltip: 'Sort',
+                        offset: const Offset(0, 45),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        onSelected: (value) {
+                          setState(() => _sortBy = value);
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'name',
+                            child: Row(
+                              children: [
+                                Icon(Icons.sort_by_alpha, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Name'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'organizations',
+                            child: Row(
+                              children: [
+                                Icon(Icons.apartment, size: 18),
+                                SizedBox(width: 12),
+                                Text('Sort by Organizations'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -168,6 +210,19 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                           ),
                         ),
 
+                        const SizedBox(height: 24),
+                        
+                        // Floating Action Button
+                        Center(
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              _showAddCategoryDialog(context);
+                            },
+                            backgroundColor: const Color(0xFF0D7C8C),
+                            child: const Icon(Icons.add, color: Colors.white),
+                          ),
+                        ),
+
                         const SizedBox(height: 32),
 
                         PaginationWidget(
@@ -233,8 +288,19 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           // Edit Icon
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              _showEditCategoryDialog(context, name);
+            },
             color: Colors.grey[600],
+          ),
+          
+          // Delete Icon
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 20),
+            onPressed: () {
+              _showDeleteCategoryDialog(context, name);
+            },
+            color: Colors.red[400],
           ),
         ],
       ),
@@ -245,5 +311,142 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showAddCategoryDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Add Category'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Category Name',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: 'Enter category name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Category "${nameController.text}" added successfully')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D7C8C)),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditCategoryDialog(BuildContext context, String currentName) {
+    final nameController = TextEditingController(text: currentName);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Edit Category'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Category Name',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: 'Enter category name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Category updated to "${nameController.text}"')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D7C8C)),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteCategoryDialog(BuildContext context, String categoryName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Delete Category'),
+        content: Text('Are you sure you want to delete "$categoryName"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Category "$categoryName" deleted successfully')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 }
