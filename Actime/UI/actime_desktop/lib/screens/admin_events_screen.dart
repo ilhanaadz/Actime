@@ -190,9 +190,9 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                   ),
                 ),
 
-                // Pagination
-                Padding(
-                  padding: const EdgeInsets.all(16),
+                // Pagination at bottom
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: PaginationWidget(
                     currentPage: _currentPage,
                     totalPages: _totalPages,

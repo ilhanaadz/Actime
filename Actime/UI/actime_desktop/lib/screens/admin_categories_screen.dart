@@ -222,18 +222,20 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                             child: const Icon(Icons.add, color: Colors.white),
                           ),
                         ),
-
-                        const SizedBox(height: 32),
-
-                        PaginationWidget(
-                          currentPage: _currentPage,
-                          totalPages: _totalPages,
-                          onPageChanged: (page) {
-                            setState(() => _currentPage = page);
-                          },
-                        ),
                       ],
                     ),
+                  ),
+                ),
+                
+                // Pagination at bottom
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  child: PaginationWidget(
+                    currentPage: _currentPage,
+                    totalPages: _totalPages,
+                    onPageChanged: (page) {
+                      setState(() => _currentPage = page);
+                    },
                   ),
                 ),
               ],

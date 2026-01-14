@@ -157,101 +157,99 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                              ),
-                            ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
                           ),
-                          child: Column(
-                            children: [
-                              // Table Header
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(color: Colors.grey[200]!),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Table Header
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: Colors.grey[200]!),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 60),
+                                const Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'First Name',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    const SizedBox(width: 60),
-                                    const Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'First Name',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
+                                const Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'Last Name',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey,
                                     ),
-                                    const Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Last Name',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                    const Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        'Email Address',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                    const Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Organizations',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(width: 40),
-                                  ],
+                                  ),
                                 ),
-                              ),
-
-                              // Table Rows
-                              _buildUserRow('Furkan Cürek', 'furkancurek@outlook.com', '2 organizations'),
-                              _buildUserRow('Armin Šišić', 'sisicarmin@gmail.com', '6 organizations'),
-                              _buildUserRow('Test User', 'testuser@gmail.com', '1 organization'),
-                              _buildUserRow('Another Cürek', 'anotherfurkan@gmail.com', '4 organizations'),
-                            ],
+                                const Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    'Email Address',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'Organizations',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                Container(width: 40),
+                              ],
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 32),
-
-                        PaginationWidget(
-                          currentPage: _currentPage,
-                          totalPages: _totalPages,
-                          onPageChanged: (page) {
-                            setState(() => _currentPage = page);
-                          },
-                        ),
-                      ],
+                          // Table Rows
+                          _buildUserRow('Furkan Cürek', 'furkancurek@outlook.com', '2 organizations'),
+                          _buildUserRow('Armin Šišić', 'sisicarmin@gmail.com', '6 organizations'),
+                          _buildUserRow('Test User', 'testuser@gmail.com', '1 organization'),
+                          _buildUserRow('Another Cürek', 'anotherfurkan@gmail.com', '4 organizations'),
+                        ],
+                      ),
                     ),
+                  ),
+                ),
+                
+                // Pagination at bottom
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  child: PaginationWidget(
+                    currentPage: _currentPage,
+                    totalPages: _totalPages,
+                    onPageChanged: (page) {
+                      setState(() => _currentPage = page);
+                    },
                   ),
                 ),
               ],
