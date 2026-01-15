@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/constants.dart';
 import '../components/app_text_field.dart';
 import '../components/app_button.dart';
+import '../services/services.dart';
 import 'admin_dashboard_screen.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -14,19 +15,52 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
-  void _handleLogin() {
-    if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+  Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showError('Please fill in all fields');
+      return;
     }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await _authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+        );
+      } else {
+        _showError(response.message ?? 'Login failed. Please try again.');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('Connection error. Please check your internet connection.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error,
+      ),
+    );
   }
 
   @override
@@ -142,10 +176,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                   // Sign In Button
                   AppButton(
-                    text: 'Sign In',
-                    onPressed: _handleLogin,
+                    text: _isLoading ? 'Signing In...' : 'Sign In',
+                    onPressed: _isLoading ? null : _handleLogin,
                     fullWidth: true,
                     size: AppButtonSize.large,
+                    isLoading: _isLoading,
                   ),
                 ],
               ),
