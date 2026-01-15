@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import '../components/admin_sidebar.dart';
+import '../components/admin_layout.dart';
 import '../components/pagination_widget.dart';
 import '../components/search_sort_header.dart';
 import '../components/delete_confirmation_dialog.dart';
-import 'admin_dashboard_screen.dart';
-import 'admin_users_screen.dart';
-import 'admin_events_screen.dart';
-import 'admin_categories_screen.dart';
-import 'admin_login_screen.dart';
 
 class AdminOrganizationsScreen extends StatefulWidget {
   const AdminOrganizationsScreen({super.key});
@@ -23,61 +18,13 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   final int _totalPages = 4;
   String _sortBy = 'name';
 
-  void _handleNavigation(String route) {
-    if (route == 'logout') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
-      );
-      return;
-    }
-
-    switch (route) {
-      case 'dashboard':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-        );
-        break;
-      case 'users':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminUsersScreen()),
-        );
-        break;
-      case 'events':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminEventsScreen()),
-        );
-        break;
-      case 'categories':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminCategoriesScreen()),
-        );
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Row(
-        children: [
-          AdminSidebar(
-            currentRoute: 'organizations',
-            onNavigate: _handleNavigation,
-          ),
-          
-          Expanded(
-            child: _selectedOrgIndex == null 
-                ? _buildOrganizationsList() 
-                : _buildOrganizationDetail(),
-          ),
-        ],
-      ),
+    return AdminLayout(
+      currentRoute: 'organizations',
+      child: _selectedOrgIndex == null
+          ? _buildOrganizationsList()
+          : _buildOrganizationDetail(),
     );
   }
 

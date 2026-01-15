@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import '../components/admin_sidebar.dart';
+import '../components/admin_layout.dart';
 import '../components/pagination_widget.dart';
 import '../components/search_sort_header.dart';
 import '../components/event_filter_tabs.dart';
 import '../components/delete_confirmation_dialog.dart';
-import 'admin_dashboard_screen.dart';
-import 'admin_organizations_screen.dart';
-import 'admin_users_screen.dart';
-import 'admin_categories_screen.dart';
-import 'admin_login_screen.dart';
 
 class AdminEventsScreen extends StatefulWidget {
   const AdminEventsScreen({super.key});
@@ -24,55 +19,11 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
   String _selectedFilter = 'All';
   String _sortBy = 'date';
 
-  void _handleNavigation(String route) {
-    if (route == 'logout') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
-      );
-      return;
-    }
-
-    switch (route) {
-      case 'dashboard':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-        );
-        break;
-      case 'organizations':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminOrganizationsScreen()),
-        );
-        break;
-      case 'users':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminUsersScreen()),
-        );
-        break;
-      case 'categories':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminCategoriesScreen()),
-        );
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Row(
-        children: [
-          AdminSidebar(
-            currentRoute: 'events',
-            onNavigate: _handleNavigation,
-          ),
-          Expanded(
-            child: Column(
+    return AdminLayout(
+      currentRoute: 'events',
+      child: Column(
               children: [
                 // Header with Search, Sort, and Calendar
                 SearchSortHeader(
@@ -151,9 +102,6 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 

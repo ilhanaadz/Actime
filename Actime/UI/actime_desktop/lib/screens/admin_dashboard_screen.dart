@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import '../components/admin_sidebar.dart';
-import 'admin_organizations_screen.dart';
-import 'admin_users_screen.dart';
-import 'admin_events_screen.dart';
-import 'admin_categories_screen.dart';
-import 'admin_login_screen.dart';
+import '../components/admin_layout.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -14,55 +9,11 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  void _handleNavigation(String route) {
-    if (route == 'logout') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
-      );
-      return;
-    }
-
-    switch (route) {
-      case 'organizations':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminOrganizationsScreen()),
-        );
-        break;
-      case 'users':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminUsersScreen()),
-        );
-        break;
-      case 'events':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminEventsScreen()),
-        );
-        break;
-      case 'categories':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminCategoriesScreen()),
-        );
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Row(
-        children: [
-          AdminSidebar(
-            currentRoute: 'dashboard',
-            onNavigate: _handleNavigation,
-          ),
-          Expanded(
-            child: Column(
+    return AdminLayout(
+      currentRoute: 'dashboard',
+      child: Column(
               children: [
                 // Header
                 Container(
@@ -160,9 +111,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
