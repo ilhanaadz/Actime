@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class CircleIconContainer extends StatelessWidget {
   final IconData icon;
@@ -14,8 +14,8 @@ class CircleIconContainer extends StatelessWidget {
     required this.icon,
     this.iconColor,
     this.backgroundColor,
-    this.size = AppSizes.circleMedium,
-    this.iconSize = AppSizes.iconLarge,
+    this.size = AppDimensions.circleMedium,
+    this.iconSize = AppDimensions.iconLarge,
     this.badge,
   });
 
@@ -29,8 +29,8 @@ class CircleIconContainer extends StatelessWidget {
       icon: icon,
       iconColor: iconColor,
       backgroundColor: backgroundColor,
-      size: AppSizes.circleSmall,
-      iconSize: AppSizes.iconDefault,
+      size: AppDimensions.circleSmall,
+      iconSize: AppDimensions.iconDefault,
       badge: badge,
     );
   }
@@ -45,8 +45,8 @@ class CircleIconContainer extends StatelessWidget {
       icon: icon,
       iconColor: iconColor,
       backgroundColor: backgroundColor,
-      size: AppSizes.circleMedium,
-      iconSize: AppSizes.iconLarge,
+      size: AppDimensions.circleMedium,
+      iconSize: AppDimensions.iconLarge,
       badge: badge,
     );
   }
@@ -61,7 +61,7 @@ class CircleIconContainer extends StatelessWidget {
       icon: icon,
       iconColor: iconColor,
       backgroundColor: backgroundColor,
-      size: AppSizes.circleLarge,
+      size: AppDimensions.circleLarge,
       iconSize: 30,
       badge: badge,
     );
@@ -77,8 +77,8 @@ class CircleIconContainer extends StatelessWidget {
       icon: icon,
       iconColor: iconColor,
       backgroundColor: backgroundColor,
-      size: AppSizes.circleXLarge,
-      iconSize: AppSizes.iconXLarge,
+      size: AppDimensions.circleXLarge,
+      iconSize: AppDimensions.iconXLarge,
       badge: badge,
     );
   }

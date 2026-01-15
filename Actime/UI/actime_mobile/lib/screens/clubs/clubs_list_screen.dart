@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
 import '../../components/event_card.dart';
@@ -18,7 +18,7 @@ class ClubsListScreen extends StatelessWidget {
         onProfileTap: () {},
       ),
       body: ListView(
-        padding: const EdgeInsets.all(AppSizes.spacingDefault),
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
         children: [
           ClubCard(
             name: 'Velež',
@@ -31,7 +31,7 @@ class ClubsListScreen extends StatelessWidget {
             isFavorite: true,
             onTap: () => _navigateToDetail(context),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           ClubCard(
             name: 'Student',
             sport: 'Volleyball',
@@ -42,7 +42,7 @@ class ClubsListScreen extends StatelessWidget {
             iconColor: AppColors.orange,
             onTap: () => _navigateToDetail(context),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           ClubCard(
             name: 'Velež',
             sport: 'Football',
@@ -53,7 +53,7 @@ class ClubsListScreen extends StatelessWidget {
             iconColor: AppColors.red,
             onTap: () => _navigateToDetail(context),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           ClubCard(
             name: 'Student',
             sport: 'Volleyball',

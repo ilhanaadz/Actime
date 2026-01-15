@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class InfoRow extends StatelessWidget {
   final IconData icon;
@@ -15,14 +15,14 @@ class InfoRow extends StatelessWidget {
     required this.text,
     this.iconColor,
     this.useContainer = true,
-    this.containerSize = AppSizes.circleSmall,
+    this.containerSize = AppDimensions.circleSmall,
     this.borderRadius,
   });
 
   @override
   Widget build(BuildContext context) {
     final effectiveIconColor = iconColor ?? AppColors.primary;
-    final effectiveBorderRadius = borderRadius ?? BorderRadius.circular(AppSizes.borderRadiusMedium);
+    final effectiveBorderRadius = borderRadius ?? BorderRadius.circular(AppDimensions.borderRadiusMedium);
 
     return Row(
       children: [
@@ -34,11 +34,11 @@ class InfoRow extends StatelessWidget {
               color: effectiveIconColor.withValues(alpha: 0.1),
               borderRadius: effectiveBorderRadius,
             ),
-            child: Icon(icon, color: effectiveIconColor, size: AppSizes.iconDefault),
+            child: Icon(icon, color: effectiveIconColor, size: AppDimensions.iconDefault),
           )
         else
-          Icon(icon, color: effectiveIconColor, size: AppSizes.iconDefault),
-        const SizedBox(width: AppSizes.spacingMedium),
+          Icon(icon, color: effectiveIconColor, size: AppDimensions.iconDefault),
+        const SizedBox(width: AppDimensions.spacingMedium),
         Expanded(
           child: Text(
             text,
@@ -66,16 +66,16 @@ class ProfileInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      padding: const EdgeInsets.all(AppDimensions.spacingDefault),
       decoration: BoxDecoration(
         color: AppColors.inputBackground,
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: AppSizes.iconDefault),
-          const SizedBox(width: AppSizes.spacingDefault),
+          Icon(icon, color: AppColors.primary, size: AppDimensions.iconDefault),
+          const SizedBox(width: AppDimensions.spacingDefault),
           Text(
             text,
             style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
@@ -125,7 +125,7 @@ class ProfileField extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: AppSizes.spacingXSmall),
+        const SizedBox(height: AppDimensions.spacingXSmall),
         Text(
           value,
           style: const TextStyle(

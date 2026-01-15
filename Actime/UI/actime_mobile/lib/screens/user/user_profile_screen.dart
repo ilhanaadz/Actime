@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
 import '../../components/event_card.dart';
@@ -36,11 +36,11 @@ class UserProfileScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingLarge),
+          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
           child: Column(
             children: [
               _buildProfilePicture(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               const Text(
                 'John Doe',
                 style: TextStyle(
@@ -49,17 +49,17 @@ class UserProfileScreen extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               const ProfileInfoRow(icon: Icons.email_outlined, text: 'john.doe@email.com'),
-              const SizedBox(height: AppSizes.spacingDefault),
+              const SizedBox(height: AppDimensions.spacingDefault),
               const ProfileInfoRow(icon: Icons.phone_outlined, text: '+387 62 123 456'),
-              const SizedBox(height: AppSizes.spacingDefault),
+              const SizedBox(height: AppDimensions.spacingDefault),
               const ProfileInfoRow(icon: Icons.cake_outlined, text: '25 years old'),
-              const SizedBox(height: AppSizes.spacingDefault),
+              const SizedBox(height: AppDimensions.spacingDefault),
               const ProfileInfoRow(icon: Icons.school_outlined, text: 'Student'),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               _buildMyClubsSection(),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               ActimeOutlinedButton(
                 label: 'Logout',
                 icon: Icons.logout,
@@ -101,10 +101,10 @@ class UserProfileScreen extends StatelessWidget {
   Widget _buildMyClubsSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      padding: const EdgeInsets.all(AppDimensions.spacingDefault),
       decoration: BoxDecoration(
         color: AppColors.inputBackground,
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -118,14 +118,14 @@ class UserProfileScreen extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           ClubItemSmall(
             name: 'Student',
             sport: 'Volleyball',
             icon: Icons.sports_volleyball,
             iconColor: AppColors.orange,
           ),
-          const SizedBox(height: AppSizes.spacingMedium),
+          const SizedBox(height: AppDimensions.spacingMedium),
           ClubItemSmall(
             name: 'Velež',
             sport: 'Football',

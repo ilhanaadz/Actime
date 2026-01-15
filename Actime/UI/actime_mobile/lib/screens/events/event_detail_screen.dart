@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
@@ -21,27 +21,27 @@ class EventDetailScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingLarge),
+          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrganizerSection(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildTitleSection(),
-              const SizedBox(height: AppSizes.spacingSmall),
+              const SizedBox(height: AppDimensions.spacingSmall),
               const Text(
                 'Hiking',
                 style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               const InfoRow(icon: Icons.calendar_today, text: '11.10.2022.'),
-              const SizedBox(height: AppSizes.spacingMedium),
+              const SizedBox(height: AppDimensions.spacingMedium),
               const InfoRow(icon: Icons.location_on_outlined, text: 'Bjelašnica'),
-              const SizedBox(height: AppSizes.spacingMedium),
+              const SizedBox(height: AppDimensions.spacingMedium),
               const InfoRow(icon: Icons.attach_money, text: '10'),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildDetailsSection(),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               ActimePrimaryButton(
                 label: 'Join',
                 onPressed: () {
@@ -67,7 +67,7 @@ class EventDetailScreen extends StatelessWidget {
               icon: Icons.hiking,
               iconColor: AppColors.orange,
             ),
-            const SizedBox(width: AppSizes.spacingMedium),
+            const SizedBox(width: AppDimensions.spacingMedium),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,7 +97,7 @@ class EventDetailScreen extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(width: AppSizes.spacingXSmall),
+            const SizedBox(width: AppDimensions.spacingXSmall),
             Icon(Icons.person_outline, size: 16, color: AppColors.textMuted),
           ],
         ),
@@ -137,7 +137,7 @@ class EventDetailScreen extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: AppSizes.spacingMedium),
+        SizedBox(height: AppDimensions.spacingMedium),
         Text(
           'Departing between 06:00am and 07:00am in Lehn at Längenfeld, this demanding long walk lets avid hikers explore the lofty and rugged mountain world of Ötztal Valley. The route winds across amazingly beautiful sceneries and passes four aquatic jewels.',
           style: TextStyle(

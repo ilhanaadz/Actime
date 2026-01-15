@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 import 'circle_icon_container.dart';
 import 'actime_button.dart';
 
@@ -40,11 +40,11 @@ class EventCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.spacingDefault),
-        padding: const EdgeInsets.all(AppSizes.spacingDefault),
+        margin: const EdgeInsets.only(bottom: AppDimensions.spacingDefault),
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
           border: Border.all(color: AppColors.border),
         ),
         child: Column(
@@ -56,7 +56,7 @@ class EventCard extends StatelessWidget {
                   iconColor: effectiveIconColor,
                   backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
                 ),
-                const SizedBox(width: AppSizes.spacingDefault),
+                const SizedBox(width: AppDimensions.spacingDefault),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,18 +77,18 @@ class EventCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: AppSizes.spacingSmall),
+                      const SizedBox(height: AppDimensions.spacingSmall),
                       Row(
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: AppSizes.spacingXSmall),
+                          const SizedBox(width: AppDimensions.spacingXSmall),
                           Text(
                             participants,
                             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppSizes.spacingXSmall),
+                      const SizedBox(height: AppDimensions.spacingXSmall),
                       Text(
                         title,
                         style: const TextStyle(
@@ -100,22 +100,22 @@ class EventCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSizes.spacingDefault),
+                const SizedBox(width: AppDimensions.spacingDefault),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
                       children: [
                         Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        const SizedBox(width: AppSizes.spacingXSmall),
+                        const SizedBox(width: AppDimensions.spacingXSmall),
                         const Icon(Icons.calendar_today, size: 12, color: AppColors.textSecondary),
                       ],
                     ),
-                    const SizedBox(height: AppSizes.spacingXSmall),
+                    const SizedBox(height: AppDimensions.spacingXSmall),
                     Row(
                       children: [
                         Text(location, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-                        const SizedBox(width: AppSizes.spacingXSmall),
+                        const SizedBox(width: AppDimensions.spacingXSmall),
                         const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
                       ],
                     ),
@@ -124,7 +124,7 @@ class EventCard extends StatelessWidget {
               ],
             ),
             if (showEditButton) ...[
-              const SizedBox(height: AppSizes.spacingMedium),
+              const SizedBox(height: AppDimensions.spacingMedium),
               ActimeSmallOutlinedButton(
                 label: 'Edit',
                 onPressed: onEditTap,
@@ -153,12 +153,12 @@ class PriceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingSmall,
+        horizontal: AppDimensions.spacingSmall,
         vertical: 2,
       ),
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.primary,
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusSmall),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
       ),
       child: Text(
         price,
@@ -202,10 +202,10 @@ class ClubCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppSizes.spacingDefault),
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
@@ -225,7 +225,7 @@ class ClubCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(width: AppSizes.spacingDefault),
+            const SizedBox(width: AppDimensions.spacingDefault),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,12 +238,12 @@ class ClubCard extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: AppSizes.spacingXSmall),
+                  const SizedBox(height: AppDimensions.spacingXSmall),
                   Text(
                     sport,
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: AppSizes.spacingSmall),
+                  const SizedBox(height: AppDimensions.spacingSmall),
                   Text(
                     email,
                     style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
@@ -265,11 +265,11 @@ class ClubCard extends StatelessWidget {
                     color: AppColors.primary,
                   ),
                 ),
-                const SizedBox(width: AppSizes.spacingXSmall),
+                const SizedBox(width: AppDimensions.spacingXSmall),
                 const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
               ],
             ),
-            const SizedBox(width: AppSizes.spacingSmall),
+            const SizedBox(width: AppDimensions.spacingSmall),
             GestureDetector(
               onTap: onFavoriteTap,
               child: const Icon(Icons.favorite_border, size: 20, color: AppColors.primary),
@@ -302,10 +302,10 @@ class ClubItemSmall extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppSizes.spacingMedium),
+        padding: const EdgeInsets.all(AppDimensions.spacingMedium),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
@@ -315,7 +315,7 @@ class ClubItemSmall extends StatelessWidget {
               iconColor: iconColor,
               backgroundColor: iconColor.withValues(alpha: 0.1),
             ),
-            const SizedBox(width: AppSizes.spacingMedium),
+            const SizedBox(width: AppDimensions.spacingMedium),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

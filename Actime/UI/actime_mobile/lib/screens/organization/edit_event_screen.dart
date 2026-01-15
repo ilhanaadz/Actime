@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../components/confirmation_dialog.dart';
@@ -63,36 +63,36 @@ class _EditEventScreenState extends State<EditEventScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingLarge),
+          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildCoverImageSection(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _eventNameController,
                 labelText: 'Event Name',
               ),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildCategoryDropdown(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildDateTimeRow(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _locationController,
                 labelText: 'Location',
                 suffixIcon: const Icon(Icons.location_on_outlined, color: AppColors.primary),
               ),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildPriceParticipantsRow(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _descriptionController,
                 labelText: 'Description',
                 maxLines: 4,
                 isOutlined: true,
               ),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               ActimePrimaryButton(
                 label: 'Save Changes',
                 onPressed: () {
@@ -115,7 +115,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
       height: 150,
       decoration: BoxDecoration(
         color: AppColors.border,
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
       ),
       child: Stack(
         children: [
@@ -123,10 +123,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
             child: Icon(Icons.image, size: 60, color: AppColors.textSecondary),
           ),
           Positioned(
-            bottom: AppSizes.spacingSmall,
-            right: AppSizes.spacingSmall,
+            bottom: AppDimensions.spacingSmall,
+            right: AppDimensions.spacingSmall,
             child: Container(
-              padding: const EdgeInsets.all(AppSizes.spacingSmall),
+              padding: const EdgeInsets.all(AppDimensions.spacingSmall),
               decoration: const BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
@@ -168,7 +168,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
             suffixIcon: const Icon(Icons.calendar_today, color: AppColors.primary),
           ),
         ),
-        const SizedBox(width: AppSizes.spacingDefault),
+        const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _timeController,
@@ -192,7 +192,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
             prefixText: '\$ ',
           ),
         ),
-        const SizedBox(width: AppSizes.spacingDefault),
+        const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _maxParticipantsController,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/info_row.dart';
 import '../../components/circle_icon_container.dart';
 import 'edit_organization_profile_screen.dart';
@@ -39,7 +39,7 @@ class OrganizationProfileScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.spacingLarge),
+        padding: const EdgeInsets.all(AppDimensions.spacingLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -51,7 +51,7 @@ class OrganizationProfileScreen extends StatelessWidget {
                 iconSize: 60,
               ),
             ),
-            const SizedBox(height: AppSizes.spacingLarge),
+            const SizedBox(height: AppDimensions.spacingLarge),
             ProfileField(
               label: 'Name',
               value: 'Student',
@@ -63,21 +63,21 @@ class OrganizationProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: AppSizes.spacingDefault),
+            const SizedBox(height: AppDimensions.spacingDefault),
             const ProfileField(label: 'Category', value: 'Volleyball'),
-            const SizedBox(height: AppSizes.spacingDefault),
+            const SizedBox(height: AppDimensions.spacingDefault),
             const ProfileField(label: 'Phone', value: '+12027953213'),
-            const SizedBox(height: AppSizes.spacingDefault),
+            const SizedBox(height: AppDimensions.spacingDefault),
             const ProfileField(label: 'Address', value: '1894 Arlington Avenue'),
-            const SizedBox(height: AppSizes.spacingDefault),
+            const SizedBox(height: AppDimensions.spacingDefault),
             const ProfileField(label: 'E-mail', value: 'club@volleyball.com'),
-            const SizedBox(height: AppSizes.spacingDefault),
+            const SizedBox(height: AppDimensions.spacingDefault),
             const ProfileField(
               label: 'About us',
               value: 'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
               isMultiline: true,
             ),
-            const SizedBox(height: AppSizes.spacingXLarge),
+            const SizedBox(height: AppDimensions.spacingXLarge),
             _buildNavigationItems(context),
           ],
         ),
@@ -118,11 +118,11 @@ class OrganizationProfileScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+      borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
       child: Column(
         children: [
           Icon(icon, color: AppColors.primary),
-          const SizedBox(height: AppSizes.spacingXSmall),
+          const SizedBox(height: AppDimensions.spacingXSmall),
           Text(
             label,
             style: const TextStyle(color: AppColors.primary, fontSize: 12),

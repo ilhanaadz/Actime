@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class ActimePrimaryButton extends StatelessWidget {
   final String label;
@@ -14,7 +14,7 @@ class ActimePrimaryButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.width,
-    this.height = AppSizes.buttonHeight,
+    this.height = AppDimensions.buttonHeight,
   });
 
   @override
@@ -27,7 +27,7 @@ class ActimePrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusRound),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusRound),
           ),
           elevation: 0,
         ),
@@ -70,7 +70,7 @@ class ActimeOutlinedButton extends StatelessWidget {
     this.textColor,
     this.icon,
     this.width,
-    this.height = AppSizes.buttonHeight,
+    this.height = AppDimensions.buttonHeight,
   });
 
   @override
@@ -92,7 +92,7 @@ class ActimeOutlinedButton extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: effectiveBorderColor),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.borderRadiusRound),
+                  borderRadius: BorderRadius.circular(AppDimensions.borderRadiusRound),
                 ),
               ),
             )
@@ -101,7 +101,7 @@ class ActimeOutlinedButton extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: effectiveBorderColor),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.borderRadiusRound),
+                  borderRadius: BorderRadius.circular(AppDimensions.borderRadiusRound),
                 ),
               ),
               child: Text(
@@ -134,13 +134,13 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: AppSizes.buttonHeightSmall,
+      height: AppDimensions.buttonHeightSmall,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: effectiveBorderColor),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           ),
         ),
         child: Text(

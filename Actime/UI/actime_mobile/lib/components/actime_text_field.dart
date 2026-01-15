@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class ActimeTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -54,15 +54,15 @@ class ActimeTextField extends StatelessWidget {
           suffixIcon: suffixIcon,
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.borderLight),
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: AppColors.primary),
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           ),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.borderLight),
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           ),
         ),
       );
@@ -116,11 +116,11 @@ class ActimeSearchField extends StatelessWidget {
         hintText: hintText,
         prefixIcon: const Icon(Icons.search, color: AppColors.primary),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           borderSide: BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           borderSide: const BorderSide(color: AppColors.primary),
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final String title;
@@ -74,7 +74,7 @@ class ConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusXLarge),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusXLarge),
       ),
       title: Text(title),
       content: Text(message),

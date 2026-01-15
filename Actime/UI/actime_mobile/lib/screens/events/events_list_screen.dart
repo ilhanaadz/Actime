@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
 import '../../components/actime_text_field.dart';
@@ -21,13 +21,13 @@ class EventsListScreen extends StatelessWidget {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppSizes.spacingDefault),
+            padding: const EdgeInsets.all(AppDimensions.spacingDefault),
             child: Row(
               children: [
                 const Expanded(
                   child: ActimeSearchField(hintText: 'Search events...'),
                 ),
-                const SizedBox(width: AppSizes.spacingMedium),
+                const SizedBox(width: AppDimensions.spacingMedium),
                 IconButton(
                   icon: const Icon(Icons.tune, color: AppColors.primary),
                   onPressed: () {},
@@ -41,7 +41,7 @@ class EventsListScreen extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
               children: [
                 EventCard(
                   title: 'Bjelašnica hiking trip',

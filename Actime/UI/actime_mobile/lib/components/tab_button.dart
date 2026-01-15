@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../constants/constants.dart';
 
 class ActimeTabButton extends StatelessWidget {
   final String label;
@@ -19,8 +19,8 @@ class ActimeTabButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingDefault,
-          vertical: AppSizes.spacingSmall,
+          horizontal: AppDimensions.spacingDefault,
+          vertical: AppDimensions.spacingSmall,
         ),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : Colors.transparent,
@@ -58,7 +58,7 @@ class ActimeTabBar extends StatelessWidget {
     return Row(
       children: List.generate(tabs.length, (index) {
         return Padding(
-          padding: EdgeInsets.only(right: index < tabs.length - 1 ? AppSizes.spacingDefault : 0),
+          padding: EdgeInsets.only(right: index < tabs.length - 1 ? AppDimensions.spacingDefault : 0),
           child: ActimeTabButton(
             label: tabs[index],
             isActive: selectedIndex == index,

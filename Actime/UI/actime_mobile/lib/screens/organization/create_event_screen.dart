@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../components/circle_icon_container.dart';
@@ -55,38 +55,38 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingLarge),
+          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrganizationInfo(),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               _buildCoverImageSection(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _eventNameController,
                 labelText: 'Event Name',
               ),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildCategoryDropdown(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildDateTimeRow(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _locationController,
                 labelText: 'Location',
                 suffixIcon: const Icon(Icons.location_on_outlined, color: AppColors.primary),
               ),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildPriceParticipantsRow(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               ActimeTextField(
                 controller: _descriptionController,
                 labelText: 'Description',
                 maxLines: 4,
                 isOutlined: true,
               ),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               ActimePrimaryButton(
                 label: 'Create Event',
                 onPressed: () {
@@ -110,7 +110,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           icon: Icons.sports_volleyball,
           iconColor: AppColors.orange,
         ),
-        const SizedBox(width: AppSizes.spacingMedium),
+        const SizedBox(width: AppDimensions.spacingMedium),
         const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -138,13 +138,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       height: 150,
       decoration: BoxDecoration(
         color: AppColors.border,
-        borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.textHint),
-          const SizedBox(height: AppSizes.spacingSmall),
+          const SizedBox(height: AppDimensions.spacingSmall),
           Text(
             'Add event cover image',
             style: TextStyle(color: AppColors.textMuted, fontSize: 12),
@@ -194,7 +194,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             },
           ),
         ),
-        const SizedBox(width: AppSizes.spacingDefault),
+        const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _timeController,
@@ -227,7 +227,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             prefixText: '\$ ',
           ),
         ),
-        const SizedBox(width: AppSizes.spacingDefault),
+        const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _maxParticipantsController,

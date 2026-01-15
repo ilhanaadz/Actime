@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/event_card.dart';
 import '../../components/tab_button.dart';
 import '../../components/circle_icon_container.dart';
@@ -45,7 +45,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
           _buildOrganizationHeader(),
           const Divider(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
             child: ActimeTabBar(
               tabs: const ['Active', 'Past'],
               selectedIndex: _selectedTabIndex,
@@ -56,10 +56,10 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
               },
             ),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
               itemCount: 5,
               itemBuilder: (context, index) {
                 return EventCard(
@@ -83,14 +83,14 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
 
   Widget _buildOrganizationHeader() {
     return Padding(
-      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      padding: const EdgeInsets.all(AppDimensions.spacingDefault),
       child: Row(
         children: [
           CircleIconContainer.large(
             icon: Icons.sports_volleyball,
             iconColor: AppColors.orange,
           ),
-          const SizedBox(width: AppSizes.spacingDefault),
+          const SizedBox(width: AppDimensions.spacingDefault),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

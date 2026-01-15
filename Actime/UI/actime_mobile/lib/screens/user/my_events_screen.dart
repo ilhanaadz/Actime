@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/event_card.dart';
 import '../../components/tab_button.dart';
 
@@ -38,7 +38,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
           _buildProfileHeader(),
           const Divider(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
             child: ActimeTabBar(
               tabs: const ['Upcoming', 'Past'],
               selectedIndex: _selectedTabIndex,
@@ -49,10 +49,10 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
               },
             ),
           ),
-          const SizedBox(height: AppSizes.spacingDefault),
+          const SizedBox(height: AppDimensions.spacingDefault),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
               itemCount: 5,
               itemBuilder: (context, index) {
                 return EventCard(
@@ -74,7 +74,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
 
   Widget _buildProfileHeader() {
     return Padding(
-      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      padding: const EdgeInsets.all(AppDimensions.spacingDefault),
       child: Row(
         children: [
           CircleAvatar(
@@ -82,7 +82,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
             backgroundColor: AppColors.borderLight,
             child: Icon(Icons.person, size: 30, color: AppColors.textMuted),
           ),
-          const SizedBox(width: AppSizes.spacingDefault),
+          const SizedBox(width: AppDimensions.spacingDefault),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

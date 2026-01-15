@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import 'sign_up_screen.dart';
@@ -47,7 +47,7 @@ class _SignInScreenState extends State<SignInScreen> {
             constraints: const BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppSizes.borderRadiusXLarge),
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusXLarge),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.black.withValues(alpha: 0.1),
@@ -68,23 +68,23 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _emailController,
                         hintText: 'Email',
                       ),
-                      const SizedBox(height: AppSizes.spacingLarge),
+                      const SizedBox(height: AppDimensions.spacingLarge),
                       ActimeTextField(
                         controller: _passwordController,
                         hintText: 'Password',
                         obscureText: true,
                       ),
-                      const SizedBox(height: AppSizes.spacingXLarge),
+                      const SizedBox(height: AppDimensions.spacingXLarge),
                       ActimePrimaryButton(
                         label: 'Sign In',
                         onPressed: _handleSignIn,
                       ),
-                      const SizedBox(height: AppSizes.spacingDefault),
+                      const SizedBox(height: AppDimensions.spacingDefault),
                       ActimeTextButton(
                         label: 'Forgot password?',
                         onPressed: () {},
                       ),
-                      const SizedBox(height: AppSizes.spacingXLarge),
+                      const SizedBox(height: AppDimensions.spacingXLarge),
                       _buildSignUpLink(),
                     ],
                   ),
@@ -104,8 +104,8 @@ class _SignInScreenState extends State<SignInScreen> {
       decoration: const BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(AppSizes.borderRadiusXLarge),
-          topRight: Radius.circular(AppSizes.borderRadiusXLarge),
+          topLeft: Radius.circular(AppDimensions.borderRadiusXLarge),
+          topRight: Radius.circular(AppDimensions.borderRadiusXLarge),
         ),
       ),
       child: Row(

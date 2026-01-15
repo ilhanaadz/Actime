@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import '../../constants/constants.dart';
 import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
@@ -22,22 +22,22 @@ class ClubDetailScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingLarge),
+          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildTitleSection(),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               const InfoRow(icon: Icons.phone_outlined, text: '+12027953213'),
-              const SizedBox(height: AppSizes.spacingMedium),
+              const SizedBox(height: AppDimensions.spacingMedium),
               const InfoRow(icon: Icons.email_outlined, text: 'club@volleyball.com'),
-              const SizedBox(height: AppSizes.spacingMedium),
+              const SizedBox(height: AppDimensions.spacingMedium),
               const InfoRow(icon: Icons.location_on_outlined, text: '1894 Arlington Avenue'),
-              const SizedBox(height: AppSizes.spacingLarge),
+              const SizedBox(height: AppDimensions.spacingLarge),
               _buildAboutSection(),
-              const SizedBox(height: AppSizes.spacingXLarge),
+              const SizedBox(height: AppDimensions.spacingXLarge),
               ActimePrimaryButton(
                 label: 'Enrollment application',
                 onPressed: () {
@@ -61,7 +61,7 @@ class ClubDetailScreen extends StatelessWidget {
           icon: Icons.sports_volleyball,
           iconColor: AppColors.orange,
         ),
-        const SizedBox(width: AppSizes.spacingDefault),
+        const SizedBox(width: AppDimensions.spacingDefault),
         Stack(
           children: [
             CircleIconContainer.xLarge(
@@ -87,7 +87,7 @@ class ClubDetailScreen extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(width: AppSizes.spacingXSmall),
+            const SizedBox(width: AppDimensions.spacingXSmall),
             const Icon(Icons.person_outline, size: 18, color: AppColors.textSecondary),
           ],
         ),
@@ -110,7 +110,7 @@ class ClubDetailScreen extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
-            SizedBox(height: AppSizes.spacingXSmall),
+            SizedBox(height: AppDimensions.spacingXSmall),
             Text(
               'Volleyball',
               style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
@@ -137,7 +137,7 @@ class ClubDetailScreen extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: AppSizes.spacingMedium),
+        SizedBox(height: AppDimensions.spacingMedium),
         Text(
           'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
           style: TextStyle(
