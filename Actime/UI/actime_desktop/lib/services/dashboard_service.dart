@@ -1,5 +1,6 @@
 import '../config/api_config.dart';
 import 'api_service.dart';
+import 'mock_api_service.dart';
 
 class DashboardStats {
   final int totalUsers;
@@ -44,8 +45,13 @@ class DashboardService {
   DashboardService._internal();
 
   final ApiService _apiService = ApiService();
+  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<DashboardStats>> getStats() async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getDashboardStats();
+    }
+
     return await _apiService.get<DashboardStats>(
       ApiConfig.dashboardStats,
       fromJson: (json) => DashboardStats.fromJson(json),
@@ -55,6 +61,10 @@ class DashboardService {
   Future<ApiResponse<List<UserGrowthData>>> getUserGrowth({
     int months = 12,
   }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getUserGrowth();
+    }
+
     return await _apiService.get<List<UserGrowthData>>(
       ApiConfig.dashboardUserGrowth,
       queryParams: {'months': months.toString()},

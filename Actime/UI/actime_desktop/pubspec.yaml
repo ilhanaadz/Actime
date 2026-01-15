@@ -38,8 +38,8 @@ dependencies:
   # HTTP client for API calls
   http: ^1.2.0
 
-  # Secure storage for JWT tokens
-  flutter_secure_storage: ^9.2.0
+  # Local storage for tokens
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,7 @@
 class ApiConfig {
+  // Set to false when you have a real backend
+  static const bool useMockApi = true;
+
   static const String baseUrl = 'http://localhost:8080';
   static const String apiVersion = '/api/v1';
 

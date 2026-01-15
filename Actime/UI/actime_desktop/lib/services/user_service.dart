@@ -1,6 +1,7 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'mock_api_service.dart';
 
 class UserService {
   static final UserService _instance = UserService._internal();
@@ -8,6 +9,7 @@ class UserService {
   UserService._internal();
 
   final ApiService _apiService = ApiService();
+  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,
@@ -16,6 +18,15 @@ class UserService {
     String? sortBy,
     String? sortOrder,
   }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getUsers(
+        page: page,
+        perPage: perPage,
+        search: search,
+        sortBy: sortBy,
+      );
+    }
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'per_page': perPage.toString(),
@@ -78,6 +89,10 @@ class UserService {
   }
 
   Future<ApiResponse<void>> deleteUser(String id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.deleteUser(id);
+    }
+
     return await _apiService.delete<void>(
       ApiConfig.userById(id),
     );

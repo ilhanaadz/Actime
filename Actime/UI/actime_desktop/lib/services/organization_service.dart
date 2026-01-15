@@ -1,6 +1,7 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'mock_api_service.dart';
 
 class OrganizationService {
   static final OrganizationService _instance = OrganizationService._internal();
@@ -8,6 +9,7 @@ class OrganizationService {
   OrganizationService._internal();
 
   final ApiService _apiService = ApiService();
+  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<PaginatedResponse<Organization>>> getOrganizations({
     int page = 1,
@@ -17,6 +19,15 @@ class OrganizationService {
     String? sortOrder,
     String? categoryId,
   }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getOrganizations(
+        page: page,
+        perPage: perPage,
+        search: search,
+        sortBy: sortBy,
+      );
+    }
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'per_page': perPage.toString(),
@@ -43,6 +54,10 @@ class OrganizationService {
   }
 
   Future<ApiResponse<Organization>> getOrganizationById(String id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getOrganizationById(id);
+    }
+
     return await _apiService.get<Organization>(
       ApiConfig.organizationById(id),
       fromJson: (json) => Organization.fromJson(json),
@@ -96,6 +111,10 @@ class OrganizationService {
   }
 
   Future<ApiResponse<void>> deleteOrganization(String id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.deleteOrganization(id);
+    }
+
     return await _apiService.delete<void>(
       ApiConfig.organizationById(id),
     );

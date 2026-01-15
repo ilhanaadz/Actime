@@ -1,6 +1,7 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'mock_api_service.dart';
 
 class CategoryService {
   static final CategoryService _instance = CategoryService._internal();
@@ -8,6 +9,7 @@ class CategoryService {
   CategoryService._internal();
 
   final ApiService _apiService = ApiService();
+  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<PaginatedResponse<Category>>> getCategories({
     int page = 1,
@@ -16,6 +18,15 @@ class CategoryService {
     String? sortBy,
     String? sortOrder,
   }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getCategories(
+        page: page,
+        perPage: perPage,
+        search: search,
+        sortBy: sortBy,
+      );
+    }
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'per_page': perPage.toString(),
@@ -68,6 +79,10 @@ class CategoryService {
     String? description,
     String? icon,
   }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.createCategory(name);
+    }
+
     return await _apiService.post<Category>(
       ApiConfig.categories,
       body: {
@@ -85,6 +100,10 @@ class CategoryService {
     String? description,
     String? icon,
   }) async {
+    if (ApiConfig.useMockApi && name != null) {
+      return await _mockService.updateCategory(id, name);
+    }
+
     final body = <String, dynamic>{};
     if (name != null) body['name'] = name;
     if (description != null) body['description'] = description;
@@ -98,6 +117,10 @@ class CategoryService {
   }
 
   Future<ApiResponse<void>> deleteCategory(String id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.deleteCategory(id);
+    }
+
     return await _apiService.delete<void>(
       ApiConfig.categoryById(id),
     );

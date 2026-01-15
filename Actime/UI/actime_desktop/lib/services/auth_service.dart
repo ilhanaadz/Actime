@@ -2,6 +2,7 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'token_service.dart';
+import 'mock_api_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -9,6 +10,7 @@ class AuthService {
   AuthService._internal();
 
   final ApiService _apiService = ApiService();
+  final MockApiService _mockService = MockApiService();
   final TokenService _tokenService = TokenService();
 
   User? _currentUser;
@@ -18,6 +20,20 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    // Use mock API if enabled
+    if (ApiConfig.useMockApi) {
+      final response = await _mockService.login(email, password);
+      if (response.success && response.data != null) {
+        await _tokenService.saveTokens(
+          accessToken: response.data!.accessToken,
+          refreshToken: response.data!.refreshToken,
+          expiry: response.data!.expiresAt,
+        );
+        _currentUser = response.data!.user;
+      }
+      return response;
+    }
+
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.login,
       body: {
@@ -41,15 +57,17 @@ class AuthService {
   }
 
   Future<ApiResponse<void>> logout() async {
-    final response = await _apiService.post<void>(
-      ApiConfig.logout,
-      requiresAuth: true,
-    );
-
     await _tokenService.clearTokens();
     _currentUser = null;
 
-    return response;
+    if (ApiConfig.useMockApi) {
+      return ApiResponse(success: true, statusCode: 200);
+    }
+
+    return await _apiService.post<void>(
+      ApiConfig.logout,
+      requiresAuth: true,
+    );
   }
 
   Future<bool> isAuthenticated() async {
