@@ -1,0 +1,344 @@
+import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import 'circle_icon_container.dart';
+import 'actime_button.dart';
+
+class EventCard extends StatelessWidget {
+  final String title;
+  final String price;
+  final String date;
+  final String location;
+  final String participants;
+  final IconData icon;
+  final Color? iconColor;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavoriteTap;
+  final VoidCallback? onEditTap;
+  final bool showFavorite;
+  final bool showEditButton;
+
+  const EventCard({
+    super.key,
+    required this.title,
+    required this.price,
+    required this.date,
+    required this.location,
+    required this.participants,
+    required this.icon,
+    this.iconColor,
+    this.onTap,
+    this.onFavoriteTap,
+    this.onEditTap,
+    this.showFavorite = true,
+    this.showEditButton = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveIconColor = iconColor ?? AppColors.orange;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSizes.spacingDefault),
+        padding: const EdgeInsets.all(AppSizes.spacingDefault),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleIconContainer(
+                  icon: icon,
+                  iconColor: effectiveIconColor,
+                  backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
+                ),
+                const SizedBox(width: AppSizes.spacingDefault),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          PriceBadge(price: price),
+                          if (showFavorite) ...[
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: onFavoriteTap,
+                              child: const Icon(
+                                Icons.favorite_border,
+                                size: 20,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSizes.spacingSmall),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: AppSizes.spacingXSmall),
+                          Text(
+                            participants,
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSizes.spacingXSmall),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSizes.spacingDefault),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        const SizedBox(width: AppSizes.spacingXSmall),
+                        const Icon(Icons.calendar_today, size: 12, color: AppColors.textSecondary),
+                      ],
+                    ),
+                    const SizedBox(height: AppSizes.spacingXSmall),
+                    Row(
+                      children: [
+                        Text(location, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                        const SizedBox(width: AppSizes.spacingXSmall),
+                        const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (showEditButton) ...[
+              const SizedBox(height: AppSizes.spacingMedium),
+              ActimeSmallOutlinedButton(
+                label: 'Edit',
+                onPressed: onEditTap,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PriceBadge extends StatelessWidget {
+  final String price;
+  final Color? backgroundColor;
+  final Color? textColor;
+
+  const PriceBadge({
+    super.key,
+    required this.price,
+    this.backgroundColor,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingSmall,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? AppColors.primary,
+        borderRadius: BorderRadius.circular(AppSizes.borderRadiusSmall),
+      ),
+      child: Text(
+        price,
+        style: TextStyle(
+          color: textColor ?? AppColors.white,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+}
+
+class ClubCard extends StatelessWidget {
+  final String name;
+  final String sport;
+  final String email;
+  final String phone;
+  final String members;
+  final IconData icon;
+  final Color iconColor;
+  final bool isFavorite;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavoriteTap;
+
+  const ClubCard({
+    super.key,
+    required this.name,
+    required this.sport,
+    required this.email,
+    required this.phone,
+    required this.members,
+    required this.icon,
+    required this.iconColor,
+    this.isFavorite = false,
+    this.onTap,
+    this.onFavoriteTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSizes.spacingDefault),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                CircleIconContainer(
+                  icon: icon,
+                  iconColor: iconColor,
+                  backgroundColor: iconColor.withValues(alpha: 0.1),
+                ),
+                if (isFavorite)
+                  const Positioned(
+                    top: 0,
+                    right: 0,
+                    child: FavoriteBadge(),
+                  ),
+              ],
+            ),
+            const SizedBox(width: AppSizes.spacingDefault),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.spacingXSmall),
+                  Text(
+                    sport,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: AppSizes.spacingSmall),
+                  Text(
+                    email,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                  Text(
+                    phone,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  members,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSizes.spacingXSmall),
+                const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+              ],
+            ),
+            const SizedBox(width: AppSizes.spacingSmall),
+            GestureDetector(
+              onTap: onFavoriteTap,
+              child: const Icon(Icons.favorite_border, size: 20, color: AppColors.primary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ClubItemSmall extends StatelessWidget {
+  final String name;
+  final String sport;
+  final IconData icon;
+  final Color iconColor;
+  final VoidCallback? onTap;
+
+  const ClubItemSmall({
+    super.key,
+    required this.name,
+    required this.sport,
+    required this.icon,
+    required this.iconColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSizes.spacingMedium),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            CircleIconContainer.small(
+              icon: icon,
+              iconColor: iconColor,
+              backgroundColor: iconColor.withValues(alpha: 0.1),
+            ),
+            const SizedBox(width: AppSizes.spacingMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Text(
+                    sport,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}

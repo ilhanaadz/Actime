@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../components/info_row.dart';
+import '../../components/circle_icon_container.dart';
 import 'edit_organization_profile_screen.dart';
 import '../events/events_list_screen.dart';
 
@@ -8,16 +11,16 @@ class OrganizationProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(12.0),
           child: Text(
             'Actime',
             style: TextStyle(
-              color: Color(0xFF0D7C8C),
+              color: AppColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -26,160 +29,103 @@ class OrganizationProfileScreen extends StatelessWidget {
         leadingWidth: 100,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_outline, color: Color(0xFF0D7C8C)),
+            icon: const Icon(Icons.person_outline, color: AppColors.primary),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.black),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            icon: const Icon(Icons.close, color: AppColors.black),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(AppSizes.spacingLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Image with volleyball icon
             Center(
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.sports_volleyball,
-                    size: 60,
-                    color: Colors.orange[700],
-                  ),
-                ),
+              child: CircleIconContainer(
+                icon: Icons.sports_volleyball,
+                iconColor: AppColors.orange,
+                size: 120,
+                iconSize: 60,
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Name
-            _buildProfileField(
-              'Name',
-              'Student',
+            const SizedBox(height: AppSizes.spacingLarge),
+            ProfileField(
+              label: 'Name',
+              value: 'Student',
               hasEdit: true,
-              onTap: () {
+              onEditTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditOrganizationProfileScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const EditOrganizationProfileScreen()),
                 );
               },
             ),
-            const SizedBox(height: 16),
-
-            // Category
-            _buildProfileField('Category', 'Volleyball'),
-            const SizedBox(height: 16),
-
-            // Phone
-            _buildProfileField('Phone', '+12027953213'),
-            const SizedBox(height: 16),
-
-            // Address
-            _buildProfileField('Address', '1894 Arlington Avenue'),
-            const SizedBox(height: 16),
-
-            // E-mail
-            _buildProfileField('E-mail', 'club@volleyball.com'),
-            const SizedBox(height: 16),
-
-            // About us
-            _buildProfileField(
-              'About us',
-              'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
+            const SizedBox(height: AppSizes.spacingDefault),
+            const ProfileField(label: 'Category', value: 'Volleyball'),
+            const SizedBox(height: AppSizes.spacingDefault),
+            const ProfileField(label: 'Phone', value: '+12027953213'),
+            const SizedBox(height: AppSizes.spacingDefault),
+            const ProfileField(label: 'Address', value: '1894 Arlington Avenue'),
+            const SizedBox(height: AppSizes.spacingDefault),
+            const ProfileField(label: 'E-mail', value: 'club@volleyball.com'),
+            const SizedBox(height: AppSizes.spacingDefault),
+            const ProfileField(
+              label: 'About us',
+              value: 'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
               isMultiline: true,
             ),
-            const SizedBox(height: 32),
-
-            // Bottom Navigation
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  Icons.event_outlined,
-                  'My events',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EventsListScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _buildNavItem(Icons.photo_library_outlined, 'Gallery'),
-                _buildNavItem(Icons.people_outline, 'People'),
-              ],
-            ),
+            const SizedBox(height: AppSizes.spacingXLarge),
+            _buildNavigationItems(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileField(
-    String label,
-    String value, {
-    bool hasEdit = false,
-    bool isMultiline = false,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildNavigationItems(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            if (hasEdit)
-              GestureDetector(
-                onTap: onTap,
-                child: const Icon(
-                  Icons.edit_outlined,
-                  size: 20,
-                  color: Color(0xFF0D7C8C),
-                ),
-              ),
-          ],
+        _buildNavItem(
+          icon: Icons.event_outlined,
+          label: 'My events',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EventsListScreen()),
+            );
+          },
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color(0xFF0D7C8C),
-            fontWeight: FontWeight.w500,
-          ),
+        _buildNavItem(
+          icon: Icons.photo_library_outlined,
+          label: 'Gallery',
+        ),
+        _buildNavItem(
+          icon: Icons.people_outline,
+          label: 'People',
         ),
       ],
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, {VoidCallback? onTap}) {
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFF0D7C8C)),
-          const SizedBox(height: 4),
+          Icon(icon, color: AppColors.primary),
+          const SizedBox(height: AppSizes.spacingXSmall),
           Text(
             label,
-            style: const TextStyle(color: Color(0xFF0D7C8C), fontSize: 12),
+            style: const TextStyle(color: AppColors.primary, fontSize: 12),
           ),
         ],
       ),

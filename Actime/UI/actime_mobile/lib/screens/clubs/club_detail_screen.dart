@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../components/circle_icon_container.dart';
+import '../../components/info_row.dart';
+import '../../components/actime_button.dart';
 import 'enrollment_application_screen.dart';
 
 class ClubDetailScreen extends StatelessWidget {
@@ -7,161 +11,41 @@ class ClubDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black),
+          icon: const Icon(Icons.close, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSizes.spacingLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.sports_volleyball, color: Colors.orange, size: 40),
-                  ),
-                  const SizedBox(width: 16),
-                  Stack(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.sports_volleyball, color: Colors.grey, size: 40),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF0D7C8C),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.add, color: Colors.white, size: 16),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      const Text(
-                        '89',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0D7C8C),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.person_outline, size: 18, color: Colors.grey),
-                    ],
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Student',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF0D7C8C),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.favorite_border, color: Color(0xFF0D7C8C)),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 4),
-              const Text(
-                'Volleyball',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              _buildInfoRow(Icons.phone_outlined, '+12027953213'),
-              const SizedBox(height: 12),
-              _buildInfoRow(Icons.email_outlined, 'club@volleyball.com'),
-              const SizedBox(height: 12),
-              _buildInfoRow(Icons.location_on_outlined, '1894 Arlington Avenue'),
-              
-              const SizedBox(height: 24),
-              
-              const Text(
-                'About',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EnrollmentApplicationScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D7C8C),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Enrollment application',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+              _buildHeader(),
+              const SizedBox(height: AppSizes.spacingLarge),
+              _buildTitleSection(),
+              const SizedBox(height: AppSizes.spacingLarge),
+              const InfoRow(icon: Icons.phone_outlined, text: '+12027953213'),
+              const SizedBox(height: AppSizes.spacingMedium),
+              const InfoRow(icon: Icons.email_outlined, text: 'club@volleyball.com'),
+              const SizedBox(height: AppSizes.spacingMedium),
+              const InfoRow(icon: Icons.location_on_outlined, text: '1894 Arlington Avenue'),
+              const SizedBox(height: AppSizes.spacingLarge),
+              _buildAboutSection(),
+              const SizedBox(height: AppSizes.spacingXLarge),
+              ActimePrimaryButton(
+                label: 'Enrollment application',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EnrollmentApplicationScreen()),
+                  );
+                },
               ),
             ],
           ),
@@ -170,23 +54,96 @@ class ClubDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildHeader() {
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D7C8C).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: const Color(0xFF0D7C8C), size: 20),
+        CircleIconContainer.xLarge(
+          icon: Icons.sports_volleyball,
+          iconColor: AppColors.orange,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
+        const SizedBox(width: AppSizes.spacingDefault),
+        Stack(
+          children: [
+            CircleIconContainer.xLarge(
+              icon: Icons.sports_volleyball,
+              iconColor: AppColors.grey,
+              backgroundColor: AppColors.inputBackground,
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: CircleBadge(icon: Icons.add),
+            ),
+          ],
+        ),
+        const Spacer(),
+        Row(
+          children: [
+            const Text(
+              '89',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: AppSizes.spacingXSmall),
+            const Icon(Icons.person_outline, size: 18, color: AppColors.textSecondary),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Student',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+            SizedBox(height: AppSizes.spacingXSmall),
+            Text(
+              'Volleyball',
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.favorite_border, color: AppColors.primary),
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'About',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: AppSizes.spacingMedium),
+        Text(
+          'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.textPrimary,
+            height: 1.5,
           ),
         ),
       ],

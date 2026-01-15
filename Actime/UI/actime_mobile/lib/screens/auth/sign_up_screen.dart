@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../components/actime_text_field.dart';
+import '../../components/actime_button.dart';
 import '../organization/complete_signup_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -24,21 +27,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  void _handleSignUp() {
+    if (_passwordController.text == _confirmPasswordController.text) {
+      if (_isOrganization) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CompleteSignUpScreen()),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppColors.background,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(AppSizes.borderRadiusXLarge),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: AppColors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -47,197 +65,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF0D7C8C),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 24),
-                        child: Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        'Actime',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader('Sign Up'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     children: [
-                      TextField(
+                      ActimeTextField(
                         controller: _nameController,
-                        decoration: InputDecoration(
-                          hintText: 'Name',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF0D7C8C)),
-                          ),
-                        ),
+                        hintText: 'Name',
                       ),
-                      const SizedBox(height: 24),
-                      TextField(
+                      const SizedBox(height: AppSizes.spacingLarge),
+                      ActimeTextField(
                         controller: _emailController,
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF0D7C8C)),
-                          ),
-                        ),
+                        hintText: 'Email',
                       ),
-                      const SizedBox(height: 24),
-                      TextField(
+                      const SizedBox(height: AppSizes.spacingLarge),
+                      ActimeTextField(
                         controller: _passwordController,
+                        hintText: 'Password',
                         obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF0D7C8C)),
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 24),
-                      TextField(
+                      const SizedBox(height: AppSizes.spacingLarge),
+                      ActimeTextField(
                         controller: _confirmPasswordController,
+                        hintText: 'Confirm password',
                         obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Confirm password',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF0D7C8C)),
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isOrganization,
-                            onChanged: (value) {
-                              setState(() {
-                                _isOrganization = value ?? false;
-                              });
-                            },
-                            activeColor: const Color(0xFF0D7C8C),
-                          ),
-                          const Text(
-                            'Sign up as organization',
-                            style: TextStyle(
-                              color: Color(0xFF0D7C8C),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: AppSizes.spacingLarge),
+                      _buildOrganizationCheckbox(),
+                      const SizedBox(height: AppSizes.spacingXLarge),
+                      ActimePrimaryButton(
+                        label: 'Sign Up',
+                        onPressed: _handleSignUp,
                       ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_passwordController.text == _confirmPasswordController.text) {
-                              print('Name: ${_nameController.text}');
-                              print('Email: ${_emailController.text}');
-                              print('Is Organization: $_isOrganization');
-                              
-                              // If organization, go to complete signup
-                              if (_isOrganization) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const CompleteSignUpScreen(),
-                                  ),
-                                );
-                              }
-                            } else {
-                              print('Passwords do not match!');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0D7C8C),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Already have an account? ',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                color: Color(0xFF0D7C8C),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      const SizedBox(height: AppSizes.spacingDefault),
+                      _buildSignInLink(),
                     ],
                   ),
                 ),
@@ -246,6 +108,98 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(String title) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(AppSizes.borderRadiusXLarge),
+          topRight: Radius.circular(AppSizes.borderRadiusXLarge),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const Spacer(),
+          const Text(
+            'Actime',
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 36,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.close, color: AppColors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrganizationCheckbox() {
+    return Row(
+      children: [
+        Checkbox(
+          value: _isOrganization,
+          onChanged: (value) {
+            setState(() {
+              _isOrganization = value ?? false;
+            });
+          },
+          activeColor: AppColors.primary,
+        ),
+        const Text(
+          'Sign up as organization',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignInLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Already have an account? ',
+          style: TextStyle(
+            color: AppColors.textMuted,
+            fontSize: 14,
+          ),
+        ),
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Text(
+            'Sign In',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

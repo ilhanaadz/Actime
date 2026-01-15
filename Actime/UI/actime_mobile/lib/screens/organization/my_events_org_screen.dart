@@ -1,105 +1,77 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../components/event_card.dart';
+import '../../components/tab_button.dart';
+import '../../components/circle_icon_container.dart';
 
-class MyEventsOrgScreen extends StatelessWidget {
+class MyEventsOrgScreen extends StatefulWidget {
   const MyEventsOrgScreen({super.key});
+
+  @override
+  State<MyEventsOrgScreen> createState() => _MyEventsOrgScreenState();
+}
+
+class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
+  int _selectedTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'My events',
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF0D7C8C)),
-            onPressed: () {
-              print('Create new event');
-            },
+            icon: const Icon(Icons.add, color: AppColors.primary),
+            onPressed: () {},
           ),
         ],
       ),
       body: Column(
         children: [
-          // Organization Header
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.sports_volleyball, color: Colors.orange, size: 30),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Student',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0D7C8C),
-                        ),
-                      ),
-                      Text(
-                        'Volleyball',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
+          _buildOrganizationHeader(),
           const Divider(),
-          
-          // Tabs
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                _buildTab('Active', true),
-                const SizedBox(width: 16),
-                _buildTab('Past', false),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
+            child: ActimeTabBar(
+              tabs: const ['Active', 'Past'],
+              selectedIndex: _selectedTabIndex,
+              onTabChanged: (index) {
+                setState(() {
+                  _selectedTabIndex = index;
+                });
+              },
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Events List with Edit button
+          const SizedBox(height: AppSizes.spacingDefault),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingDefault),
               itemCount: 5,
               itemBuilder: (context, index) {
-                return _buildEventCard(
-                  'Bjelašnica hiking trip',
-                  'Free',
-                  '11.10.2022',
-                  'Bjelašnica',
-                  '205',
-                  Icons.hiking,
+                return EventCard(
+                  title: 'Bjelašnica hiking trip',
+                  price: 'Free',
+                  date: '11.10.2022',
+                  location: 'Bjelašnica',
+                  participants: '205',
+                  icon: Icons.hiking,
+                  showFavorite: false,
+                  showEditButton: true,
+                  onEditTap: () {},
                 );
               },
             ),
@@ -109,125 +81,33 @@ class MyEventsOrgScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTab(String label, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF0D7C8C) : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive ? const Color(0xFF0D7C8C) : Colors.grey.shade300,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.grey,
-          fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventCard(String title, String price, String date, String location, String participants, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
+  Widget _buildOrganizationHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: Colors.orange, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0D7C8C),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(participants, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF0D7C8C),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(location, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+          CircleIconContainer.large(
+            icon: Icons.sports_volleyball,
+            iconColor: AppColors.orange,
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 36,
-            child: OutlinedButton(
-              onPressed: () {
-                print('Edit event');
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF0D7C8C)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          const SizedBox(width: AppSizes.spacingDefault),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Student',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Edit',
-                style: TextStyle(color: Color(0xFF0D7C8C)),
-              ),
+                Text(
+                  'Volleyball',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
             ),
           ),
         ],

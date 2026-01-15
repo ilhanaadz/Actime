@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../components/info_row.dart';
+import '../../components/actime_button.dart';
+import '../../components/event_card.dart';
+import '../../components/confirmation_dialog.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -6,134 +11,61 @@ class UserProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Profile',
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Color(0xFF0D7C8C)),
-            onPressed: () {
-              print('Edit profile');
-            },
+            icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+            onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSizes.spacingLarge),
           child: Column(
             children: [
-              // Profile Picture
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey.shade300,
-                    child: Icon(Icons.person, size: 50, color: Colors.grey.shade600),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF0D7C8C),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Name
+              _buildProfilePicture(),
+              const SizedBox(height: AppSizes.spacingLarge),
               const Text(
                 'John Doe',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF0D7C8C),
+                  color: AppColors.primary,
                 ),
               ),
-              
-              const SizedBox(height: 32),
-              
-              // Profile Info
-              _buildInfoRow(Icons.email_outlined, 'john.doe@email.com'),
-              const SizedBox(height: 16),
-              _buildInfoRow(Icons.phone_outlined, '+387 62 123 456'),
-              const SizedBox(height: 16),
-              _buildInfoRow(Icons.cake_outlined, '25 years old'),
-              const SizedBox(height: 16),
-              _buildInfoRow(Icons.school_outlined, 'Student'),
-              
-              const SizedBox(height: 32),
-              
-              // My Clubs Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'My Clubs',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildClubItem('Student', 'Volleyball', Icons.sports_volleyball, Colors.orange),
-                    const SizedBox(height: 12),
-                    _buildClubItem('Velež', 'Football', Icons.sports_soccer, Colors.red),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Logout Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    _showLogoutDialog(context);
-                  },
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red, fontSize: 16),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                ),
+              const SizedBox(height: AppSizes.spacingXLarge),
+              const ProfileInfoRow(icon: Icons.email_outlined, text: 'john.doe@email.com'),
+              const SizedBox(height: AppSizes.spacingDefault),
+              const ProfileInfoRow(icon: Icons.phone_outlined, text: '+387 62 123 456'),
+              const SizedBox(height: AppSizes.spacingDefault),
+              const ProfileInfoRow(icon: Icons.cake_outlined, text: '25 years old'),
+              const SizedBox(height: AppSizes.spacingDefault),
+              const ProfileInfoRow(icon: Icons.school_outlined, text: 'Student'),
+              const SizedBox(height: AppSizes.spacingXLarge),
+              _buildMyClubsSection(),
+              const SizedBox(height: AppSizes.spacingXLarge),
+              ActimeOutlinedButton(
+                label: 'Logout',
+                icon: Icons.logout,
+                borderColor: AppColors.red,
+                textColor: AppColors.red,
+                onPressed: () => _showLogoutDialog(context),
               ),
             ],
           ),
@@ -142,95 +74,73 @@ class UserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF0D7C8C), size: 20),
-          const SizedBox(width: 16),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClubItem(String name, String sport, IconData icon, Color iconColor) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+  Widget _buildProfilePicture() {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundColor: AppColors.borderLight,
+          child: Icon(Icons.person, size: 50, color: AppColors.textMuted),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: const Icon(Icons.camera_alt, size: 16, color: AppColors.white),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0D7C8C),
-                  ),
-                ),
-                Text(
-                  sport,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMyClubsSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.spacingDefault),
+      decoration: BoxDecoration(
+        color: AppColors.inputBackground,
+        borderRadius: BorderRadius.circular(AppSizes.borderRadiusLarge),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'My Clubs',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          const SizedBox(height: AppSizes.spacingDefault),
+          ClubItemSmall(
+            name: 'Student',
+            sport: 'Volleyball',
+            icon: Icons.sports_volleyball,
+            iconColor: AppColors.orange,
+          ),
+          const SizedBox(height: AppSizes.spacingMedium),
+          ClubItemSmall(
+            name: 'Velež',
+            sport: 'Football',
+            icon: Icons.sports_soccer,
+            iconColor: AppColors.red,
+          ),
         ],
       ),
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Navigate to login
-              },
-              child: const Text('Logout', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    final confirmed = await ConfirmationDialog.showLogout(context: context);
+    if (confirmed == true) {
+      // Navigate to login
+    }
   }
 }
