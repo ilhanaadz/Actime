@@ -1,13 +1,115 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/event_card.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 import 'event_detail_screen.dart';
 
-class EventsListScreen extends StatelessWidget {
+class EventsListScreen extends StatefulWidget {
   const EventsListScreen({super.key});
+
+  @override
+  State<EventsListScreen> createState() => _EventsListScreenState();
+}
+
+class _EventsListScreenState extends State<EventsListScreen> {
+  final _eventService = EventService();
+  final _searchController = TextEditingController();
+
+  List<Event> _events = [];
+  bool _isLoading = true;
+  String? _error;
+  int _currentPage = 1;
+  int _totalPages = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Debounce search
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _currentPage = 1;
+        _loadEvents();
+      }
+    });
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final response = await _eventService.getEvents(
+        page: _currentPage,
+        perPage: 10,
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
+        status: EventStatus.upcoming,
+        sortBy: 'startDate',
+      );
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _events = response.data!.data;
+          _totalPages = response.data!.lastPage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Greška pri učitavanju događaja';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Došlo je do greške. Pokušajte ponovo.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      default:
+        return Icons.event;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd.MM.yyyy.').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +126,11 @@ class EventsListScreen extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.spacingDefault),
             child: Row(
               children: [
-                const Expanded(
-                  child: ActimeSearchField(hintText: 'Search events...'),
+                Expanded(
+                  child: ActimeSearchField(
+                    hintText: 'Pretraži događaje...',
+                    controller: _searchController,
+                  ),
                 ),
                 const SizedBox(width: AppDimensions.spacingMedium),
                 IconButton(
@@ -40,47 +145,7 @@ class EventsListScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
-              children: [
-                EventCard(
-                  title: 'Bjelašnica hiking trip',
-                  price: 'Free',
-                  date: '11.10.2022',
-                  location: 'Bjelašnica',
-                  participants: '205',
-                  icon: Icons.hiking,
-                  onTap: () => _navigateToDetail(context),
-                ),
-                EventCard(
-                  title: 'Volleyball tournament',
-                  price: '\$10',
-                  date: '21.12.2022',
-                  location: 'USCR Midhat Hujdur',
-                  participants: '31',
-                  icon: Icons.sports_volleyball,
-                  onTap: () => _navigateToDetail(context),
-                ),
-                EventCard(
-                  title: 'Bjelašnica hiking trip',
-                  price: 'Free',
-                  date: '11.10.2022',
-                  location: 'Bjelašnica',
-                  participants: '205',
-                  icon: Icons.hiking,
-                  onTap: () => _navigateToDetail(context),
-                ),
-                EventCard(
-                  title: 'Volleyball tournament',
-                  price: '\$10',
-                  date: '21.12.2022',
-                  location: 'USCR Midhat Hujdur',
-                  participants: '31',
-                  icon: Icons.sports_volleyball,
-                  onTap: () => _navigateToDetail(context),
-                ),
-              ],
-            ),
+            child: _buildContent(),
           ),
         ],
       ),
@@ -88,10 +153,79 @@ class EventsListScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToDetail(BuildContext context) {
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              _error!,
+              style: TextStyle(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            TextButton(
+              onPressed: _loadEvents,
+              child: const Text('Pokušaj ponovo'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_events.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.event_busy, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              'Nema pronađenih događaja',
+              style: TextStyle(color: AppColors.textMuted),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadEvents,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
+        itemCount: _events.length,
+        itemBuilder: (context, index) {
+          final event = _events[index];
+          return EventCard(
+            title: event.name,
+            price: event.formattedPrice,
+            date: _formatDate(event.startDate),
+            location: event.location ?? 'Nije određeno',
+            participants: event.participantsCount.toString(),
+            icon: _getCategoryIcon(event.categoryName),
+            onTap: () => _navigateToDetail(context, event),
+          );
+        },
+      ),
+    );
+  }
+
+  void _navigateToDetail(BuildContext context, Event event) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const EventDetailScreen()),
+      MaterialPageRoute(
+        builder: (context) => EventDetailScreen(eventId: event.id),
+      ),
     );
   }
 }

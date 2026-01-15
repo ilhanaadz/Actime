@@ -1,11 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 
-class EventDetailScreen extends StatelessWidget {
-  const EventDetailScreen({super.key});
+class EventDetailScreen extends StatefulWidget {
+  final String eventId;
+
+  const EventDetailScreen({super.key, required this.eventId});
+
+  @override
+  State<EventDetailScreen> createState() => _EventDetailScreenState();
+}
+
+class _EventDetailScreenState extends State<EventDetailScreen> {
+  final _eventService = EventService();
+
+  Event? _event;
+  bool _isLoading = true;
+  bool _isJoining = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvent();
+  }
+
+  Future<void> _loadEvent() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final response = await _eventService.getEventById(widget.eventId);
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _event = response.data;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Greška pri učitavanju događaja';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Došlo je do greške. Pokušajte ponovo.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleJoinEvent() async {
+    if (_event == null) return;
+
+    setState(() => _isJoining = true);
+
+    try {
+      final response = await _eventService.joinEvent(_event!.id);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Uspješno ste se prijavili na događaj!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh event data
+        _loadEvent();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri prijavi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isJoining = false);
+      }
+    }
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      default:
+        return Icons.event;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd.MM.yyyy.').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,39 +138,83 @@ class EventDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOrganizerSection(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildTitleSection(),
-              const SizedBox(height: AppDimensions.spacingSmall),
-              const Text(
-                'Hiking',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              const InfoRow(icon: Icons.calendar_today, text: '11.10.2022.'),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              _error!,
+              style: TextStyle(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            TextButton(
+              onPressed: _loadEvent,
+              child: const Text('Pokušaj ponovo'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_event == null) {
+      return const Center(
+        child: Text('Događaj nije pronađen'),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildOrganizerSection(),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            _buildTitleSection(),
+            const SizedBox(height: AppDimensions.spacingSmall),
+            Text(
+              _event!.categoryName ?? 'Događaj',
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            InfoRow(icon: Icons.calendar_today, text: _formatDate(_event!.startDate)),
+            const SizedBox(height: AppDimensions.spacingMedium),
+            InfoRow(
+              icon: Icons.location_on_outlined,
+              text: _event!.location ?? 'Nije određeno',
+            ),
+            const SizedBox(height: AppDimensions.spacingMedium),
+            InfoRow(
+              icon: Icons.attach_money,
+              text: _event!.formattedPrice,
+            ),
+            if (_event!.maxParticipants != null) ...[
               const SizedBox(height: AppDimensions.spacingMedium),
-              const InfoRow(icon: Icons.location_on_outlined, text: 'Bjelašnica'),
-              const SizedBox(height: AppDimensions.spacingMedium),
-              const InfoRow(icon: Icons.attach_money, text: '10'),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildDetailsSection(),
-              const SizedBox(height: AppDimensions.spacingXLarge),
-              ActimePrimaryButton(
-                label: 'Join',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Joined event successfully!')),
-                  );
-                },
+              InfoRow(
+                icon: Icons.group,
+                text: '${_event!.participantsCount}/${_event!.maxParticipants} učesnika',
               ),
             ],
-          ),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            _buildDetailsSection(),
+            const SizedBox(height: AppDimensions.spacingXLarge),
+            _buildJoinButton(),
+          ],
         ),
       ),
     );
@@ -64,7 +227,7 @@ class EventDetailScreen extends StatelessWidget {
         Row(
           children: [
             CircleIconContainer(
-              icon: Icons.hiking,
+              icon: _getCategoryIcon(_event!.categoryName),
               iconColor: AppColors.orange,
             ),
             const SizedBox(width: AppDimensions.spacingMedium),
@@ -75,9 +238,9 @@ class EventDetailScreen extends StatelessWidget {
                   'Organizator',
                   style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                 ),
-                const Text(
-                  '"Alpe"',
-                  style: TextStyle(
+                Text(
+                  _event!.organizationName ?? 'Nepoznato',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -89,9 +252,9 @@ class EventDetailScreen extends StatelessWidget {
         ),
         Row(
           children: [
-            const Text(
-              '89',
-              style: TextStyle(
+            Text(
+              _event!.participantsCount.toString(),
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
@@ -109,12 +272,14 @@ class EventDetailScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Bjelašnica hiking trip',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primary,
+        Expanded(
+          child: Text(
+            _event!.name,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
           ),
         ),
         IconButton(
@@ -126,27 +291,42 @@ class EventDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDetailsSection() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Details',
+        const Text(
+          'Detalji',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: AppDimensions.spacingMedium),
+        const SizedBox(height: AppDimensions.spacingMedium),
         Text(
-          'Departing between 06:00am and 07:00am in Lehn at Längenfeld, this demanding long walk lets avid hikers explore the lofty and rugged mountain world of Ötztal Valley. The route winds across amazingly beautiful sceneries and passes four aquatic jewels.',
-          style: TextStyle(
+          _event!.description ?? 'Nema opisa za ovaj događaj.',
+          style: const TextStyle(
             fontSize: 14,
             color: AppColors.textPrimary,
             height: 1.5,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildJoinButton() {
+    final canJoin = _event!.hasAvailableSpots && _event!.status == EventStatus.upcoming;
+
+    if (_isJoining) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    return ActimePrimaryButton(
+      label: canJoin ? 'Pridruži se' : 'Popunjeno',
+      onPressed: canJoin ? _handleJoinEvent : null,
     );
   }
 }

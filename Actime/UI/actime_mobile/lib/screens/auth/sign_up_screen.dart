@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
+import '../../services/services.dart';
+import '../../models/models.dart';
 import '../organization/complete_signup_screen.dart';
+import '../landing/landing_logged_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,7 +19,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
   bool _isOrganization = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,18 +32,74 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
-    if (_passwordController.text == _confirmPasswordController.text) {
-      if (_isOrganization) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CompleteSignUpScreen()),
+  Future<void> _handleSignUp() async {
+    // Validate fields
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Popunite sva polja')),
+      );
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lozinke se ne podudaraju')),
+      );
+      return;
+    }
+
+    if (_passwordController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lozinka mora imati najmanje 6 karaktera')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final request = RegisterRequest(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        role: _isOrganization ? UserRole.organizer : UserRole.user,
+      );
+
+      final response = await _authService.register(request);
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        if (_isOrganization) {
+          // Navigate to complete organization signup
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const CompleteSignUpScreen()),
+          );
+        } else {
+          // Navigate to home for regular users
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message ?? 'Greška pri registraciji')),
         );
       }
-    } else {
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match!')),
+        const SnackBar(content: Text('Došlo je do greške. Pokušajte ponovo.')),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -65,39 +126,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildHeader('Sign Up'),
+                _buildHeader('Registracija'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     children: [
                       ActimeTextField(
                         controller: _nameController,
-                        hintText: 'Name',
+                        hintText: 'Ime i prezime',
                       ),
                       const SizedBox(height: AppDimensions.spacingLarge),
                       ActimeTextField(
                         controller: _emailController,
                         hintText: 'Email',
+                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppDimensions.spacingLarge),
                       ActimeTextField(
                         controller: _passwordController,
-                        hintText: 'Password',
+                        hintText: 'Lozinka',
                         obscureText: true,
                       ),
                       const SizedBox(height: AppDimensions.spacingLarge),
                       ActimeTextField(
                         controller: _confirmPasswordController,
-                        hintText: 'Confirm password',
+                        hintText: 'Potvrdi lozinku',
                         obscureText: true,
                       ),
                       const SizedBox(height: AppDimensions.spacingLarge),
                       _buildOrganizationCheckbox(),
                       const SizedBox(height: AppDimensions.spacingXLarge),
-                      ActimePrimaryButton(
-                        label: 'Sign Up',
-                        onPressed: _handleSignUp,
-                      ),
+                      _isLoading
+                          ? const CircularProgressIndicator(
+                              color: AppColors.primary,
+                            )
+                          : ActimePrimaryButton(
+                              label: 'Registruj se',
+                              onPressed: _handleSignUp,
+                            ),
                       const SizedBox(height: AppDimensions.spacingDefault),
                       _buildSignInLink(),
                     ],
@@ -167,7 +233,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           activeColor: AppColors.primary,
         ),
         const Text(
-          'Sign up as organization',
+          'Registruj se kao organizacija',
           style: TextStyle(
             color: AppColors.primary,
             fontSize: 14,
@@ -182,7 +248,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Already have an account? ',
+          'Već imate račun? ',
           style: TextStyle(
             color: AppColors.textMuted,
             fontSize: 14,
@@ -191,7 +257,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: const Text(
-            'Sign In',
+            'Prijavite se',
             style: TextStyle(
               color: AppColors.primary,
               fontSize: 14,

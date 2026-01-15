@@ -3,10 +3,102 @@ import '../../constants/constants.dart';
 import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 import 'enrollment_application_screen.dart';
 
-class ClubDetailScreen extends StatelessWidget {
-  const ClubDetailScreen({super.key});
+class ClubDetailScreen extends StatefulWidget {
+  final String organizationId;
+
+  const ClubDetailScreen({super.key, required this.organizationId});
+
+  @override
+  State<ClubDetailScreen> createState() => _ClubDetailScreenState();
+}
+
+class _ClubDetailScreenState extends State<ClubDetailScreen> {
+  final _organizationService = OrganizationService();
+
+  Organization? _organization;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrganization();
+  }
+
+  Future<void> _loadOrganization() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final response = await _organizationService.getOrganizationById(
+        widget.organizationId,
+      );
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _organization = response.data;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Greška pri učitavanju kluba';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Došlo je do greške. Pokušajte ponovo.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      default:
+        return Icons.groups;
+    }
+  }
+
+  Color _getCategoryColor(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return AppColors.red;
+      case 'kultura':
+        return Colors.purple;
+      case 'edukacija':
+        return Colors.blue;
+      case 'zdravlje':
+        return AppColors.red;
+      case 'muzika':
+        return AppColors.orange;
+      case 'tehnologija':
+        return Colors.grey;
+      default:
+        return AppColors.primary;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,35 +112,89 @@ class ClubDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildTitleSection(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              const InfoRow(icon: Icons.phone_outlined, text: '+12027953213'),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              _error!,
+              style: TextStyle(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            TextButton(
+              onPressed: _loadOrganization,
+              child: const Text('Pokušaj ponovo'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_organization == null) {
+      return const Center(
+        child: Text('Klub nije pronađen'),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            _buildTitleSection(),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            if (_organization!.phone != null && _organization!.phone!.isNotEmpty)
+              InfoRow(icon: Icons.phone_outlined, text: _organization!.phone!),
+            if (_organization!.phone != null && _organization!.phone!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
-              const InfoRow(icon: Icons.email_outlined, text: 'club@volleyball.com'),
+            if (_organization!.email != null && _organization!.email!.isNotEmpty)
+              InfoRow(icon: Icons.email_outlined, text: _organization!.email!),
+            if (_organization!.email != null && _organization!.email!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
-              const InfoRow(icon: Icons.location_on_outlined, text: '1894 Arlington Avenue'),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildAboutSection(),
-              const SizedBox(height: AppDimensions.spacingXLarge),
-              ActimePrimaryButton(
-                label: 'Enrollment application',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const EnrollmentApplicationScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
+            if (_organization!.address != null && _organization!.address!.isNotEmpty)
+              InfoRow(icon: Icons.location_on_outlined, text: _organization!.address!),
+            if (_organization!.address != null && _organization!.address!.isNotEmpty)
+              const SizedBox(height: AppDimensions.spacingMedium),
+            InfoRow(
+              icon: Icons.event,
+              text: '${_organization!.eventsCount} događaja',
+            ),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            _buildAboutSection(),
+            const SizedBox(height: AppDimensions.spacingXLarge),
+            ActimePrimaryButton(
+              label: 'Prijava za članstvo',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EnrollmentApplicationScreen(
+                      organizationId: _organization!.id,
+                      organizationName: _organization!.name,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -58,30 +204,26 @@ class ClubDetailScreen extends StatelessWidget {
     return Row(
       children: [
         CircleIconContainer.xLarge(
-          icon: Icons.sports_volleyball,
-          iconColor: AppColors.orange,
+          icon: _getCategoryIcon(_organization!.categoryName),
+          iconColor: _getCategoryColor(_organization!.categoryName),
         ),
         const SizedBox(width: AppDimensions.spacingDefault),
-        Stack(
-          children: [
-            CircleIconContainer.xLarge(
-              icon: Icons.sports_volleyball,
-              iconColor: AppColors.grey,
-              backgroundColor: AppColors.inputBackground,
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: CircleBadge(icon: Icons.add),
-            ),
-          ],
-        ),
+        if (_organization!.isVerified)
+          Stack(
+            children: [
+              CircleIconContainer.xLarge(
+                icon: Icons.verified,
+                iconColor: AppColors.primary,
+                backgroundColor: AppColors.inputBackground,
+              ),
+            ],
+          ),
         const Spacer(),
         Row(
           children: [
-            const Text(
-              '89',
-              style: TextStyle(
+            Text(
+              _organization!.membersCount.toString(),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
@@ -99,23 +241,25 @@ class ClubDetailScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Student',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _organization!.name,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
               ),
-            ),
-            SizedBox(height: AppDimensions.spacingXSmall),
-            Text(
-              'Volleyball',
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-            ),
-          ],
+              const SizedBox(height: AppDimensions.spacingXSmall),
+              Text(
+                _organization!.categoryName ?? 'Klub',
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
         ),
         IconButton(
           icon: const Icon(Icons.favorite_border, color: AppColors.primary),
@@ -126,21 +270,21 @@ class ClubDetailScreen extends StatelessWidget {
   }
 
   Widget _buildAboutSection() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'About',
+        const Text(
+          'O klubu',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: AppDimensions.spacingMedium),
+        const SizedBox(height: AppDimensions.spacingMedium),
         Text(
-          'Practice yoga postures while learning about how yoga can be used to manage stress, improve the mind-body connection, and increase strength and flexibility.',
-          style: TextStyle(
+          _organization!.description ?? 'Nema opisa za ovaj klub.',
+          style: const TextStyle(
             fontSize: 14,
             color: AppColors.textPrimary,
             height: 1.5,

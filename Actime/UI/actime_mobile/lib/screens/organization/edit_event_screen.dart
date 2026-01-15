@@ -1,27 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../components/confirmation_dialog.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 
 class EditEventScreen extends StatefulWidget {
-  const EditEventScreen({super.key});
+  final String eventId;
+
+  const EditEventScreen({super.key, required this.eventId});
 
   @override
   State<EditEventScreen> createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<EditEventScreen> {
-  final _eventNameController = TextEditingController(text: 'Bjelašnica hiking trip');
-  final _locationController = TextEditingController(text: 'Bjelašnica');
-  final _dateController = TextEditingController(text: '11.10.2022');
-  final _timeController = TextEditingController(text: '06:00');
-  final _priceController = TextEditingController(text: '0');
-  final _maxParticipantsController = TextEditingController(text: '250');
-  final _descriptionController = TextEditingController(
-    text: 'Departing between 06:00am and 07:00am in Lehn at Längenfeld, this demanding long walk lets avid hikers explore the lofty and rugged mountain world of Ötztal Valley.',
-  );
-  String _selectedCategory = 'Sports';
+  final _eventService = EventService();
+  final _categoryService = CategoryService();
+
+  final _eventNameController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _maxParticipantsController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  Event? _event;
+  List<Category> _categories = [];
+  String? _selectedCategoryId;
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
+  bool _isLoading = false;
+  bool _isLoadingData = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventData();
+  }
+
+  Future<void> _loadEventData() async {
+    try {
+      final eventResponse = await _eventService.getEventById(widget.eventId);
+      final categoriesResponse = await _categoryService.getCategories();
+
+      if (!mounted) return;
+
+      if (categoriesResponse.success && categoriesResponse.data != null) {
+        _categories = categoriesResponse.data!.data;
+      }
+
+      if (eventResponse.success && eventResponse.data != null) {
+        _event = eventResponse.data;
+        _populateFields();
+      }
+
+      setState(() => _isLoadingData = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingData = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Greška pri učitavanju događaja'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _populateFields() {
+    if (_event == null) return;
+
+    _eventNameController.text = _event!.name;
+    _locationController.text = _event!.location ?? '';
+    _descriptionController.text = _event!.description ?? '';
+    _priceController.text = _event!.price?.toString() ?? '';
+    _maxParticipantsController.text = _event!.maxParticipants?.toString() ?? '';
+
+    _selectedDate = _event!.startDate;
+    _dateController.text = DateFormat('dd.MM.yyyy.').format(_event!.startDate);
+
+    _selectedTime = TimeOfDay(
+      hour: _event!.startDate.hour,
+      minute: _event!.startDate.minute,
+    );
+    _timeController.text =
+        '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
+
+    _selectedCategoryId = _event!.categoryId;
+  }
 
   @override
   void dispose() {
@@ -33,6 +103,125 @@ class _EditEventScreenState extends State<EditEventScreen> {
     _maxParticipantsController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateEvent() async {
+    if (_eventNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unesite naziv događaja')),
+      );
+      return;
+    }
+
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Odaberite datum događaja')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      DateTime startDate = _selectedDate!;
+      if (_selectedTime != null) {
+        startDate = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+          _selectedTime!.hour,
+          _selectedTime!.minute,
+        );
+      }
+
+      final response = await _eventService.updateEvent(widget.eventId, {
+        'name': _eventNameController.text.trim(),
+        'description': _descriptionController.text.isNotEmpty
+            ? _descriptionController.text.trim()
+            : null,
+        'location': _locationController.text.isNotEmpty
+            ? _locationController.text.trim()
+            : null,
+        'startDate': startDate.toIso8601String(),
+        'price': _priceController.text.isNotEmpty
+            ? double.tryParse(_priceController.text)
+            : null,
+        'maxParticipants': _maxParticipantsController.text.isNotEmpty
+            ? int.tryParse(_maxParticipantsController.text)
+            : null,
+        'categoryId': _selectedCategoryId,
+      });
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Događaj je uspješno ažuriran!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri ažuriranju događaja'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _deleteEvent() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await _eventService.deleteEvent(widget.eventId);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Događaj je obrisan'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri brisanju događaja'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -47,7 +236,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Edit Event',
+          'Uredi događaj',
           style: TextStyle(
             color: AppColors.black,
             fontSize: 18,
@@ -61,51 +250,56 @@ class _EditEventScreenState extends State<EditEventScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildCoverImageSection(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              ActimeTextField(
-                controller: _eventNameController,
-                labelText: 'Event Name',
+      body: _isLoadingData
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.spacingLarge),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCoverImageSection(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    ActimeTextField(
+                      controller: _eventNameController,
+                      labelText: 'Naziv događaja',
+                    ),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    _buildDateTimeRow(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    ActimeTextField(
+                      controller: _locationController,
+                      labelText: 'Lokacija',
+                      suffixIcon: const Icon(Icons.location_on_outlined,
+                          color: AppColors.primary),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    _buildPriceParticipantsRow(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    ActimeTextField(
+                      controller: _descriptionController,
+                      labelText: 'Opis',
+                      maxLines: 4,
+                      isOutlined: true,
+                    ),
+                    const SizedBox(height: AppDimensions.spacingXLarge),
+                    _isLoading
+                        ? const Center(
+                            child:
+                                CircularProgressIndicator(color: AppColors.primary),
+                          )
+                        : ActimePrimaryButton(
+                            label: 'Spremi promjene',
+                            onPressed: _updateEvent,
+                          ),
+                  ],
+                ),
               ),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildCategoryDropdown(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildDateTimeRow(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              ActimeTextField(
-                controller: _locationController,
-                labelText: 'Location',
-                suffixIcon: const Icon(Icons.location_on_outlined, color: AppColors.primary),
-              ),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              _buildPriceParticipantsRow(),
-              const SizedBox(height: AppDimensions.spacingLarge),
-              ActimeTextField(
-                controller: _descriptionController,
-                labelText: 'Description',
-                maxLines: 4,
-                isOutlined: true,
-              ),
-              const SizedBox(height: AppDimensions.spacingXLarge),
-              ActimePrimaryButton(
-                label: 'Save Changes',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Event updated successfully!')),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -141,17 +335,17 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   Widget _buildCategoryDropdown() {
     return ActimeDropdownField<String>(
-      initialValue: _selectedCategory,
-      labelText: 'Category',
-      items: ['Sports', 'Music', 'Art', 'Education', 'Other']
+      initialValue: _selectedCategoryId,
+      labelText: 'Kategorija',
+      items: _categories
           .map((category) => DropdownMenuItem(
-                value: category,
-                child: Text(category),
+                value: category.id,
+                child: Text(category.name),
               ))
           .toList(),
       onChanged: (value) {
         setState(() {
-          _selectedCategory = value!;
+          _selectedCategoryId = value;
         });
       },
     );
@@ -163,18 +357,47 @@ class _EditEventScreenState extends State<EditEventScreen> {
         Expanded(
           child: ActimeTextField(
             controller: _dateController,
-            labelText: 'Date',
+            labelText: 'Datum',
             readOnly: true,
-            suffixIcon: const Icon(Icons.calendar_today, color: AppColors.primary),
+            suffixIcon:
+                const Icon(Icons.calendar_today, color: AppColors.primary),
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate ?? DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2030),
+              );
+              if (date != null) {
+                setState(() {
+                  _selectedDate = date;
+                  _dateController.text = DateFormat('dd.MM.yyyy.').format(date);
+                });
+              }
+            },
           ),
         ),
         const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _timeController,
-            labelText: 'Time',
+            labelText: 'Vrijeme',
             readOnly: true,
-            suffixIcon: const Icon(Icons.access_time, color: AppColors.primary),
+            suffixIcon:
+                const Icon(Icons.access_time, color: AppColors.primary),
+            onTap: () async {
+              final time = await showTimePicker(
+                context: context,
+                initialTime: _selectedTime ?? TimeOfDay.now(),
+              );
+              if (time != null) {
+                setState(() {
+                  _selectedTime = time;
+                  _timeController.text =
+                      '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                });
+              }
+            },
           ),
         ),
       ],
@@ -187,16 +410,16 @@ class _EditEventScreenState extends State<EditEventScreen> {
         Expanded(
           child: ActimeTextField(
             controller: _priceController,
-            labelText: 'Price',
+            labelText: 'Cijena (opcionalno)',
             keyboardType: TextInputType.number,
-            prefixText: '\$ ',
+            prefixText: 'BAM ',
           ),
         ),
         const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
           child: ActimeTextField(
             controller: _maxParticipantsController,
-            labelText: 'Max Participants',
+            labelText: 'Max učesnika',
             keyboardType: TextInputType.number,
           ),
         ),
@@ -207,13 +430,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
   Future<void> _showDeleteDialog() async {
     final confirmed = await ConfirmationDialog.showDelete(
       context: context,
-      itemName: 'Event',
+      itemName: 'događaj',
     );
     if (confirmed == true && mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Event deleted')),
-      );
+      _deleteEvent();
     }
   }
 }

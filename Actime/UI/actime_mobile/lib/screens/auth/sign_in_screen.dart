@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
+import '../../services/services.dart';
 import 'sign_up_screen.dart';
 import '../landing/landing_logged_screen.dart';
 
@@ -15,6 +16,8 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,16 +26,43 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  void _handleSignIn() {
-    if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LandingPageLogged()),
-      );
-    } else {
+  Future<void> _handleSignIn() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
+        const SnackBar(content: Text('Unesite email i lozinku')),
       );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await _authService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message ?? 'Greška pri prijavi')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške. Pokušajte ponovo.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -59,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildHeader('Sign In'),
+                _buildHeader('Prijava'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
@@ -67,21 +97,26 @@ class _SignInScreenState extends State<SignInScreen> {
                       ActimeTextField(
                         controller: _emailController,
                         hintText: 'Email',
+                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppDimensions.spacingLarge),
                       ActimeTextField(
                         controller: _passwordController,
-                        hintText: 'Password',
+                        hintText: 'Lozinka',
                         obscureText: true,
                       ),
                       const SizedBox(height: AppDimensions.spacingXLarge),
-                      ActimePrimaryButton(
-                        label: 'Sign In',
-                        onPressed: _handleSignIn,
-                      ),
+                      _isLoading
+                          ? const CircularProgressIndicator(
+                              color: AppColors.primary,
+                            )
+                          : ActimePrimaryButton(
+                              label: 'Prijavi se',
+                              onPressed: _handleSignIn,
+                            ),
                       const SizedBox(height: AppDimensions.spacingDefault),
                       ActimeTextButton(
-                        label: 'Forgot password?',
+                        label: 'Zaboravljena lozinka?',
                         onPressed: () {},
                       ),
                       const SizedBox(height: AppDimensions.spacingXLarge),
@@ -145,7 +180,7 @@ class _SignInScreenState extends State<SignInScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Don't have an account? ",
+          'Nemate račun? ',
           style: TextStyle(
             color: AppColors.textMuted,
             fontSize: 14,
@@ -159,7 +194,7 @@ class _SignInScreenState extends State<SignInScreen> {
             );
           },
           child: const Text(
-            'Sign Up',
+            'Registrujte se',
             style: TextStyle(
               color: AppColors.primary,
               fontSize: 14,

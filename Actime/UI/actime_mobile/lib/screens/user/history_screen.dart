@@ -1,9 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  final _userService = UserService();
+  final _authService = AuthService();
+
+  List<Event> _events = [];
+  bool _isLoading = true;
+  String? _error;
+  int _selectedFilter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final currentUser = _authService.currentUser;
+      if (currentUser == null) {
+        setState(() {
+          _error = 'Niste prijavljeni';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final response = await _userService.getUserEventHistory(currentUser.id);
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _events = response.data!.data;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Greška pri učitavanju historije';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Došlo je do greške. Pokušajte ponovo.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd.MM.yyyy.').format(date);
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      default:
+        return Icons.event;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +102,12 @@ class HistoryScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 const Text(
-                  'History',
+                  'Historija',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -31,46 +116,30 @@ class HistoryScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.filter_list, color: Color(0xFF0D7C8C)),
+                  icon: const Icon(Icons.filter_list, color: AppColors.primary),
                   onPressed: () {},
                 ),
               ],
             ),
           ),
-          
-          // Filter Tabs
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-                _buildTab('All', true),
+                _buildTab('Svi', 0),
                 const SizedBox(width: 12),
-                _buildTab('This Month', false),
+                _buildTab('Ovaj mjesec', 1),
                 const SizedBox(width: 12),
-                _buildTab('This Year', false),
+                _buildTab('Ova godina', 2),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
-          // Past Events List
+
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return _buildEventCard(
-                  'Volleyball tournament',
-                  '\$10',
-                  '21.09.2022',
-                  'USCR Midhat Hujdur',
-                  '31',
-                  Icons.sports_volleyball,
-                  index % 2 == 0,
-                );
-              },
-            ),
+            child: _buildContent(),
           ),
         ],
       ),
@@ -78,22 +147,97 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTab(String label, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF0D7C8C) : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive ? const Color(0xFF0D7C8C) : Colors.grey.shade300,
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              _error!,
+              style: TextStyle(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            TextButton(
+              onPressed: _loadHistory,
+              child: const Text('Pokušaj ponovo'),
+            ),
+          ],
         ),
+      );
+    }
+
+    if (_events.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.history, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              'Nemate historiju događaja',
+              style: TextStyle(color: AppColors.textMuted),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadHistory,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: _events.length,
+        itemBuilder: (context, index) {
+          final event = _events[index];
+          return _buildEventCard(
+            event.name,
+            event.formattedPrice,
+            _formatDate(event.startDate),
+            event.location ?? 'Nije određeno',
+            event.participantsCount.toString(),
+            _getCategoryIcon(event.categoryName),
+            event.status == EventStatus.completed,
+          );
+        },
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          color: isActive ? Colors.white : Colors.grey,
-          fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+    );
+  }
+
+  Widget _buildTab(String label, int index) {
+    final isActive = _selectedFilter == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedFilter = index;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? AppColors.primary : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: isActive ? Colors.white : Colors.grey,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+          ),
         ),
       ),
     );
@@ -154,7 +298,7 @@ class HistoryScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D7C8C),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
@@ -168,7 +312,7 @@ class HistoryScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
-                          'Attended',
+                          'Prisustvovao',
                           style: TextStyle(color: Colors.green, fontSize: 10),
                         ),
                       ),
@@ -188,7 +332,7 @@ class HistoryScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0D7C8C),
+                    color: AppColors.primary,
                   ),
                 ),
               ],

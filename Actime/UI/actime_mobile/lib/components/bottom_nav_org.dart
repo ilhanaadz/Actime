@@ -5,10 +5,12 @@ import '../screens/user/people_screen.dart';
 
 class BottomNavOrg extends StatelessWidget {
   final int currentIndex;
+  final String organizationId;
 
   const BottomNavOrg({
     super.key,
     required this.currentIndex,
+    required this.organizationId,
   });
 
   void _onTap(BuildContext context, int index) {
@@ -18,13 +20,17 @@ class BottomNavOrg extends StatelessWidget {
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MyEventsOrgScreen()),
+          MaterialPageRoute(
+            builder: (context) => MyEventsOrgScreen(organizationId: organizationId),
+          ),
         );
         break;
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const EnrollmentApplicationsScreen()),
+          MaterialPageRoute(
+            builder: (context) => EnrollmentApplicationsScreen(organizationId: organizationId),
+          ),
         );
         break;
       case 2:
