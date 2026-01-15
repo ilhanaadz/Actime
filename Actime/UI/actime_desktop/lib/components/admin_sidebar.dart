@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/constants.dart';
 
 class AdminSidebar extends StatelessWidget {
   final String currentRoute;
@@ -13,24 +14,27 @@ class AdminSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      color: Colors.white,
+      width: AppDimensions.sidebarWidth,
+      color: AppColors.surface,
       child: Column(
         children: [
           // Logo Section
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppDimensions.paddingXL),
             alignment: Alignment.centerLeft,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingL,
+                vertical: AppDimensions.paddingS,
+              ),
               decoration: BoxDecoration(
-                color: const Color(0xFF0D7C8C),
-                borderRadius: BorderRadius.circular(6),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusS),
               ),
               child: const Text(
                 'Actime',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textOnPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -40,36 +44,36 @@ class AdminSidebar extends StatelessWidget {
 
           // Welcome Section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingXL,
+              vertical: AppDimensions.paddingS,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Welcome back, Mr. Administrator',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                  style: AppTextStyles.heading4.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppDimensions.spacingXS),
                 Text(
                   'Hello, Admin! Check out what\'s next',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppDimensions.spacingXL),
 
           // Navigation Items
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL),
               children: [
                 _buildNavItem(
                   icon: Icons.dashboard_outlined,
@@ -102,7 +106,7 @@ class AdminSidebar extends StatelessWidget {
 
           // Sign Out
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppDimensions.paddingL),
             child: _buildNavItem(
               icon: Icons.logout,
               label: 'Sign out',
@@ -123,28 +127,33 @@ class AdminSidebar extends StatelessWidget {
 
     return InkWell(
       onTap: () => onNavigate(route),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppDimensions.radiusM),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.only(bottom: AppDimensions.spacingXS),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.paddingL,
+          vertical: AppDimensions.paddingM,
+        ),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF0D7C8C).withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isActive
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 20,
-              color: isActive ? const Color(0xFF0D7C8C) : Colors.grey[600],
+              size: AppDimensions.iconM,
+              color: isActive ? AppColors.primary : AppColors.grey600,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppDimensions.spacingM),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive ? const Color(0xFF0D7C8C) : Colors.grey[700],
+                color: isActive ? AppColors.primary : AppColors.grey700,
               ),
             ),
           ],
