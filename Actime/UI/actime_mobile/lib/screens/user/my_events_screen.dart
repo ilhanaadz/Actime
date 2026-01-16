@@ -3,8 +3,13 @@ import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/event_card.dart';
 import '../../components/tab_button.dart';
+import '../../components/app_bar_component.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../components/bottom_nav_user.dart';
+import '../landing/landing_logged_screen.dart';
+import 'user_profile_screen.dart';
+import 'favorites_screen.dart';
 
 class MyEventsScreen extends StatefulWidget {
   const MyEventsScreen({super.key});
@@ -100,21 +105,26 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Moji događaji',
-          style: TextStyle(
-            color: AppColors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      appBar: ActimeAppBar(
+        showFavorite: true,
+        onLogoTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
+        onFavoriteTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+          );
+        },
+        onProfileTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+          );
+        },
       ),
       body: Column(
         children: [
@@ -139,6 +149,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const BottomNavUser(currentIndex: 2),
     );
   }
 

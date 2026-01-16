@@ -8,6 +8,7 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onFilterTap;
+  final VoidCallback? onLogoTap;
 
   const ActimeAppBar({
     super.key,
@@ -18,6 +19,7 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onFavoriteTap,
     this.onSearchTap,
     this.onFilterTap,
+    this.onLogoTap,
   });
 
   @override
@@ -25,12 +27,15 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      title: const Text(
-        'Actime',
-        style: TextStyle(
-          color: Color(0xFF0D7C8C),
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+      title: GestureDetector(
+        onTap: onLogoTap,
+        child: const Text(
+          'Actime',
+          style: TextStyle(
+            color: Color(0xFF0D7C8C),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       actions: [

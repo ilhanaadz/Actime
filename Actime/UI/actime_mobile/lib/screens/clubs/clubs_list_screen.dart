@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
-import '../../components/bottom_nav.dart';
+import '../../components/bottom_nav_user.dart';
+import '../user/user_profile_screen.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../user/favorites_screen.dart';
+import '../landing/landing_logged_screen.dart';
 import 'club_detail_screen.dart';
 
 class ClubsListScreen extends StatefulWidget {
@@ -134,16 +136,27 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
         showFavorite: true,
         showSearch: true,
         showFilter: true,
+        onLogoTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
         onFavoriteTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const FavoritesScreen()),
           );
         },
-        onProfileTap: () {},
+        onProfileTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+          );
+        },
       ),
       body: _buildContent(),
-      bottomNavigationBar: const BottomNav(currentIndex: 1),
+      bottomNavigationBar: const BottomNavUser(currentIndex: 1),
     );
   }
 

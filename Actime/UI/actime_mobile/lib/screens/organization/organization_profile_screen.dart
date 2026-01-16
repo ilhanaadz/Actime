@@ -5,9 +5,8 @@ import '../../components/circle_icon_container.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import 'edit_organization_profile_screen.dart';
-import 'my_events_org_screen.dart';
-import 'gallery_org_screen.dart';
-import 'people_org_screen.dart';
+import '../../components/bottom_nav_org.dart';
+import '../auth/sign_in_screen.dart';
 
 class OrganizationProfileScreen extends StatefulWidget {
   final String? organizationId;
@@ -67,6 +66,68 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
     }
   }
 
+  Future<void> _showLogoutDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Odjava',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: const Text(
+          'Da li ste sigurni da se želite odjaviti?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Ne',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Da',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _authService.logout();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   IconData _getCategoryIcon(String? categoryName) {
     switch (categoryName?.toLowerCase()) {
       case 'sport':
@@ -107,16 +168,16 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
         leadingWidth: 100,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_outline, color: AppColors.primary),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: AppColors.black),
-            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.logout, color: AppColors.primary),
+            onPressed: _showLogoutDialog,
           ),
         ],
       ),
       body: _buildBody(),
+      bottomNavigationBar: BottomNavOrg(
+        currentIndex: -1, // Profile is not in bottom nav
+        organizationId: _organizationId,
+      ),
     );
   }
 
@@ -199,73 +260,6 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
             label: 'About us',
             value: _organization?.description ?? '-',
             isMultiline: true,
-          ),
-          const SizedBox(height: AppDimensions.spacingXLarge),
-          _buildNavigationItems(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavigationItems(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildNavItem(
-          icon: Icons.event_outlined,
-          label: 'My events',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyEventsOrgScreen(organizationId: _organizationId),
-              ),
-            );
-          },
-        ),
-        _buildNavItem(
-          icon: Icons.photo_library_outlined,
-          label: 'Gallery',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => GalleryOrgScreen(organizationId: _organizationId),
-              ),
-            );
-          },
-        ),
-        _buildNavItem(
-          icon: Icons.people_outline,
-          label: 'People',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PeopleOrgScreen(organizationId: _organizationId),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-      child: Column(
-        children: [
-          Icon(icon, color: AppColors.primary),
-          const SizedBox(height: AppDimensions.spacingXSmall),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.primary, fontSize: 12),
           ),
         ],
       ),

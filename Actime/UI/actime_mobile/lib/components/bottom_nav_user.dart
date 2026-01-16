@@ -38,10 +38,13 @@ class BottomNavUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use 0 as fallback when currentIndex is invalid (e.g., -1 for landing page)
+    final safeIndex = currentIndex >= 0 && currentIndex < 3 ? currentIndex : 0;
+
     return BottomNavigationBar(
-      currentIndex: currentIndex,
+      currentIndex: safeIndex,
       onTap: (index) => _onTap(context, index),
-      selectedItemColor: const Color(0xFF0D7C8C),
+      selectedItemColor: currentIndex >= 0 ? const Color(0xFF0D7C8C) : Colors.grey,
       unselectedItemColor: Colors.grey,
       items: const [
         BottomNavigationBarItem(

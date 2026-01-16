@@ -8,6 +8,7 @@ import '../../models/models.dart';
 import '../../services/services.dart';
 import 'create_event_screen.dart';
 import 'edit_event_screen.dart';
+import '../../components/bottom_nav_org.dart';
 
 class MyEventsOrgScreen extends StatefulWidget {
   final String organizationId;
@@ -183,10 +184,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: const Text(
           'Moji događaji',
           style: TextStyle(
@@ -233,6 +231,10 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             child: _buildContent(),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavOrg(
+        currentIndex: 0,
+        organizationId: widget.organizationId,
       ),
     );
   }

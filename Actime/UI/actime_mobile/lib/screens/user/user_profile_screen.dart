@@ -7,6 +7,7 @@ import '../../components/confirmation_dialog.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../auth/sign_in_screen.dart';
+import 'edit_user_profile_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -84,7 +85,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditUserProfileScreen()),
+              ).then((_) => _loadUserProfile());
+            },
           ),
         ],
       ),

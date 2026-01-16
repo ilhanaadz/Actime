@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
-import '../../components/bottom_nav.dart';
+import '../../components/bottom_nav_user.dart';
+import 'user_profile_screen.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import 'favorites_screen.dart';
+import '../landing/landing_logged_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -148,13 +150,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: Colors.white,
       appBar: ActimeAppBar(
         showFavorite: true,
+        onLogoTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
         onFavoriteTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const FavoritesScreen()),
           );
         },
-        onProfileTap: () {},
+        onProfileTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+          );
+        },
       ),
       body: Column(
         children: [
@@ -180,7 +193,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNav(currentIndex: 2),
+      bottomNavigationBar: const BottomNavUser(currentIndex: 2),
     );
   }
 

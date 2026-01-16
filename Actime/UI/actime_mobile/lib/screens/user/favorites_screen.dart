@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
-import '../../components/bottom_nav.dart';
+import '../../components/bottom_nav_user.dart';
+import 'user_profile_screen.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../clubs/club_detail_screen.dart';
 import '../events/event_detail_screen.dart';
+import '../landing/landing_logged_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -68,8 +70,19 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       backgroundColor: Colors.white,
       appBar: ActimeAppBar(
         showFavorite: true,
+        onLogoTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
         onFavoriteTap: () {},
-        onProfileTap: () {},
+        onProfileTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+          );
+        },
       ),
       body: Column(
         children: [
@@ -95,7 +108,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNav(currentIndex: 0),
+      bottomNavigationBar: const BottomNavUser(currentIndex: -1),
     );
   }
 

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../components/app_bar_component.dart';
-import '../../components/bottom_nav.dart';
+import '../../components/bottom_nav_user.dart';
+import '../../constants/constants.dart';
+import '../user/favorites_screen.dart';
+import '../user/user_profile_screen.dart';
+import '../clubs/clubs_list_screen.dart';
+import '../events/events_list_screen.dart';
 
 class LandingPageLogged extends StatelessWidget {
   const LandingPageLogged({super.key});
@@ -12,10 +17,16 @@ class LandingPageLogged extends StatelessWidget {
       appBar: ActimeAppBar(
         showFavorite: true,
         onFavoriteTap: () {
-          print('Show favorites');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+          );
         },
         onProfileTap: () {
-          print('Navigate to Profile');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+          );
         },
       ),
       body: SingleChildScrollView(
@@ -32,23 +43,29 @@ class LandingPageLogged extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0D7C8C),
+                      color: AppColors.primary,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
-                    onPressed: () {},
+                    icon: const Icon(Icons.arrow_forward, color: AppColors.primary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ClubsListScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
                   Expanded(
                     child: _buildClubCard(
+                      context,
                       'Velež',
                       'Football',
                       '89 members',
@@ -59,6 +76,7 @@ class LandingPageLogged extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildClubCard(
+                      context,
                       'Student',
                       'Volleyball',
                       '89 members',
@@ -69,9 +87,9 @@ class LandingPageLogged extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -82,17 +100,22 @@ class LandingPageLogged extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0D7C8C),
+                      color: AppColors.primary,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
-                    onPressed: () {},
+                    icon: const Icon(Icons.arrow_forward, color: AppColors.primary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const EventsListScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            
+
             _buildEventCard(
               'Bjelašnica hiking trip',
               'Free',
@@ -112,62 +135,70 @@ class LandingPageLogged extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNav(currentIndex: 0),
+      bottomNavigationBar: const BottomNavUser(currentIndex: -1),
     );
   }
 
-  Widget _buildClubCard(String name, String sport, String members, IconData icon, Color iconColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
+  Widget _buildClubCard(BuildContext context, String name, String sport, String members, IconData icon, Color iconColor) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ClubsListScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: iconColor, size: 30),
                 ),
-                child: Icon(icon, color: iconColor, size: 30),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0D7C8C),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            sport,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(members, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(width: 4),
-              const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-            ],
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              sport,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(members, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                const SizedBox(width: 4),
+                const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -202,13 +233,13 @@ class LandingPageLogged extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D7C8C),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
                     ),
                     const Spacer(),
-                    const Icon(Icons.favorite_border, size: 20, color: Color(0xFF0D7C8C)),
+                    const Icon(Icons.favorite_border, size: 20, color: AppColors.primary),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -225,7 +256,7 @@ class LandingPageLogged extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0D7C8C),
+                    color: AppColors.primary,
                   ),
                 ),
               ],

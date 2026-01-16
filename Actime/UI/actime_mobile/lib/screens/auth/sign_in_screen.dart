@@ -3,8 +3,10 @@ import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../services/services.dart';
+import '../../models/models.dart';
 import 'sign_up_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../organization/organization_profile_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -45,10 +47,22 @@ class _SignInScreenState extends State<SignInScreen> {
       if (!mounted) return;
 
       if (response.success && response.data != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LandingPageLogged()),
-        );
+        final authResponse = response.data!;
+        final user = authResponse.user;
+        // Route based on user role
+        if (user.role == UserRole.organizer) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrganizationProfileScreen(organizationId: user.id),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response.message ?? 'Greška pri prijavi')),

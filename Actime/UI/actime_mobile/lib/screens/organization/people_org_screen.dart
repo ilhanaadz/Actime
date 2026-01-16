@@ -5,6 +5,7 @@ import '../../components/bottom_nav_org.dart';
 import '../../components/circle_icon_container.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import 'organization_profile_screen.dart';
 
 class PeopleOrgScreen extends StatefulWidget {
   final String organizationId;
@@ -110,7 +111,16 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline, color: AppColors.primary),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OrganizationProfileScreen(
+                    organizationId: widget.organizationId,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

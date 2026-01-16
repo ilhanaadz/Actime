@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/constants.dart';
 
 class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
@@ -24,9 +25,11 @@ class GalleryScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_photo_alternate_outlined, color: Color(0xFF0D7C8C)),
+            icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
             onPressed: () {
-              print('Add photo');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Dodavanje slike ce biti implementirano')),
+              );
             },
           ),
         ],
@@ -58,7 +61,7 @@ class GalleryScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF0D7C8C),
+                          color: AppColors.primary,
                         ),
                       ),
                       Text(
@@ -70,9 +73,9 @@ class GalleryScreen extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Gallery Grid
             Expanded(
               child: GridView.builder(

@@ -171,11 +171,13 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    // Clear navigation stack and go to organization profile
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const OrganizationProfileScreen(),
                       ),
+                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
