@@ -5,6 +5,7 @@ import '../../components/bottom_nav.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../user/favorites_screen.dart';
 import 'club_detail_screen.dart';
 
 class ClubsListScreen extends StatefulWidget {
@@ -16,8 +17,10 @@ class ClubsListScreen extends StatefulWidget {
 
 class _ClubsListScreenState extends State<ClubsListScreen> {
   final _organizationService = OrganizationService();
+  final _favoriteService = FavoriteService();
 
   List<Organization> _organizations = [];
+  Set<String> _favoriteClubIds = {};
   bool _isLoading = true;
   String? _error;
 
@@ -25,6 +28,29 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
   void initState() {
     super.initState();
     _loadOrganizations();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final favorites = await _favoriteService.getFavoriteClubs();
+    if (mounted) {
+      setState(() {
+        _favoriteClubIds = favorites.map((c) => c.id).toSet();
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite(Organization org) async {
+    final isFavorite = await _favoriteService.toggleClubFavorite(org);
+    if (mounted) {
+      setState(() {
+        if (isFavorite) {
+          _favoriteClubIds.add(org.id);
+        } else {
+          _favoriteClubIds.remove(org.id);
+        }
+      });
+    }
   }
 
   Future<void> _loadOrganizations() async {
@@ -105,8 +131,15 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
+        showFavorite: true,
         showSearch: true,
         showFilter: true,
+        onFavoriteTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+          );
+        },
         onProfileTap: () {},
       ),
       body: _buildContent(),
@@ -177,8 +210,9 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
             members: org.membersCount.toString(),
             icon: _getCategoryIcon(org.categoryName),
             iconColor: _getCategoryColor(org.categoryName),
-            isFavorite: org.isVerified,
+            isFavorite: _favoriteClubIds.contains(org.id),
             onTap: () => _navigateToDetail(context, org),
+            onFavoriteTap: () => _toggleFavorite(org),
           );
         },
       ),

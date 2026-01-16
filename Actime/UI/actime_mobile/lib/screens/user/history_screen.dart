@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
-import '../../components/bottom_nav_user.dart';
+import '../../components/bottom_nav.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import 'favorites_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -17,18 +18,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final _userService = UserService();
   final _authService = AuthService();
 
+  List<Enrollment> _memberships = [];
   List<Event> _events = [];
   bool _isLoading = true;
   String? _error;
-  int _selectedFilter = 0;
+  int _selectedTab = 0; // 0 = Memberships, 1 = Events
 
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    _loadData();
   }
 
-  Future<void> _loadHistory() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _error = null;
@@ -44,21 +46,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return;
       }
 
-      final response = await _userService.getUserEventHistory(currentUser.id);
+      // Load both memberships and event history
+      final membershipResponse = await _userService.getUserMemberships(currentUser.id);
+      final historyResponse = await _userService.getUserEventHistory(currentUser.id);
 
       if (!mounted) return;
 
-      if (response.success && response.data != null) {
-        setState(() {
-          _events = response.data!.data;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _error = response.message ?? 'Greška pri učitavanju historije';
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        if (membershipResponse.success && membershipResponse.data != null) {
+          _memberships = membershipResponse.data!.data;
+        }
+        if (historyResponse.success && historyResponse.data != null) {
+          _events = historyResponse.data!.data;
+        }
+        _isLoading = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -72,22 +74,71 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return DateFormat('dd.MM.yyyy.').format(date);
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
+  Future<void> _showCancelMembershipDialog(Enrollment membership) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Confirmation',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to cancel membership?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'No',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFF8B4A5E),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _cancelMembership(membership);
+    }
+  }
+
+  Future<void> _cancelMembership(Enrollment membership) async {
+    final response = await _userService.cancelMembership(membership.id);
+    if (response.success) {
+      await _loadData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Članstvo je uspješno otkazano')),
+        );
+      }
     }
   }
 
@@ -97,53 +148,70 @@ class _HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: Colors.white,
       appBar: ActimeAppBar(
         showFavorite: true,
-        onFavoriteTap: () {},
+        onFavoriteTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+          );
+        },
         onProfileTap: () {},
       ),
       body: Column(
         children: [
+          // Tab buttons
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                const Text(
-                  'Historija',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                Expanded(
+                  child: _buildTabButton('Memberships', 0),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.filter_list, color: AppColors.primary),
-                  onPressed: () {},
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTabButton('Events', 1),
                 ),
               ],
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                _buildTab('Svi', 0),
-                const SizedBox(width: 12),
-                _buildTab('Ovaj mjesec', 1),
-                const SizedBox(width: 12),
-                _buildTab('Ova godina', 2),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
+          // Content
           Expanded(
             child: _buildContent(),
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavUser(currentIndex: 2),
+      bottomNavigationBar: const BottomNav(currentIndex: 2),
+    );
+  }
+
+  Widget _buildTabButton(String label, int index) {
+    final isActive = _selectedTab == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTab = index;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isActive ? AppColors.primary : Colors.grey.shade300,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: isActive ? Colors.white : Colors.grey,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -168,7 +236,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
             const SizedBox(height: AppDimensions.spacingDefault),
             TextButton(
-              onPressed: _loadHistory,
+              onPressed: _loadData,
               child: const Text('Pokušaj ponovo'),
             ),
           ],
@@ -176,6 +244,139 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
     }
 
+    if (_selectedTab == 0) {
+      return _buildMembershipsList();
+    } else {
+      return _buildEventsList();
+    }
+  }
+
+  Widget _buildMembershipsList() {
+    if (_memberships.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.card_membership, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            Text(
+              'Nemate aktivnih članstava',
+              style: TextStyle(color: AppColors.textMuted),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: _memberships.length,
+        itemBuilder: (context, index) {
+          final membership = _memberships[index];
+          return _buildMembershipCard(membership);
+        },
+      ),
+    );
+  }
+
+  Widget _buildMembershipCard(Enrollment membership) {
+    final org = membership.organization;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          // Organization logo/icon
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: org?.logo != null
+                ? ClipOval(
+                    child: Image.network(
+                      org!.logo!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _buildOrgIcon(org.categoryName);
+                      },
+                    ),
+                  )
+                : _buildOrgIcon(org?.categoryName),
+          ),
+          const SizedBox(width: 16),
+          // Organization info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  org?.name ?? 'Nepoznat klub',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  org?.categoryName ?? 'Klub',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Remove button
+          IconButton(
+            icon: Icon(Icons.remove_circle_outline, color: Colors.grey.shade400),
+            onPressed: () => _showCancelMembershipDialog(membership),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrgIcon(String? categoryName) {
+    IconData icon;
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        icon = Icons.sports_soccer;
+        break;
+      case 'kultura':
+        icon = Icons.palette;
+        break;
+      case 'edukacija':
+        icon = Icons.school;
+        break;
+      case 'zdravlje':
+        icon = Icons.favorite;
+        break;
+      case 'muzika':
+        icon = Icons.music_note;
+        break;
+      case 'tehnologija':
+        icon = Icons.computer;
+        break;
+      default:
+        icon = Icons.groups;
+    }
+    return Icon(icon, color: Colors.orange, size: 24);
+  }
+
+  Widget _buildEventsList() {
     if (_events.isEmpty) {
       return Center(
         child: Column(
@@ -193,67 +394,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: _loadHistory,
+      onRefresh: _loadData,
       color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _events.length,
         itemBuilder: (context, index) {
           final event = _events[index];
-          return _buildEventCard(
-            event.name,
-            event.formattedPrice,
-            _formatDate(event.startDate),
-            event.location ?? 'Nije određeno',
-            event.participantsCount.toString(),
-            _getCategoryIcon(event.categoryName),
-            event.status == EventStatus.completed,
-          );
+          return _buildEventCard(event);
         },
       ),
     );
   }
 
-  Widget _buildTab(String label, int index) {
-    final isActive = _selectedFilter == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedFilter = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? AppColors.primary : Colors.grey.shade300,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: isActive ? Colors.white : Colors.grey,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventCard(
-    String title,
-    String price,
-    String date,
-    String location,
-    String participants,
-    IconData icon,
-    bool isCompleted,
-  ) {
+  Widget _buildEventCard(Event event) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -262,105 +418,90 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       child: Row(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: Colors.orange, size: 24),
-              ),
-              if (isCompleted)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check, size: 12, color: Colors.white),
-                  ),
-                ),
-            ],
+          // Event icon
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _getCategoryIcon(event.categoryName),
+              color: Colors.orange,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
+          // Event info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(price, style: const TextStyle(color: Colors.white, fontSize: 10)),
-                    ),
-                    const Spacer(),
-                    if (isCompleted)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'Prisustvovao',
-                          style: TextStyle(color: Colors.green, fontSize: 10),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(participants, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
+                Text(
+                  event.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                  event.categoryName ?? 'Dogadaj',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          // Date and remove button
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    _formatDate(event.startDate),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                  Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
                 ],
               ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(location, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
-                ],
-              ),
+              const SizedBox(height: 8),
+              Icon(Icons.remove_circle_outline, color: Colors.grey.shade400, size: 20),
             ],
           ),
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      case 'hiking':
+        return Icons.terrain;
+      default:
+        return Icons.event;
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/events/events_list_screen.dart';
 import '../screens/clubs/clubs_list_screen.dart';
+import '../screens/user/history_screen.dart';
 
 class BottomNav extends StatelessWidget {
   final int currentIndex;
@@ -30,8 +31,11 @@ class BottomNav extends StatelessWidget {
         );
         break;
       case 2:
-        // Navigate to History (placeholder)
-        print('Navigate to History');
+        // Navigate to History
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HistoryScreen()),
+        );
         break;
     }
   }

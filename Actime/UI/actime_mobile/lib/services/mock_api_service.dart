@@ -442,6 +442,26 @@ class MockApiService {
     ),
   ];
 
+  /// Mock user memberships (approved enrollments for current user)
+  List<Enrollment> get _mockUserMemberships => [
+    Enrollment(
+      id: 'm1',
+      userId: '1',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 60)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 59)),
+    ),
+    Enrollment(
+      id: 'm2',
+      userId: '1',
+      organizationId: '5',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 29)),
+    ),
+  ];
+
   // ==================== AUTH API ====================
 
   /// Login
@@ -1082,6 +1102,38 @@ class MockApiService {
     );
 
     return ApiResponse.success(updatedEnrollment);
+  }
+
+  /// Get user memberships (approved enrollments with organization data)
+  Future<ApiResponse<PaginatedResponse<Enrollment>>> getUserMemberships(
+    String userId, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    await _simulateDelay();
+
+    // Get memberships and enrich with organization data
+    final enrichedMemberships = _mockUserMemberships.map((membership) {
+      final org = _mockOrganizations.firstWhere(
+        (o) => o.id == membership.organizationId,
+        orElse: () => _mockOrganizations.first,
+      );
+      return membership.copyWith(organization: org);
+    }).toList();
+
+    return ApiResponse.success(PaginatedResponse(
+      data: enrichedMemberships,
+      currentPage: page,
+      lastPage: 1,
+      perPage: perPage,
+      total: enrichedMemberships.length,
+    ));
+  }
+
+  /// Cancel membership
+  Future<ApiResponse<void>> cancelMembership(String enrollmentId) async {
+    await _simulateDelay();
+    return ApiResponse.success(null, message: 'Članstvo je uspješno otkazano');
   }
 
   /// Reject enrollment

@@ -10,3 +10,4 @@ export 'organization_service.dart';
 export 'event_service.dart';
 export 'category_service.dart';
 export 'enrollment_service.dart';
+export 'favorite_service.dart';

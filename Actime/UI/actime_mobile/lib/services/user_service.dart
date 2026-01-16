@@ -127,4 +127,37 @@ class UserService {
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
     );
   }
+
+  /// Get user's memberships (approved enrollments)
+  Future<ApiResponse<PaginatedResponse<Enrollment>>> getUserMemberships(
+    String userId, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getUserMemberships(
+        userId,
+        page: page,
+        perPage: perPage,
+      );
+    }
+
+    return await _apiService.get<PaginatedResponse<Enrollment>>(
+      '${ApiConfig.userById(userId)}/memberships',
+      queryParams: {
+        'page': page.toString(),
+        'perPage': perPage.toString(),
+      },
+      fromJson: (json) => PaginatedResponse.fromJson(json, Enrollment.fromJson),
+    );
+  }
+
+  /// Cancel membership
+  Future<ApiResponse<void>> cancelMembership(String enrollmentId) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.cancelMembership(enrollmentId);
+    }
+
+    return await _apiService.delete('${ApiConfig.enrollments}/$enrollmentId');
+  }
 }

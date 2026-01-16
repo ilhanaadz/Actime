@@ -7,6 +7,7 @@ import '../../components/actime_text_field.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../user/favorites_screen.dart';
 import 'event_detail_screen.dart';
 
 class EventsListScreen extends StatefulWidget {
@@ -18,9 +19,11 @@ class EventsListScreen extends StatefulWidget {
 
 class _EventsListScreenState extends State<EventsListScreen> {
   final _eventService = EventService();
+  final _favoriteService = FavoriteService();
   final _searchController = TextEditingController();
 
   List<Event> _events = [];
+  Set<String> _favoriteEventIds = {};
   bool _isLoading = true;
   String? _error;
   int _currentPage = 1;
@@ -30,7 +33,30 @@ class _EventsListScreenState extends State<EventsListScreen> {
   void initState() {
     super.initState();
     _loadEvents();
+    _loadFavorites();
     _searchController.addListener(_onSearchChanged);
+  }
+
+  Future<void> _loadFavorites() async {
+    final favorites = await _favoriteService.getFavoriteEvents();
+    if (mounted) {
+      setState(() {
+        _favoriteEventIds = favorites.map((e) => e.id).toSet();
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite(Event event) async {
+    final isFavorite = await _favoriteService.toggleEventFavorite(event);
+    if (mounted) {
+      setState(() {
+        if (isFavorite) {
+          _favoriteEventIds.add(event.id);
+        } else {
+          _favoriteEventIds.remove(event.id);
+        }
+      });
+    }
   }
 
   @override
@@ -117,7 +143,12 @@ class _EventsListScreenState extends State<EventsListScreen> {
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
         showFavorite: true,
-        onFavoriteTap: () {},
+        onFavoriteTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+          );
+        },
         onProfileTap: () {},
       ),
       body: Column(
@@ -213,7 +244,9 @@ class _EventsListScreenState extends State<EventsListScreen> {
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
             icon: _getCategoryIcon(event.categoryName),
+            isFavorite: _favoriteEventIds.contains(event.id),
             onTap: () => _navigateToDetail(context, event),
+            onFavoriteTap: () => _toggleFavorite(event),
           );
         },
       ),

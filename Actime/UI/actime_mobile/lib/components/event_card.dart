@@ -16,6 +16,7 @@ class EventCard extends StatelessWidget {
   final VoidCallback? onEditTap;
   final bool showFavorite;
   final bool showEditButton;
+  final bool isFavorite;
 
   const EventCard({
     super.key,
@@ -31,6 +32,7 @@ class EventCard extends StatelessWidget {
     this.onEditTap,
     this.showFavorite = true,
     this.showEditButton = false,
+    this.isFavorite = false,
   });
 
   @override
@@ -68,8 +70,8 @@ class EventCard extends StatelessWidget {
                             const Spacer(),
                             GestureDetector(
                               onTap: onFavoriteTap,
-                              child: const Icon(
-                                Icons.favorite_border,
+                              child: Icon(
+                                isFavorite ? Icons.favorite : Icons.favorite_border,
                                 size: 20,
                                 color: AppColors.primary,
                               ),
@@ -272,7 +274,11 @@ class ClubCard extends StatelessWidget {
             const SizedBox(width: AppDimensions.spacingSmall),
             GestureDetector(
               onTap: onFavoriteTap,
-              child: const Icon(Icons.favorite_border, size: 20, color: AppColors.primary),
+              child: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                size: 20,
+                color: AppColors.primary,
+              ),
             ),
           ],
         ),
