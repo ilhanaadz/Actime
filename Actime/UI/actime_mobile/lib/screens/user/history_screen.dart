@@ -457,26 +457,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ],
             ),
           ),
-          // Date and remove button
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          // Date
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _formatDate(event.startDate),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
-                ],
+              Text(
+                _formatDate(event.startDate),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
               ),
-              const SizedBox(height: 8),
-              Icon(Icons.remove_circle_outline, color: Colors.grey.shade400, size: 20),
+              const SizedBox(width: 4),
+              Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
             ],
           ),
         ],
