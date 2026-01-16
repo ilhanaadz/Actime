@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/organization/my_events_org_screen.dart';
-import '../screens/organization/enrollment_applications_screen.dart';
-import '../screens/user/people_screen.dart';
+import '../screens/organization/people_org_screen.dart';
+import '../screens/organization/gallery_org_screen.dart';
 
 class BottomNavOrg extends StatelessWidget {
   final int currentIndex;
@@ -29,14 +29,16 @@ class BottomNavOrg extends StatelessWidget {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => EnrollmentApplicationsScreen(organizationId: organizationId),
+            builder: (context) => GalleryOrgScreen(organizationId: organizationId),
           ),
         );
         break;
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const PeopleScreen()),
+          MaterialPageRoute(
+            builder: (context) => PeopleOrgScreen(organizationId: organizationId),
+          ),
         );
         break;
     }
@@ -52,15 +54,15 @@ class BottomNavOrg extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.event),
-          label: 'My Events',
+          label: 'My events',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.assignment),
-          label: 'Applications',
+          icon: Icon(Icons.photo_library_outlined),
+          label: 'Gallery',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.people),
-          label: 'Members',
+          label: 'People',
         ),
       ],
     );

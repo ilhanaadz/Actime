@@ -97,6 +97,85 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
     }
   }
 
+  Future<void> _showDeleteConfirmation(Event event) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Potvrda brisanja',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Da li ste sigurni da želite obrisati događaj "${event.name}"?',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Ne',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.red,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Da, obriši',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _deleteEvent(event);
+    }
+  }
+
+  Future<void> _deleteEvent(Event event) async {
+    try {
+      final response = await _eventService.deleteEvent(event.id);
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Događaj je uspješno obrisan')),
+        );
+        _loadData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message ?? 'Greška pri brisanju')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,6 +301,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             icon: _getCategoryIcon(event.categoryName),
             showFavorite: false,
             showEditButton: true,
+            showDeleteButton: true,
             onEditTap: () {
               Navigator.push(
                 context,
@@ -230,6 +310,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
                 ),
               ).then((_) => _loadData());
             },
+            onDeleteTap: () => _showDeleteConfirmation(event),
           );
         },
       ),

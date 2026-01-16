@@ -14,8 +14,10 @@ class EventCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onEditTap;
+  final VoidCallback? onDeleteTap;
   final bool showFavorite;
   final bool showEditButton;
+  final bool showDeleteButton;
   final bool isFavorite;
 
   const EventCard({
@@ -30,8 +32,10 @@ class EventCard extends StatelessWidget {
     this.onTap,
     this.onFavoriteTap,
     this.onEditTap,
+    this.onDeleteTap,
     this.showFavorite = true,
     this.showEditButton = false,
+    this.showDeleteButton = false,
     this.isFavorite = false,
   });
 
@@ -125,11 +129,26 @@ class EventCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (showEditButton) ...[
+            if (showEditButton || showDeleteButton) ...[
               const SizedBox(height: AppDimensions.spacingMedium),
-              ActimeSmallOutlinedButton(
-                label: 'Edit',
-                onPressed: onEditTap,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (showEditButton)
+                    ActimeSmallOutlinedButton(
+                      label: 'Edit',
+                      onPressed: onEditTap,
+                    ),
+                  if (showEditButton && showDeleteButton)
+                    const SizedBox(width: AppDimensions.spacingMedium),
+                  if (showDeleteButton)
+                    ActimeSmallOutlinedButton(
+                      label: 'Delete',
+                      onPressed: onDeleteTap,
+                      borderColor: AppColors.red,
+                      textColor: AppColors.red,
+                    ),
+                ],
               ),
             ],
           ],

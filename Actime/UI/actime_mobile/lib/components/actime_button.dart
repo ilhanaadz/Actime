@@ -118,6 +118,8 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color? borderColor;
   final Color? textColor;
+  final double? width;
+  final bool expanded;
 
   const ActimeSmallOutlinedButton({
     super.key,
@@ -125,6 +127,8 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
     this.onPressed,
     this.borderColor,
     this.textColor,
+    this.width,
+    this.expanded = false,
   });
 
   @override
@@ -132,8 +136,8 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
     final effectiveBorderColor = borderColor ?? AppColors.primary;
     final effectiveTextColor = textColor ?? AppColors.primary;
 
-    return SizedBox(
-      width: double.infinity,
+    final button = SizedBox(
+      width: width,
       height: AppDimensions.buttonHeightSmall,
       child: OutlinedButton(
         onPressed: onPressed,
@@ -142,6 +146,7 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
         child: Text(
           label,
@@ -149,6 +154,15 @@ class ActimeSmallOutlinedButton extends StatelessWidget {
         ),
       ),
     );
+
+    if (expanded) {
+      return SizedBox(
+        width: double.infinity,
+        child: button,
+      );
+    }
+
+    return button;
   }
 }
 
