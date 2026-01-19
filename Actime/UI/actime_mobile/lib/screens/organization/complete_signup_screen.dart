@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'organization_profile_screen.dart';
+import '../landing/landing_not_logged_screen.dart';
 
 class CompleteSignUpScreen extends StatefulWidget {
   const CompleteSignUpScreen({super.key});
@@ -30,22 +31,25 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text(
-            'Actime',
-            style: TextStyle(
-              color: Color(0xFF0D7C8C),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+        title: const Text(
+          'Actime',
+          style: TextStyle(
+            color: Color(0xFF0D7C8C),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        leadingWidth: 100,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_outline, color: Color(0xFF0D7C8C)),
-            onPressed: () {},
+            icon: const Icon(Icons.close, color: Color(0xFF0D7C8C)),
+            onPressed: () {
+              // Navigate back to landing page and clear navigation stack
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LandingPageNotLogged()),
+                (route) => false,
+              );
+            },
           ),
         ],
       ),

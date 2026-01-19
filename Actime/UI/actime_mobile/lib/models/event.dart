@@ -19,6 +19,7 @@ class Event {
   final String? categoryName;
   final EventStatus status;
   final bool isFeatured;
+  final bool isEnrolled;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -42,6 +43,7 @@ class Event {
     this.categoryName,
     this.status = EventStatus.upcoming,
     this.isFeatured = false,
+    this.isEnrolled = false,
     required this.createdAt,
     this.updatedAt,
   });
@@ -69,6 +71,7 @@ class Event {
       categoryName: json['categoryName'] as String?,
       status: EventStatus.fromString(json['status'] as String? ?? 'upcoming'),
       isFeatured: json['isFeatured'] as bool? ?? false,
+      isEnrolled: json['isEnrolled'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
@@ -97,6 +100,7 @@ class Event {
       'categoryName': categoryName,
       'status': status.value,
       'isFeatured': isFeatured,
+      'isEnrolled': isEnrolled,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -122,6 +126,7 @@ class Event {
     String? categoryName,
     EventStatus? status,
     bool? isFeatured,
+    bool? isEnrolled,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -145,6 +150,7 @@ class Event {
       categoryName: categoryName ?? this.categoryName,
       status: status ?? this.status,
       isFeatured: isFeatured ?? this.isFeatured,
+      isEnrolled: isEnrolled ?? this.isEnrolled,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

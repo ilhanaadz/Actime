@@ -5,12 +5,18 @@ import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../auth/sign_in_screen.dart';
 import 'enrollment_application_screen.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final String organizationId;
+  final bool isLoggedIn;
 
-  const ClubDetailScreen({super.key, required this.organizationId});
+  const ClubDetailScreen({
+    super.key,
+    required this.organizationId,
+    this.isLoggedIn = true,
+  });
 
   @override
   State<ClubDetailScreen> createState() => _ClubDetailScreenState();
@@ -18,9 +24,11 @@ class ClubDetailScreen extends StatefulWidget {
 
 class _ClubDetailScreenState extends State<ClubDetailScreen> {
   final _organizationService = OrganizationService();
+  final _userService = UserService();
 
   Organization? _organization;
   bool _isLoading = true;
+  bool _isCancelling = false;
   String? _error;
 
   @override
@@ -59,6 +67,50 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
         _error = 'Došlo je do greške. Pokušajte ponovo.';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _handleCancelMembership() async {
+    if (_organization == null) return;
+
+    setState(() => _isCancelling = true);
+
+    try {
+      // Note: This requires the enrollment ID, which we'd need from the API
+      // For now, we'll use the organization ID as a placeholder
+      final response = await _userService.cancelMembership(_organization!.id);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Članstvo je uspješno otkazano.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh organization data
+        _loadOrganization();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri otkazivanju članstva'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCancelling = false);
+      }
     }
   }
 
@@ -180,20 +232,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             const SizedBox(height: AppDimensions.spacingLarge),
             _buildAboutSection(),
             const SizedBox(height: AppDimensions.spacingXLarge),
-            ActimePrimaryButton(
-              label: 'Prijava za članstvo',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EnrollmentApplicationScreen(
-                      organizationId: _organization!.id,
-                      organizationName: _organization!.name,
-                    ),
-                  ),
-                );
-              },
-            ),
+            _buildMembershipButton(),
           ],
         ),
       ),
@@ -291,6 +330,51 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMembershipButton() {
+    if (_isCancelling) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    // Not logged in - show button that redirects to login
+    if (!widget.isLoggedIn) {
+      return ActimePrimaryButton(
+        label: 'Prijava za članstvo',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SignInScreen()),
+          );
+        },
+      );
+    }
+
+    // Already a member - show cancel button
+    if (_organization!.isMember) {
+      return ActimeOutlinedButton(
+        label: 'Otkaži članstvo',
+        onPressed: _handleCancelMembership,
+      );
+    }
+
+    // Not a member - show join button
+    return ActimePrimaryButton(
+      label: 'Prijava za članstvo',
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EnrollmentApplicationScreen(
+              organizationId: _organization!.id,
+              organizationName: _organization!.name,
+            ),
+          ),
+        ).then((_) => _loadOrganization());
+      },
     );
   }
 }

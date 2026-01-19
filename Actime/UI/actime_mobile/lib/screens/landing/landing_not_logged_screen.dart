@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
 import '../auth/sign_in_screen.dart';
+import '../events/events_list_screen.dart';
+import '../clubs/clubs_list_screen.dart';
 
 class LandingPageNotLogged extends StatelessWidget {
   const LandingPageNotLogged({super.key});
@@ -37,12 +39,19 @@ class LandingPageNotLogged extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ClubsListScreen(isLoggedIn: false),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
@@ -87,12 +96,19 @@ class LandingPageNotLogged extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward, color: Color(0xFF0D7C8C)),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EventsListScreen(isLoggedIn: false),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            
+
             _buildEventCard(
               'Bjelašnica hiking trip',
               'Free',
@@ -120,7 +136,7 @@ class LandingPageNotLogged extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNav(currentIndex: 0),
+      bottomNavigationBar: const BottomNav(currentIndex: -1),
     );
   }
 

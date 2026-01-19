@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
+import '../../components/bottom_nav.dart';
 import '../user/user_profile_screen.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../user/favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../landing/landing_not_logged_screen.dart';
+import '../auth/sign_in_screen.dart';
 import 'club_detail_screen.dart';
 
 class ClubsListScreen extends StatefulWidget {
-  const ClubsListScreen({super.key});
+  final bool isLoggedIn;
+
+  const ClubsListScreen({super.key, this.isLoggedIn = true});
 
   @override
   State<ClubsListScreen> createState() => _ClubsListScreenState();
@@ -30,10 +35,13 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
   void initState() {
     super.initState();
     _loadOrganizations();
-    _loadFavorites();
+    if (widget.isLoggedIn) {
+      _loadFavorites();
+    }
   }
 
   Future<void> _loadFavorites() async {
+    if (!widget.isLoggedIn) return;
     final favorites = await _favoriteService.getFavoriteClubs();
     if (mounted) {
       setState(() {
@@ -43,6 +51,13 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
   }
 
   Future<void> _toggleFavorite(Organization org) async {
+    if (!widget.isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+      );
+      return;
+    }
     final isFavorite = await _favoriteService.toggleClubFavorite(org);
     if (mounted) {
       setState(() {
@@ -133,30 +148,45 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
-        showFavorite: true,
+        showFavorite: widget.isLoggedIn,
         showSearch: true,
         showFilter: true,
         onLogoTap: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+            MaterialPageRoute(
+              builder: (context) => widget.isLoggedIn
+                  ? const LandingPageLogged()
+                  : const LandingPageNotLogged(),
+            ),
           );
         },
-        onFavoriteTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
-          );
-        },
+        onFavoriteTap: widget.isLoggedIn
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+                );
+              }
+            : null,
         onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-          );
+          if (widget.isLoggedIn) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignInScreen()),
+            );
+          }
         },
       ),
       body: _buildContent(),
-      bottomNavigationBar: const BottomNavUser(currentIndex: 1),
+      bottomNavigationBar: widget.isLoggedIn
+          ? const BottomNavUser(currentIndex: 1)
+          : const BottomNav(currentIndex: 1),
     );
   }
 
@@ -236,7 +266,10 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClubDetailScreen(organizationId: org.id),
+        builder: (context) => ClubDetailScreen(
+          organizationId: org.id,
+          isLoggedIn: widget.isLoggedIn,
+        ),
       ),
     );
   }

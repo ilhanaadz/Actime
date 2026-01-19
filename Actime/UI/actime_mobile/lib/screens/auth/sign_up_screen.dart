@@ -6,6 +6,7 @@ import '../../services/services.dart';
 import '../../models/models.dart';
 import '../organization/complete_signup_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../landing/landing_not_logged_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -213,7 +214,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.close, color: AppColors.white),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LandingPageNotLogged()),
+                (route) => false,
+              );
+            },
           ),
         ],
       ),

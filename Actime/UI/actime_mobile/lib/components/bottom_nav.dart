@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../screens/auth/sign_in_screen.dart';
 import '../screens/events/events_list_screen.dart';
 import '../screens/clubs/clubs_list_screen.dart';
-import '../screens/user/history_screen.dart';
 
+/// Bottom navigation for non-logged users
+/// Events and Clubs are accessible, History requires login
 class BottomNav extends StatelessWidget {
   final int currentIndex;
 
@@ -17,24 +19,24 @@ class BottomNav extends StatelessWidget {
 
     switch (index) {
       case 0:
-        // Navigate to Events
+        // Events - accessible to all
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const EventsListScreen()),
+          MaterialPageRoute(builder: (context) => const EventsListScreen(isLoggedIn: false)),
         );
         break;
       case 1:
-        // Navigate to Clubs
+        // Clubs - accessible to all
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ClubsListScreen()),
+          MaterialPageRoute(builder: (context) => const ClubsListScreen(isLoggedIn: false)),
         );
         break;
       case 2:
-        // Navigate to History
-        Navigator.pushReplacement(
+        // History - requires login
+        Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const HistoryScreen()),
+          MaterialPageRoute(builder: (context) => const SignInScreen()),
         );
         break;
     }
@@ -42,10 +44,13 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use -1 for landing page (no selection), clamp to valid range for display
+    final safeIndex = currentIndex < 0 ? 0 : currentIndex;
+
     return BottomNavigationBar(
-      currentIndex: currentIndex,
+      currentIndex: safeIndex,
       onTap: (index) => _onTap(context, index),
-      selectedItemColor: const Color(0xFF0D7C8C),
+      selectedItemColor: currentIndex < 0 ? Colors.grey : const Color(0xFF0D7C8C),
       unselectedItemColor: Colors.grey,
       items: const [
         BottomNavigationBarItem(

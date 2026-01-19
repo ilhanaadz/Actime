@@ -27,6 +27,7 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      automaticallyImplyLeading: false,
       title: GestureDetector(
         onTap: onLogoTap,
         child: const Text(

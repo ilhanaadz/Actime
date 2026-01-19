@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
+import '../../components/bottom_nav.dart';
 import '../user/user_profile_screen.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/event_card.dart';
@@ -10,10 +11,14 @@ import '../../models/models.dart';
 import '../../services/services.dart';
 import '../user/favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../landing/landing_not_logged_screen.dart';
+import '../auth/sign_in_screen.dart';
 import 'event_detail_screen.dart';
 
 class EventsListScreen extends StatefulWidget {
-  const EventsListScreen({super.key});
+  final bool isLoggedIn;
+
+  const EventsListScreen({super.key, this.isLoggedIn = true});
 
   @override
   State<EventsListScreen> createState() => _EventsListScreenState();
@@ -35,11 +40,14 @@ class _EventsListScreenState extends State<EventsListScreen> {
   void initState() {
     super.initState();
     _loadEvents();
-    _loadFavorites();
+    if (widget.isLoggedIn) {
+      _loadFavorites();
+    }
     _searchController.addListener(_onSearchChanged);
   }
 
   Future<void> _loadFavorites() async {
+    if (!widget.isLoggedIn) return;
     final favorites = await _favoriteService.getFavoriteEvents();
     if (mounted) {
       setState(() {
@@ -49,6 +57,14 @@ class _EventsListScreenState extends State<EventsListScreen> {
   }
 
   Future<void> _toggleFavorite(Event event) async {
+    if (!widget.isLoggedIn) {
+      // Redirect to login
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+      );
+      return;
+    }
     final isFavorite = await _favoriteService.toggleEventFavorite(event);
     if (mounted) {
       setState(() {
@@ -144,24 +160,37 @@ class _EventsListScreenState extends State<EventsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
-        showFavorite: true,
+        showFavorite: widget.isLoggedIn,
         onLogoTap: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+            MaterialPageRoute(
+              builder: (context) => widget.isLoggedIn
+                  ? const LandingPageLogged()
+                  : const LandingPageNotLogged(),
+            ),
           );
         },
-        onFavoriteTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
-          );
-        },
+        onFavoriteTap: widget.isLoggedIn
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+                );
+              }
+            : null,
         onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-          );
+          if (widget.isLoggedIn) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignInScreen()),
+            );
+          }
         },
       ),
       body: Column(
@@ -193,7 +222,9 @@ class _EventsListScreenState extends State<EventsListScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavUser(currentIndex: 0),
+      bottomNavigationBar: widget.isLoggedIn
+          ? const BottomNavUser(currentIndex: 0)
+          : const BottomNav(currentIndex: 0),
     );
   }
 
@@ -270,7 +301,10 @@ class _EventsListScreenState extends State<EventsListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EventDetailScreen(eventId: event.id),
+        builder: (context) => EventDetailScreen(
+          eventId: event.id,
+          isLoggedIn: widget.isLoggedIn,
+        ),
       ),
     );
   }

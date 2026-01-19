@@ -7,6 +7,7 @@ import '../../components/confirmation_dialog.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../auth/sign_in_screen.dart';
+import '../clubs/club_detail_screen.dart';
 import 'edit_user_profile_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -21,6 +22,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final _userService = UserService();
 
   User? _user;
+  List<Enrollment> _memberships = [];
   bool _isLoading = true;
 
   @override
@@ -40,14 +42,35 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       if (response.success && response.data != null) {
         setState(() {
           _user = response.data;
-          _isLoading = false;
         });
-      } else {
+        // Load user memberships
+        await _loadMemberships();
+      }
+
+      if (mounted) {
         setState(() => _isLoading = false);
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadMemberships() async {
+    if (_user == null) return;
+
+    try {
+      final response = await _userService.getUserMemberships(_user!.id);
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _memberships = response.data!.data;
+        });
+      }
+    } catch (e) {
+      // Silently fail - memberships are optional display
     }
   }
 
@@ -207,29 +230,77 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
           ),
           const SizedBox(height: AppDimensions.spacingDefault),
-          if (_user?.organizationsCount == 0)
+          if (_memberships.isEmpty)
             Text(
               'Niste član nijednog kluba',
               style: TextStyle(color: AppColors.textMuted),
             )
-          else ...[
-            ClubItemSmall(
-              name: 'Planinarsko društvo',
-              sport: 'Sport',
-              icon: Icons.hiking,
-              iconColor: AppColors.orange,
-            ),
-            const SizedBox(height: AppDimensions.spacingMedium),
-            ClubItemSmall(
-              name: 'IT Hub Sarajevo',
-              sport: 'Edukacija',
-              icon: Icons.computer,
-              iconColor: AppColors.primary,
-            ),
-          ],
+          else
+            ..._memberships.map((membership) {
+              final org = membership.organization;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppDimensions.spacingMedium),
+                child: ClubItemSmall(
+                  name: org?.name ?? 'Nepoznat klub',
+                  sport: org?.categoryName ?? 'Klub',
+                  icon: _getCategoryIcon(org?.categoryName),
+                  iconColor: _getCategoryColor(org?.categoryName),
+                  onTap: org != null
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ClubDetailScreen(
+                                organizationId: org.id,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
+                ),
+              );
+            }),
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return Icons.sports_soccer;
+      case 'kultura':
+        return Icons.palette;
+      case 'edukacija':
+        return Icons.school;
+      case 'zdravlje':
+        return Icons.favorite;
+      case 'muzika':
+        return Icons.music_note;
+      case 'tehnologija':
+        return Icons.computer;
+      default:
+        return Icons.groups;
+    }
+  }
+
+  Color _getCategoryColor(String? categoryName) {
+    switch (categoryName?.toLowerCase()) {
+      case 'sport':
+        return AppColors.red;
+      case 'kultura':
+        return Colors.purple;
+      case 'edukacija':
+        return Colors.blue;
+      case 'zdravlje':
+        return AppColors.red;
+      case 'muzika':
+        return AppColors.orange;
+      case 'tehnologija':
+        return Colors.grey;
+      default:
+        return AppColors.primary;
+    }
   }
 
   Future<void> _showLogoutDialog(BuildContext context) async {

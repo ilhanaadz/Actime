@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/event_card.dart';
-import '../../components/tab_button.dart';
-import '../../components/circle_icon_container.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import 'create_event_screen.dart';
 import 'edit_event_screen.dart';
 import '../../components/bottom_nav_org.dart';
+import 'organization_profile_screen.dart';
 
 class MyEventsOrgScreen extends StatefulWidget {
   final String organizationId;
@@ -21,11 +20,8 @@ class MyEventsOrgScreen extends StatefulWidget {
 
 class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
   final _eventService = EventService();
-  final _organizationService = OrganizationService();
 
-  int _selectedTabIndex = 0;
   List<Event> _events = [];
-  Organization? _organization;
   bool _isLoading = true;
   String? _error;
 
@@ -42,18 +38,11 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
     });
 
     try {
-      // Load organization and events in parallel
-      final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
       final eventsResponse = await _eventService.getOrganizationEvents(
         widget.organizationId,
-        status: _selectedTabIndex == 0 ? EventStatus.upcoming : EventStatus.completed,
       );
 
       if (!mounted) return;
-
-      if (orgResponse.success && orgResponse.data != null) {
-        _organization = orgResponse.data;
-      }
 
       if (eventsResponse.success && eventsResponse.data != null) {
         setState(() {
@@ -186,55 +175,87 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: const Text(
-          'Moji događaji',
+          'Actime',
           style: TextStyle(
-            color: AppColors.black,
-            fontSize: 18,
+            color: AppColors.primary,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AppColors.primary),
+            icon: const Icon(Icons.person_outline, color: AppColors.primary),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CreateEventScreen(
+                  builder: (context) => OrganizationProfileScreen(
                     organizationId: widget.organizationId,
                   ),
                 ),
-              ).then((_) => _loadData());
+              );
             },
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildOrganizationHeader(),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingDefault),
-            child: ActimeTabBar(
-              tabs: const ['Aktivni', 'Prošli'],
-              selectedIndex: _selectedTabIndex,
-              onTabChanged: (index) {
-                setState(() {
-                  _selectedTabIndex = index;
-                });
-                _loadData();
-              },
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingDefault),
+          _buildSearchFilterRow(),
+          const Divider(height: 1),
           Expanded(
             child: _buildContent(),
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateEventScreen(
+                organizationId: widget.organizationId,
+              ),
+            ),
+          ).then((_) => _loadData());
+        },
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: AppColors.white),
+      ),
       bottomNavigationBar: BottomNavOrg(
         currentIndex: 0,
         organizationId: widget.organizationId,
+      ),
+    );
+  }
+
+  Widget _buildSearchFilterRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingDefault,
+        vertical: AppDimensions.spacingSmall,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.textSecondary),
+            onPressed: () {
+              // TODO: Implement search
+            },
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.sort, color: AppColors.textSecondary),
+            onPressed: () {
+              // TODO: Implement sort
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary),
+            onPressed: () {
+              // TODO: Implement calendar filter
+            },
+          ),
+        ],
       ),
     );
   }
@@ -276,9 +297,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             Icon(Icons.event_busy, size: 48, color: AppColors.textMuted),
             const SizedBox(height: AppDimensions.spacingDefault),
             Text(
-              _selectedTabIndex == 0
-                  ? 'Nemate aktivnih događaja'
-                  : 'Nemate prošlih događaja',
+              'Nemate događaja',
               style: TextStyle(color: AppColors.textMuted),
             ),
           ],
@@ -315,40 +334,6 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             onDeleteTap: () => _showDeleteConfirmation(event),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildOrganizationHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(AppDimensions.spacingDefault),
-      child: Row(
-        children: [
-          CircleIconContainer.large(
-            icon: _getCategoryIcon(_organization?.categoryName),
-            iconColor: AppColors.orange,
-          ),
-          const SizedBox(width: AppDimensions.spacingDefault),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _organization?.name ?? 'Organizacija',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-                Text(
-                  _organization?.categoryName ?? 'Klub',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

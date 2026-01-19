@@ -6,11 +6,17 @@ import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../auth/sign_in_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
+  final bool isLoggedIn;
 
-  const EventDetailScreen({super.key, required this.eventId});
+  const EventDetailScreen({
+    super.key,
+    required this.eventId,
+    this.isLoggedIn = true,
+  });
 
   @override
   State<EventDetailScreen> createState() => _EventDetailScreenState();
@@ -84,6 +90,48 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message ?? 'Greška pri prijavi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isJoining = false);
+      }
+    }
+  }
+
+  Future<void> _handleLeaveEvent() async {
+    if (_event == null) return;
+
+    setState(() => _isJoining = true);
+
+    try {
+      final response = await _eventService.leaveEvent(_event!.id);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Uspješno ste otkazali prijavu.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh event data
+        _loadEvent();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri otkazivanju'),
             backgroundColor: Colors.red,
           ),
         );
@@ -316,7 +364,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildJoinButton() {
-    final canJoin = _event!.hasAvailableSpots && _event!.status == EventStatus.upcoming;
+    final isUpcoming = _event!.status == EventStatus.upcoming;
 
     if (_isJoining) {
       return const Center(
@@ -324,6 +372,32 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       );
     }
 
+    // Not logged in - show button that redirects to login
+    if (!widget.isLoggedIn) {
+      final canJoin = _event!.hasAvailableSpots && isUpcoming;
+      return ActimePrimaryButton(
+        label: canJoin ? 'Pridruži se' : 'Popunjeno',
+        onPressed: canJoin
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignInScreen()),
+                );
+              }
+            : null,
+      );
+    }
+
+    // Already enrolled - show cancel button
+    if (_event!.isEnrolled) {
+      return ActimeOutlinedButton(
+        label: 'Otkaži prijavu',
+        onPressed: isUpcoming ? _handleLeaveEvent : null,
+      );
+    }
+
+    // Not enrolled - show join button
+    final canJoin = _event!.hasAvailableSpots && isUpcoming;
     return ActimePrimaryButton(
       label: canJoin ? 'Pridruži se' : 'Popunjeno',
       onPressed: canJoin ? _handleJoinEvent : null,

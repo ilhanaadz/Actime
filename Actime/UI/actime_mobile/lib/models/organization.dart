@@ -14,6 +14,7 @@ class Organization {
   final int membersCount;
   final int eventsCount;
   final bool isVerified;
+  final bool isMember;
   final OrganizationStatus status;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -33,6 +34,7 @@ class Organization {
     this.membersCount = 0,
     this.eventsCount = 0,
     this.isVerified = false,
+    this.isMember = false,
     this.status = OrganizationStatus.active,
     required this.createdAt,
     this.updatedAt,
@@ -54,6 +56,7 @@ class Organization {
       membersCount: json['membersCount'] as int? ?? 0,
       eventsCount: json['eventsCount'] as int? ?? 0,
       isVerified: json['isVerified'] as bool? ?? false,
+      isMember: json['isMember'] as bool? ?? false,
       status: OrganizationStatus.fromString(json['status'] as String? ?? 'active'),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] != null
@@ -78,6 +81,7 @@ class Organization {
       'membersCount': membersCount,
       'eventsCount': eventsCount,
       'isVerified': isVerified,
+      'isMember': isMember,
       'status': status.value,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -99,6 +103,7 @@ class Organization {
     int? membersCount,
     int? eventsCount,
     bool? isVerified,
+    bool? isMember,
     OrganizationStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -118,6 +123,7 @@ class Organization {
       membersCount: membersCount ?? this.membersCount,
       eventsCount: eventsCount ?? this.eventsCount,
       isVerified: isVerified ?? this.isVerified,
+      isMember: isMember ?? this.isMember,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
