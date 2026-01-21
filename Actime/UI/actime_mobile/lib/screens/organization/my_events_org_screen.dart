@@ -8,6 +8,7 @@ import 'create_event_screen.dart';
 import 'edit_event_screen.dart';
 import '../../components/bottom_nav_org.dart';
 import 'organization_profile_screen.dart';
+import '../events/event_detail_screen.dart';
 
 class MyEventsOrgScreen extends StatefulWidget {
   final String organizationId;
@@ -323,6 +324,17 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             showFavorite: false,
             showEditButton: true,
             showDeleteButton: true,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailScreen(
+                    eventId: event.id,
+                    isLoggedIn: true,
+                  ),
+                ),
+              );
+            },
             onEditTap: () {
               Navigator.push(
                 context,

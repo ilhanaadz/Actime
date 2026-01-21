@@ -8,6 +8,7 @@ import '../../models/models.dart';
 import '../../services/services.dart';
 import '../../components/bottom_nav_user.dart';
 import '../landing/landing_logged_screen.dart';
+import '../events/event_detail_screen.dart';
 import 'user_profile_screen.dart';
 import 'favorites_screen.dart';
 
@@ -216,6 +217,17 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
             participants: event.participantsCount.toString(),
             icon: _getCategoryIcon(event.categoryName),
             showFavorite: false,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailScreen(
+                    eventId: event.id,
+                    isLoggedIn: true,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

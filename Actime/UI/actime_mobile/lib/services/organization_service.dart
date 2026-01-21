@@ -117,6 +117,30 @@ class OrganizationService {
     return await _apiService.delete(ApiConfig.organizationById(id));
   }
 
+  /// Get organization event participations (events with participant counts)
+  Future<ApiResponse<PaginatedResponse<EventParticipation>>> getOrganizationParticipations(
+    String organizationId, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getOrganizationParticipations(
+        organizationId,
+        page: page,
+        perPage: perPage,
+      );
+    }
+
+    return await _apiService.get<PaginatedResponse<EventParticipation>>(
+      ApiConfig.organizationParticipations(organizationId),
+      queryParams: {
+        'page': page.toString(),
+        'perPage': perPage.toString(),
+      },
+      fromJson: (json) => PaginatedResponse.fromJson(json, EventParticipation.fromJson),
+    );
+  }
+
   /// Get organization enrollments
   Future<ApiResponse<PaginatedResponse<Enrollment>>> getOrganizationEnrollments(
     String organizationId, {

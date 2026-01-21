@@ -10,3 +10,4 @@ export 'paginated_response.dart';
 export 'api_response.dart';
 export 'enrollment.dart';
 export 'participant.dart';
+export 'event_participation.dart';

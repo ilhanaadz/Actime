@@ -347,6 +347,99 @@ class MockApiService {
       status: EventStatus.completed,
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
     ),
+    // Additional events for FK Sarajevo Mladi (org 1)
+    Event(
+      id: '9',
+      name: 'Utakmica - FK Sarajevo vs FK Željezničar',
+      description: 'Prijateljska utakmica omladinskih selekcija. Dođite i podržite naše mlade talente!',
+      location: 'Stadion Koševo',
+      address: 'Patriotske lige 35, Sarajevo',
+      startDate: DateTime.now().add(const Duration(days: 8)),
+      endDate: DateTime.now().add(const Duration(days: 8, hours: 2)),
+      price: 5,
+      currency: 'BAM',
+      maxParticipants: 200,
+      participantsCount: 85,
+      organizationId: '1',
+      organizationName: 'FK Sarajevo Mladi',
+      categoryId: '1',
+      categoryName: 'Sport',
+      status: EventStatus.upcoming,
+      isFeatured: true,
+      createdAt: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    Event(
+      id: '10',
+      name: 'Trening - Napredna grupa',
+      description: 'Intenzivan trening za napredne igrače. Fokus na taktici i timskoj igri.',
+      location: 'Sportska dvorana Skenderija',
+      address: 'Terezije bb, Sarajevo',
+      startDate: DateTime.now().add(const Duration(days: 4)),
+      endDate: DateTime.now().add(const Duration(days: 4, hours: 2)),
+      price: 0,
+      maxParticipants: 20,
+      participantsCount: 15,
+      organizationId: '1',
+      organizationName: 'FK Sarajevo Mladi',
+      categoryId: '1',
+      categoryName: 'Sport',
+      status: EventStatus.upcoming,
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    Event(
+      id: '11',
+      name: 'Ljetni kamp - Fudbal',
+      description: 'Trodnevni ljetni kamp za mlade fudbalere. Uključuje smještaj i hranu.',
+      location: 'Sportski centar Vlašić',
+      address: 'Vlašić, Travnik',
+      startDate: DateTime.now().add(const Duration(days: 30)),
+      endDate: DateTime.now().add(const Duration(days: 33)),
+      price: 150,
+      currency: 'BAM',
+      maxParticipants: 40,
+      participantsCount: 28,
+      organizationId: '1',
+      organizationName: 'FK Sarajevo Mladi',
+      categoryId: '1',
+      categoryName: 'Sport',
+      status: EventStatus.upcoming,
+      isFeatured: true,
+      createdAt: DateTime.now().subtract(const Duration(days: 14)),
+    ),
+    Event(
+      id: '12',
+      name: 'Trening - Prošli tjedan',
+      description: 'Redovni fudbalski trening.',
+      location: 'Sportska dvorana Skenderija',
+      address: 'Terezije bb, Sarajevo',
+      startDate: DateTime.now().subtract(const Duration(days: 7)),
+      endDate: DateTime.now().subtract(const Duration(days: 7, hours: -2)),
+      price: 0,
+      participantsCount: 19,
+      organizationId: '1',
+      organizationName: 'FK Sarajevo Mladi',
+      categoryId: '1',
+      categoryName: 'Sport',
+      status: EventStatus.completed,
+      createdAt: DateTime.now().subtract(const Duration(days: 17)),
+    ),
+    Event(
+      id: '13',
+      name: 'Mini turnir - U12',
+      description: 'Mini turnir za uzrast do 12 godina.',
+      location: 'Sportska dvorana Skenderija',
+      address: 'Terezije bb, Sarajevo',
+      startDate: DateTime.now().subtract(const Duration(days: 14)),
+      endDate: DateTime.now().subtract(const Duration(days: 14, hours: -4)),
+      price: 0,
+      participantsCount: 32,
+      organizationId: '1',
+      organizationName: 'FK Sarajevo Mladi',
+      categoryId: '1',
+      categoryName: 'Sport',
+      status: EventStatus.completed,
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
+    ),
   ];
 
   /// Mock categories
@@ -415,11 +508,12 @@ class MockApiService {
 
   /// Mock enrollments
   final List<Enrollment> _mockEnrollments = [
+    // Pending enrollments for organization 1
     Enrollment(
       id: '1',
       userId: '3',
       organizationId: '1',
-      message: 'Želim se pridružiti klubu jer volim fudbal.',
+      message: 'Želim se pridružiti klubu jer volim fudbal. Imam 14 godina i treniram već 2 godine.',
       status: EnrollmentStatus.pending,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
@@ -427,18 +521,126 @@ class MockApiService {
       id: '2',
       userId: '4',
       organizationId: '1',
-      message: 'Imam iskustva u fudbalu i želim trenirati.',
+      message: 'Imam iskustva u fudbalu i želim trenirati sa vašim klubom.',
       status: EnrollmentStatus.pending,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     Enrollment(
+      id: '10',
+      userId: '7',
+      organizationId: '1',
+      message: 'Želim se pridružiti klubu. Igram fudbal od malih nogu.',
+      status: EnrollmentStatus.pending,
+      createdAt: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    Enrollment(
+      id: '11',
+      userId: '8',
+      organizationId: '1',
+      message: 'Zainteresovana sam za članstvo. Mogu li doći na probni trening?',
+      status: EnrollmentStatus.pending,
+      createdAt: DateTime.now().subtract(const Duration(days: 4)),
+    ),
+    Enrollment(
+      id: '12',
+      userId: '5',
+      organizationId: '1',
+      message: 'Molim za članstvo. Preporučio me prijatelj koji je već član.',
+      status: EnrollmentStatus.pending,
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+    ),
+    // Approved enrollments for organization 1
+    Enrollment(
       id: '3',
+      userId: '1',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 180)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 179)),
+    ),
+    Enrollment(
+      id: '4',
+      userId: '2',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 365)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 364)),
+    ),
+    Enrollment(
+      id: '5',
+      userId: '6',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 90)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 89)),
+    ),
+    // Additional approved enrollments for organization 1
+    Enrollment(
+      id: '13',
+      userId: '3',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 45)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 44)),
+    ),
+    Enrollment(
+      id: '14',
+      userId: '4',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 120)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 119)),
+    ),
+    Enrollment(
+      id: '15',
+      userId: '7',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 200)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 199)),
+    ),
+    Enrollment(
+      id: '16',
+      userId: '8',
+      organizationId: '1',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 60)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 59)),
+    ),
+    // Approved enrollments for organization 2
+    Enrollment(
+      id: '6',
       userId: '6',
       organizationId: '2',
       message: 'Volim planinarenje i želim se pridružiti.',
       status: EnrollmentStatus.approved,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       reviewedAt: DateTime.now().subtract(const Duration(days: 4)),
+    ),
+    Enrollment(
+      id: '7',
+      userId: '1',
+      organizationId: '2',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 150)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 149)),
+    ),
+    Enrollment(
+      id: '8',
+      userId: '3',
+      organizationId: '2',
+      status: EnrollmentStatus.approved,
+      createdAt: DateTime.now().subtract(const Duration(days: 80)),
+      reviewedAt: DateTime.now().subtract(const Duration(days: 79)),
+    ),
+    // Pending enrollments for organization 2
+    Enrollment(
+      id: '9',
+      userId: '5',
+      organizationId: '2',
+      message: 'Želim se pridružiti planinarskom društvu. Imam opremu i iskustvo.',
+      status: EnrollmentStatus.pending,
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
   ];
 
@@ -791,10 +993,10 @@ class MockApiService {
       filteredEvents = filteredEvents.where((e) => e.categoryId == categoryId).toList();
     }
 
-    // Apply organization filter
-    if (organizationId != null && organizationId.isNotEmpty) {
-      filteredEvents = filteredEvents.where((e) => e.organizationId == organizationId).toList();
-    }
+    // Apply organization filter (disabled for testing - show all events)
+    // if (organizationId != null && organizationId.isNotEmpty) {
+    //   filteredEvents = filteredEvents.where((e) => e.organizationId == organizationId).toList();
+    // }
 
     // Apply status filter
     if (status != null) {
@@ -1031,6 +1233,41 @@ class MockApiService {
     return ApiResponse.success(category);
   }
 
+  // ==================== PARTICIPATION API ====================
+
+  /// Get organization event participations
+  Future<ApiResponse<PaginatedResponse<EventParticipation>>> getOrganizationParticipations(
+    String organizationId, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    await _simulateDelay();
+
+    // For testing: return all events (ignore organizationId filter)
+    final orgEvents = _mockEvents.toList();
+
+    final participations = orgEvents
+        .map((e) => EventParticipation.fromEvent(e))
+        .toList();
+
+    // Sort by participants count descending
+    participations.sort((a, b) => b.participantsCount.compareTo(a.participantsCount));
+
+    // Calculate total participations
+    final totalParticipations = participations.fold<int>(
+      0,
+      (sum, p) => sum + p.participantsCount,
+    );
+
+    return ApiResponse.success(PaginatedResponse(
+      data: participations,
+      currentPage: page,
+      lastPage: 1,
+      perPage: perPage,
+      total: totalParticipations,
+    ));
+  }
+
   // ==================== ENROLLMENT API ====================
 
   /// Get organization enrollments
@@ -1042,9 +1279,8 @@ class MockApiService {
   }) async {
     await _simulateDelay();
 
-    var filteredEnrollments = _mockEnrollments
-        .where((e) => e.organizationId == organizationId)
-        .toList();
+    // For testing: return all enrollments (ignore organizationId filter)
+    var filteredEnrollments = _mockEnrollments.toList();
 
     if (status != null) {
       filteredEnrollments = filteredEnrollments.where((e) => e.status == status).toList();

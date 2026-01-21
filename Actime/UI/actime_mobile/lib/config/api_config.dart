@@ -53,6 +53,7 @@ class ApiConfig {
   static String organizationEvents(String orgId) => '$organizations/$orgId/events';
   static String organizationMembers(String orgId) => '$organizations/$orgId/members';
   static String organizationEnrollments(String orgId) => '$organizations/$orgId/enrollments';
+  static String organizationParticipations(String orgId) => '$organizations/$orgId/participations';
 
   // Event specific endpoints
   static String eventParticipants(String eventId) => '$events/$eventId/participants';
