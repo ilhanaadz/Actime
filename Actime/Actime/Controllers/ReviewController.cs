@@ -3,6 +3,7 @@ using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Interfaces;
 using Actime.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
@@ -16,6 +17,7 @@ namespace Actime.Controllers
             _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
         }
 
+        [AllowAnonymous]
         [HttpGet("organization/{organizationId}")]
         public async Task<ActionResult<List<Review>>> GetOrganizationReviews(int organizationId)
         {
@@ -23,6 +25,7 @@ namespace Actime.Controllers
             return Ok(reviews);
         }
 
+        [AllowAnonymous]
         [HttpGet("organization/{organizationId}/average")]
         public async Task<ActionResult<double>> GetOrganizationAverageScore(int organizationId)
         {

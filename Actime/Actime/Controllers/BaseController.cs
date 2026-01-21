@@ -9,7 +9,7 @@ namespace Actime.Controllers
     //NOTE: Pay attention to ApiController attribute, it enables automatic model validation and other features.
     [ApiController]
     [Route("[controller]")]
-    //[Authorize]
+    [Authorize]
     public class BaseController<T, TSearch> : ControllerBase where T : class where TSearch : BaseSearchObject, new()
     {
         protected readonly IService<T, TSearch> _service;
