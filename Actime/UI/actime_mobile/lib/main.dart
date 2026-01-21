@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens/landing/landing_not_logged_screen.dart';
-import 'screens/landing/landing_logged_screen.dart';
-import 'screens/organization/my_events_org_screen.dart';
-import 'screens/organization/people_org_screen.dart';
 
 void main() {
   runApp(const ActimeApp());
