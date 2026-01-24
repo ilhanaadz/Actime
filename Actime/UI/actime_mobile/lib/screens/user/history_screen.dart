@@ -8,6 +8,8 @@ import '../../models/models.dart';
 import '../../services/services.dart';
 import 'favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../clubs/club_detail_screen.dart';
+import '../events/event_detail_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -19,6 +21,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final _userService = UserService();
   final _authService = AuthService();
+  final _eventService = EventService();
 
   List<Enrollment> _memberships = [];
   List<Event> _events = [];
@@ -142,6 +145,81 @@ class _HistoryScreenState extends State<HistoryScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showCancelEventDialog(Event event) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Confirmation',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to cancel your registration for this event?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'No',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFF8B4A5E),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _cancelEvent(event);
+    }
+  }
+
+  Future<void> _cancelEvent(Event event) async {
+    final response = await _eventService.leaveEvent(event.id);
+    if (response.success) {
+      await _loadData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registracija je uspješno otkazana')),
+        );
+      }
+    }
+  }
+
+  bool _canCancelEvent(Event event) {
+    final now = DateTime.now();
+    final hasNotPassed = event.startDate.isAfter(now);
+    final isNotPaid = event.isFree;
+    return hasNotPassed && isNotPaid;
   }
 
   @override
@@ -297,67 +375,79 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildMembershipCard(Enrollment membership) {
     final org = membership.organization;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          // Organization logo/icon
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+        if (org != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClubDetailScreen(organizationId: org.id),
             ),
-            child: org?.logo != null
-                ? ClipOval(
-                    child: Image.network(
-                      org!.logo!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildOrgIcon(org.categoryName);
-                      },
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            // Organization logo/icon
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: org?.logo != null
+                  ? ClipOval(
+                      child: Image.network(
+                        org!.logo!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildOrgIcon(org.categoryName);
+                        },
+                      ),
+                    )
+                  : _buildOrgIcon(org?.categoryName),
+            ),
+            const SizedBox(width: 16),
+            // Organization info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    org?.name ?? 'Nepoznat klub',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
                     ),
-                  )
-                : _buildOrgIcon(org?.categoryName),
-          ),
-          const SizedBox(width: 16),
-          // Organization info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  org?.name ?? 'Nepoznat klub',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  org?.categoryName ?? 'Klub',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                  const SizedBox(height: 4),
+                  Text(
+                    org?.categoryName ?? 'Klub',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Remove button
-          IconButton(
-            icon: Icon(Icons.remove_circle_outline, color: Colors.grey.shade400),
-            onPressed: () => _showCancelMembershipDialog(membership),
-          ),
-        ],
+            // Remove button
+            IconButton(
+              icon: Icon(Icons.remove_circle_outline, color: Colors.grey.shade400),
+              onPressed: () => _showCancelMembershipDialog(membership),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -421,71 +511,95 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildEventCard(Event event) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          // Event icon
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              _getCategoryIcon(event.categoryName),
-              color: Colors.orange,
-              size: 24,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailScreen(eventId: event.id),
           ),
-          const SizedBox(width: 16),
-          // Event info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            // Event icon
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getCategoryIcon(event.categoryName),
+                color: Colors.orange,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Event info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    event.categoryName ?? 'Dogadaj',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Date and cancel button
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  event.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _formatDate(event.startDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  event.categoryName ?? 'Dogadaj',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                if (_canCancelEvent(event))
+                  IconButton(
+                    icon: Icon(Icons.remove_circle_outline, color: Colors.grey.shade400),
+                    onPressed: () => _showCancelEventDialog(event),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    visualDensity: VisualDensity.compact,
                   ),
-                ),
               ],
             ),
-          ),
-          // Date
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _formatDate(event.startDate),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

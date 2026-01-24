@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/events/events_list_screen.dart';
 import '../screens/clubs/clubs_list_screen.dart';
-import '../screens/user/my_events_screen.dart';
+import '../screens/user/history_screen.dart';
 
 class BottomNavUser extends StatelessWidget {
   final int currentIndex;
@@ -30,7 +30,7 @@ class BottomNavUser extends StatelessWidget {
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MyEventsScreen()),
+          MaterialPageRoute(builder: (context) => const HistoryScreen()),
         );
         break;
     }
@@ -57,7 +57,7 @@ class BottomNavUser extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.history),
-          label: 'My Events',
+          label: 'History',
         ),
       ],
     );

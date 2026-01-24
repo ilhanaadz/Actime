@@ -45,114 +45,117 @@ class EventCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppDimensions.spacingDefault),
-        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: AppDimensions.spacingDefault),
+            padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
               children: [
-                CircleIconContainer(
-                  icon: icon,
-                  iconColor: effectiveIconColor,
-                  backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
-                ),
-                const SizedBox(width: AppDimensions.spacingDefault),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                Row(
+                  children: [
+                    CircleIconContainer(
+                      icon: icon,
+                      iconColor: effectiveIconColor,
+                      backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
+                    ),
+                    const SizedBox(width: AppDimensions.spacingDefault),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           PriceBadge(price: price),
-                          if (showFavorite) ...[
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: onFavoriteTap,
-                              child: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
-                                size: 20,
-                                color: AppColors.primary,
+                          const SizedBox(height: AppDimensions.spacingSmall),
+                          Row(
+                            children: [
+                              const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: AppDimensions.spacingXSmall),
+                              Text(
+                                participants,
+                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: AppDimensions.spacingSmall),
-                      Row(
-                        children: [
-                          const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: AppDimensions.spacingXSmall),
+                            ],
+                          ),
+                          const SizedBox(height: AppDimensions.spacingXSmall),
                           Text(
-                            participants,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppDimensions.spacingXSmall),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingDefault),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        const SizedBox(width: AppDimensions.spacingXSmall),
-                        const Icon(Icons.calendar_today, size: 12, color: AppColors.textSecondary),
-                      ],
                     ),
-                    const SizedBox(height: AppDimensions.spacingXSmall),
-                    Row(
+                    const SizedBox(width: AppDimensions.spacingDefault),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(location, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-                        const SizedBox(width: AppDimensions.spacingXSmall),
-                        const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
+                        Row(
+                          children: [
+                            Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const SizedBox(width: AppDimensions.spacingXSmall),
+                            const Icon(Icons.calendar_today, size: 12, color: AppColors.textSecondary),
+                          ],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingXSmall),
+                        Row(
+                          children: [
+                            Text(location, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                            const SizedBox(width: AppDimensions.spacingXSmall),
+                            const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
+                          ],
+                        ),
                       ],
                     ),
                   ],
                 ),
+                if (showEditButton || showDeleteButton) ...[
+                  const SizedBox(height: AppDimensions.spacingMedium),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (showEditButton)
+                        ActimeSmallOutlinedButton(
+                          label: 'Edit',
+                          onPressed: onEditTap,
+                        ),
+                      if (showEditButton && showDeleteButton)
+                        const SizedBox(width: AppDimensions.spacingMedium),
+                      if (showDeleteButton)
+                        ActimeSmallOutlinedButton(
+                          label: 'Delete',
+                          onPressed: onDeleteTap,
+                          borderColor: AppColors.red,
+                          textColor: AppColors.red,
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
-            if (showEditButton || showDeleteButton) ...[
-              const SizedBox(height: AppDimensions.spacingMedium),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (showEditButton)
-                    ActimeSmallOutlinedButton(
-                      label: 'Edit',
-                      onPressed: onEditTap,
-                    ),
-                  if (showEditButton && showDeleteButton)
-                    const SizedBox(width: AppDimensions.spacingMedium),
-                  if (showDeleteButton)
-                    ActimeSmallOutlinedButton(
-                      label: 'Delete',
-                      onPressed: onDeleteTap,
-                      borderColor: AppColors.red,
-                      textColor: AppColors.red,
-                    ),
-                ],
+          ),
+          // Favorite button positioned at top-right corner
+          if (showFavorite)
+            Positioned(
+              top: AppDimensions.spacingSmall,
+              right: AppDimensions.spacingSmall,
+              child: GestureDetector(
+                onTap: onFavoriteTap,
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  size: 20,
+                  color: AppColors.primary,
+                ),
               ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -222,76 +225,84 @@ class ClubCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Stack(
-              children: [
-                CircleIconContainer(
-                  icon: icon,
-                  iconColor: iconColor,
-                  backgroundColor: iconColor.withValues(alpha: 0.1),
-                ),
-                if (isFavorite)
-                  const Positioned(
-                    top: 0,
-                    right: 0,
-                    child: FavoriteBadge(),
-                  ),
-              ],
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              border: Border.all(color: AppColors.border),
             ),
-            const SizedBox(width: AppDimensions.spacingDefault),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    CircleIconContainer(
+                      icon: icon,
+                      iconColor: iconColor,
+                      backgroundColor: iconColor.withValues(alpha: 0.1),
                     ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXSmall),
-                  Text(
-                    sport,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingSmall),
-                  Text(
-                    email,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                  ),
-                  Text(
-                    phone,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Text(
-                  members,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    if (isFavorite)
+                      const Positioned(
+                        top: 0,
+                        right: 0,
+                        child: FavoriteBadge(),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: AppDimensions.spacingDefault),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingXSmall),
+                      Text(
+                        sport,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingSmall),
+                      Text(
+                        email,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                      Text(
+                        phone,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: AppDimensions.spacingXSmall),
-                const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                Row(
+                  children: [
+                    Text(
+                      members,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: AppDimensions.spacingXSmall),
+                    const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(width: AppDimensions.spacingSmall),
-            GestureDetector(
+          ),
+          // Favorite button positioned at top-right corner
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
               onTap: onFavoriteTap,
               child: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -299,8 +310,8 @@ class ClubCard extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

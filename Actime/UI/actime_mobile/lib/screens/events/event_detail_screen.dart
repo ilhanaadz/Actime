@@ -7,6 +7,7 @@ import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../auth/sign_in_screen.dart';
+import 'checkout_bottom_sheet.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
@@ -70,7 +71,29 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Future<void> _handleJoinEvent() async {
     if (_event == null) return;
 
+    // If event has a price, show checkout first
+    if (!_event!.isFree) {
+      CheckoutBottomSheet.show(
+        context,
+        _event!,
+        () => _processJoinEvent(),
+      );
+      return;
+    }
+
+    // Free event - join directly
+    await _processJoinEvent();
+  }
+
+  Future<void> _processJoinEvent() async {
+    if (_event == null) return;
+
     setState(() => _isJoining = true);
+
+    // Close checkout bottom sheet if open
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context, true);
+    }
 
     try {
       final response = await _eventService.joinEvent(_event!.id);
