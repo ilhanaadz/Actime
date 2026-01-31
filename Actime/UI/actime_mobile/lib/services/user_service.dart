@@ -4,6 +4,7 @@ import 'api_service.dart';
 import 'mock_api_service.dart';
 
 /// User service for user-related operations
+/// Communicates with backend UserController
 class UserService {
   static final UserService _instance = UserService._internal();
   factory UserService() => _instance;
@@ -19,7 +20,7 @@ class UserService {
     }
 
     return await _apiService.get<User>(
-      ApiConfig.userById(id),
+      '${ApiConfig.user}/$id',
       fromJson: (json) => User.fromJson(json),
     );
   }
@@ -31,119 +32,90 @@ class UserService {
     }
 
     return await _apiService.get<User>(
-      ApiConfig.userProfile,
+      ApiConfig.userProfile(),
       fromJson: (json) => User.fromJson(json),
     );
   }
 
-  /// Update user profile
+  /// Update user profile (own profile)
+  Future<ApiResponse<User>> updateProfile(Map<String, dynamic> data) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.updateUser('1', data);
+    }
+
+    return await _apiService.put<User>(
+      ApiConfig.userProfile(),
+      body: data,
+      fromJson: (json) => User.fromJson(json),
+    );
+  }
+
+  /// Update user by ID (admin only)
   Future<ApiResponse<User>> updateUser(String id, Map<String, dynamic> data) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.updateUser(id, data);
     }
 
     return await _apiService.put<User>(
-      ApiConfig.userById(id),
+      '${ApiConfig.user}/$id',
       body: data,
       fromJson: (json) => User.fromJson(json),
     );
   }
 
+  /// Delete user (admin only)
+  Future<ApiResponse<void>> deleteUser(String id) async {
+    if (ApiConfig.useMockApi) {
+      return ApiResponse.success(null, message: 'Korisnik je obrisan');
+    }
+
+    return await _apiService.delete('${ApiConfig.user}/$id');
+  }
+
   /// Get users list (paginated)
+  /// Backend uses TextSearchObject for filtering
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,
-    int perPage = 10,
-    String? search,
+    int pageSize = 10,
+    String? text,
     String? sortBy,
+    bool sortDescending = false,
+    bool includeTotalCount = true,
   }) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.getUsers(
         page: page,
-        perPage: perPage,
-        search: search,
+        perPage: pageSize,
+        search: text,
         sortBy: sortBy,
       );
     }
 
     return await _apiService.get<PaginatedResponse<User>>(
-      ApiConfig.users,
+      ApiConfig.user,
       queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-        if (search != null) 'search': search,
-        if (sortBy != null) 'sortBy': sortBy,
+        'Page': page.toString(),
+        'PageSize': pageSize.toString(),
+        'IncludeTotalCount': includeTotalCount.toString(),
+        if (text != null && text.isNotEmpty) 'Text': text,
+        if (sortBy != null) 'SortBy': sortBy,
+        'SortDescending': sortDescending.toString(),
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, User.fromJson),
     );
   }
 
-  /// Get user's events
-  Future<ApiResponse<PaginatedResponse<Event>>> getUserEvents(
-    String userId, {
-    int page = 1,
-    int perPage = 10,
-    EventStatus? status,
-  }) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getUserEvents(
-        userId,
-        page: page,
-        perPage: perPage,
-        status: status,
-      );
-    }
-
-    return await _apiService.get<PaginatedResponse<Event>>(
-      ApiConfig.userEvents(userId),
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-        if (status != null) 'status': status.value,
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
-    );
-  }
-
-  /// Get user's event history
-  Future<ApiResponse<PaginatedResponse<Event>>> getUserEventHistory(
-    String userId, {
+  /// Get user's memberships (organizations they belong to)
+  Future<ApiResponse<PaginatedResponse<Enrollment>>> getUserMemberships({
     int page = 1,
     int perPage = 10,
   }) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getUserEventHistory(
-        userId,
-        page: page,
-        perPage: perPage,
-      );
-    }
-
-    return await _apiService.get<PaginatedResponse<Event>>(
-      ApiConfig.userHistory(userId),
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
-    );
-  }
-
-  /// Get user's memberships (approved enrollments)
-  Future<ApiResponse<PaginatedResponse<Enrollment>>> getUserMemberships(
-    String userId, {
-    int page = 1,
-    int perPage = 10,
-  }) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getUserMemberships(
-        userId,
-        page: page,
-        perPage: perPage,
-      );
+      return await _mockService.getUserMemberships('1', page: page, perPage: perPage);
     }
 
     return await _apiService.get<PaginatedResponse<Enrollment>>(
-      '${ApiConfig.userById(userId)}/memberships',
+      '${ApiConfig.membership}/my',
       queryParams: {
         'page': page.toString(),
         'perPage': perPage.toString(),
@@ -152,12 +124,76 @@ class UserService {
     );
   }
 
-  /// Cancel membership
+  /// Cancel membership (leave organization)
   Future<ApiResponse<void>> cancelMembership(String enrollmentId) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.cancelMembership(enrollmentId);
     }
 
-    return await _apiService.delete('${ApiConfig.enrollments}/$enrollmentId');
+    return await _apiService.delete('${ApiConfig.membership}/$enrollmentId');
+  }
+
+  /// Get user's event history (past events)
+  Future<ApiResponse<PaginatedResponse<Event>>> getUserEventHistory({
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    if (ApiConfig.useMockApi) {
+      // Return mock events filtered as past events
+      final eventsResponse = await _mockService.getEvents(page: page, perPage: perPage);
+      if (eventsResponse.success && eventsResponse.data != null) {
+        final pastEvents = eventsResponse.data!.items
+            .where((e) => e.status == EventStatus.completed)
+            .toList();
+        return ApiResponse.success(PaginatedResponse<Event>(
+          items: pastEvents,
+          totalCount: pastEvents.length,
+          page: page,
+          pageSize: perPage,
+        ));
+      }
+      return eventsResponse;
+    }
+
+    return await _apiService.get<PaginatedResponse<Event>>(
+      '${ApiConfig.participation}/my/history',
+      queryParams: {
+        'page': page.toString(),
+        'perPage': perPage.toString(),
+      },
+      fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
+    );
+  }
+
+  /// Get user's upcoming events
+  Future<ApiResponse<PaginatedResponse<Event>>> getUserEvents({
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    if (ApiConfig.useMockApi) {
+      // Return mock events filtered as upcoming
+      final eventsResponse = await _mockService.getEvents(page: page, perPage: perPage);
+      if (eventsResponse.success && eventsResponse.data != null) {
+        final upcomingEvents = eventsResponse.data!.items
+            .where((e) => e.status == EventStatus.upcoming)
+            .toList();
+        return ApiResponse.success(PaginatedResponse<Event>(
+          items: upcomingEvents,
+          totalCount: upcomingEvents.length,
+          page: page,
+          pageSize: perPage,
+        ));
+      }
+      return eventsResponse;
+    }
+
+    return await _apiService.get<PaginatedResponse<Event>>(
+      '${ApiConfig.participation}/my',
+      queryParams: {
+        'page': page.toString(),
+        'perPage': perPage.toString(),
+      },
+      fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
+    );
   }
 }

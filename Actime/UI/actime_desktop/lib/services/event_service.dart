@@ -13,65 +13,69 @@ class EventService {
 
   Future<ApiResponse<PaginatedResponse<Event>>> getEvents({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
     String? sortOrder,
-    String? status,
-    String? organizationId,
-    String? categoryId,
+    int? eventStatusId,
+    int? organizationId,
+    int? activityTypeId,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.getEvents(
         page: page,
-        perPage: perPage,
+        pageSize: pageSize,
         search: search,
         sortBy: sortBy,
-        status: status,
+        eventStatusId: eventStatusId,
         startDate: startDate,
       );
     }
 
     final queryParams = <String, String>{
-      'page': page.toString(),
-      'per_page': perPage.toString(),
+      'Page': page.toString(),
+      'PageSize': pageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
+      queryParams['Search'] = search;
     }
     if (sortBy != null) {
-      queryParams['sort_by'] = sortBy;
+      queryParams['SortBy'] = sortBy;
     }
     if (sortOrder != null) {
-      queryParams['sort_order'] = sortOrder;
+      queryParams['SortOrder'] = sortOrder;
     }
-    if (status != null) {
-      queryParams['status'] = status;
+    if (eventStatusId != null) {
+      queryParams['EventStatusId'] = eventStatusId.toString();
     }
     if (organizationId != null) {
-      queryParams['organization_id'] = organizationId;
+      queryParams['OrganizationId'] = organizationId.toString();
     }
-    if (categoryId != null) {
-      queryParams['category_id'] = categoryId;
+    if (activityTypeId != null) {
+      queryParams['ActivityTypeId'] = activityTypeId.toString();
     }
     if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String().split('T')[0];
+      queryParams['StartDate'] = startDate.toIso8601String();
     }
     if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String().split('T')[0];
+      queryParams['EndDate'] = endDate.toIso8601String();
     }
 
     return await _apiService.get<PaginatedResponse<Event>>(
-      ApiConfig.events,
+      ApiConfig.event,
       queryParams: queryParams,
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
     );
   }
 
-  Future<ApiResponse<Event>> getEventById(String id) async {
+  Future<ApiResponse<Event>> getEventById(int id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getEventById(id);
+    }
+
     return await _apiService.get<Event>(
       ApiConfig.eventById(id),
       fromJson: (json) => Event.fromJson(json),
@@ -79,49 +83,61 @@ class EventService {
   }
 
   Future<ApiResponse<Event>> createEvent({
-    required String name,
+    required int organizationId,
+    required String title,
     String? description,
-    String? location,
-    DateTime? startDate,
-    DateTime? endDate,
+    required DateTime start,
+    required DateTime end,
+    required int locationId,
     int? maxParticipants,
-    String? organizationId,
-    String? categoryId,
+    bool isFree = true,
+    double price = 0,
+    required int eventStatusId,
+    required int activityTypeId,
   }) async {
     return await _apiService.post<Event>(
-      ApiConfig.events,
+      ApiConfig.event,
       body: {
-        'name': name,
-        'description': description,
-        'location': location,
-        'start_date': startDate?.toIso8601String(),
-        'end_date': endDate?.toIso8601String(),
-        'max_participants': maxParticipants,
-        'organization_id': organizationId,
-        'category_id': categoryId,
+        'OrganizationId': organizationId,
+        'Title': title,
+        'Description': description,
+        'Start': start.toIso8601String(),
+        'End': end.toIso8601String(),
+        'LocationId': locationId,
+        'MaxParticipants': maxParticipants,
+        'IsFree': isFree,
+        'Price': price,
+        'EventStatusId': eventStatusId,
+        'ActivityTypeId': activityTypeId,
       },
       fromJson: (json) => Event.fromJson(json),
     );
   }
 
   Future<ApiResponse<Event>> updateEvent({
-    required String id,
-    String? name,
+    required int id,
+    String? title,
     String? description,
-    String? location,
-    DateTime? startDate,
-    DateTime? endDate,
+    DateTime? start,
+    DateTime? end,
+    int? locationId,
     int? maxParticipants,
-    String? status,
+    bool? isFree,
+    double? price,
+    int? eventStatusId,
+    int? activityTypeId,
   }) async {
     final body = <String, dynamic>{};
-    if (name != null) body['name'] = name;
-    if (description != null) body['description'] = description;
-    if (location != null) body['location'] = location;
-    if (startDate != null) body['start_date'] = startDate.toIso8601String();
-    if (endDate != null) body['end_date'] = endDate.toIso8601String();
-    if (maxParticipants != null) body['max_participants'] = maxParticipants;
-    if (status != null) body['status'] = status;
+    if (title != null) body['Title'] = title;
+    if (description != null) body['Description'] = description;
+    if (start != null) body['Start'] = start.toIso8601String();
+    if (end != null) body['End'] = end.toIso8601String();
+    if (locationId != null) body['LocationId'] = locationId;
+    if (maxParticipants != null) body['MaxParticipants'] = maxParticipants;
+    if (isFree != null) body['IsFree'] = isFree;
+    if (price != null) body['Price'] = price;
+    if (eventStatusId != null) body['EventStatusId'] = eventStatusId;
+    if (activityTypeId != null) body['ActivityTypeId'] = activityTypeId;
 
     return await _apiService.put<Event>(
       ApiConfig.eventById(id),
@@ -130,7 +146,7 @@ class EventService {
     );
   }
 
-  Future<ApiResponse<void>> deleteEvent(String id) async {
+  Future<ApiResponse<void>> deleteEvent(int id) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.deleteEvent(id);
     }

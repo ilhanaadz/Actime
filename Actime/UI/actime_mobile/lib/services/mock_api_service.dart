@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/models.dart';
+import 'event_service.dart' show Participant;
 
 /// Mock API service for development and testing
 /// Simulates API responses with realistic data
@@ -452,7 +453,6 @@ class MockApiService {
       color: '#4CAF50',
       organizationsCount: 12,
       eventsCount: 45,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     Category(
       id: '2',
@@ -462,7 +462,6 @@ class MockApiService {
       color: '#9C27B0',
       organizationsCount: 8,
       eventsCount: 30,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     Category(
       id: '3',
@@ -472,7 +471,6 @@ class MockApiService {
       color: '#2196F3',
       organizationsCount: 15,
       eventsCount: 60,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     Category(
       id: '4',
@@ -482,7 +480,6 @@ class MockApiService {
       color: '#F44336',
       organizationsCount: 6,
       eventsCount: 25,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     Category(
       id: '5',
@@ -492,7 +489,6 @@ class MockApiService {
       color: '#FF9800',
       organizationsCount: 10,
       eventsCount: 35,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     Category(
       id: '6',
@@ -502,7 +498,6 @@ class MockApiService {
       color: '#607D8B',
       organizationsCount: 5,
       eventsCount: 20,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
   ];
 
@@ -670,22 +665,21 @@ class MockApiService {
   Future<ApiResponse<AuthResponse>> login(String email, String password) async {
     await _simulateDelay();
 
-    // Find user by email
-    final user = _mockUsers.firstWhere(
-      (u) => u.email.toLowerCase() == email.toLowerCase(),
-      orElse: () => _mockUsers.first,
-    );
-
     // Simulate password check (any password works for mock)
     if (password.isEmpty) {
       return ApiResponse.error('Unesite lozinku', statusCode: 400);
     }
 
     final authResponse = AuthResponse(
-      user: user,
-      accessToken: 'mock_access_token_${user.id}_${DateTime.now().millisecondsSinceEpoch}',
-      refreshToken: 'mock_refresh_token_${user.id}',
+      id: '1',
+      email: email,
+      firstName: 'Amar',
+      lastName: 'Hadžić',
+      accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',
+      refreshToken: 'mock_refresh_token_1',
       expiresAt: DateTime.now().add(const Duration(days: 7)),
+      roles: ['User'],
+      requiresOrganizationSetup: false,
     );
 
     return ApiResponse.success(authResponse);
@@ -695,29 +689,35 @@ class MockApiService {
   Future<ApiResponse<AuthResponse>> register(RegisterRequest request) async {
     await _simulateDelay();
 
-    // Check if email already exists
-    final exists = _mockUsers.any(
-      (u) => u.email.toLowerCase() == request.email.toLowerCase(),
-    );
-
-    if (exists) {
-      return ApiResponse.error('Email već postoji', statusCode: 400);
-    }
-
-    final newUser = User(
+    final authResponse = AuthResponse(
       id: '${_mockUsers.length + 1}',
-      name: request.name,
       email: request.email,
-      phone: request.phone,
-      role: request.role,
-      createdAt: DateTime.now(),
+      firstName: null,
+      lastName: null,
+      accessToken: 'mock_access_token_new_${DateTime.now().millisecondsSinceEpoch}',
+      refreshToken: 'mock_refresh_token_new',
+      expiresAt: DateTime.now().add(const Duration(days: 7)),
+      roles: request.isOrganization ? ['Organization'] : ['User'],
+      requiresOrganizationSetup: request.isOrganization,
     );
+
+    return ApiResponse.success(authResponse);
+  }
+
+  /// Get current user auth info
+  Future<ApiResponse<AuthResponse>> getCurrentUserAuth() async {
+    await _simulateDelay();
 
     final authResponse = AuthResponse(
-      user: newUser,
-      accessToken: 'mock_access_token_${newUser.id}_${DateTime.now().millisecondsSinceEpoch}',
-      refreshToken: 'mock_refresh_token_${newUser.id}',
+      id: '1',
+      email: 'amar.hadzic@email.com',
+      firstName: 'Amar',
+      lastName: 'Hadžić',
+      accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',
+      refreshToken: 'mock_refresh_token_1',
       expiresAt: DateTime.now().add(const Duration(days: 7)),
+      roles: ['User'],
+      requiresOrganizationSetup: false,
     );
 
     return ApiResponse.success(authResponse);
@@ -757,7 +757,7 @@ class MockApiService {
       phone: data['phone'] as String? ?? _mockUsers[index].phone,
       bio: data['bio'] as String? ?? _mockUsers[index].bio,
       address: data['address'] as String? ?? _mockUsers[index].address,
-      updatedAt: DateTime.now(),
+      lastModifiedAt: DateTime.now(),
     );
 
     return ApiResponse.success(updatedUser);
@@ -927,7 +927,7 @@ class MockApiService {
       name: data['name'] as String,
       description: data['description'] as String?,
       phone: data['phone'] as String?,
-      email: data['email'] as String?,
+      email: data['email'] as String? ?? '',
       address: data['address'] as String?,
       categoryId: data['categoryId'] as String?,
       createdAt: DateTime.now(),
@@ -954,7 +954,7 @@ class MockApiService {
       phone: data['phone'] as String? ?? _mockOrganizations[index].phone,
       email: data['email'] as String? ?? _mockOrganizations[index].email,
       address: data['address'] as String? ?? _mockOrganizations[index].address,
-      updatedAt: DateTime.now(),
+      lastModifiedAt: DateTime.now(),
     );
 
     return ApiResponse.success(updatedOrg);
@@ -1113,7 +1113,7 @@ class MockApiService {
       address: data['address'] as String?,
       startDate: DateTime.parse(data['startDate'] as String),
       endDate: data['endDate'] != null ? DateTime.parse(data['endDate'] as String) : null,
-      price: (data['price'] as num?)?.toDouble(),
+      price: (data['price'] as num?)?.toDouble() ?? 0,
       maxParticipants: data['maxParticipants'] as int?,
       organizationId: data['organizationId'] as String,
       organizationName: data['organizationName'] as String?,
@@ -1141,7 +1141,7 @@ class MockApiService {
       address: data['address'] as String? ?? _mockEvents[index].address,
       price: (data['price'] as num?)?.toDouble() ?? _mockEvents[index].price,
       maxParticipants: data['maxParticipants'] as int? ?? _mockEvents[index].maxParticipants,
-      updatedAt: DateTime.now(),
+      lastModifiedAt: DateTime.now(),
     );
 
     return ApiResponse.success(updatedEvent);
@@ -1178,9 +1178,12 @@ class MockApiService {
         id: 'p_${user.id}',
         userId: user.id,
         eventId: eventId,
-        user: user,
-        status: ParticipantStatus.registered,
+        userName: user.name,
+        userEmail: user.email,
+        userPhone: user.phone,
+        userAvatar: user.profileImageUrl,
         joinedAt: DateTime.now().subtract(Duration(days: _random.nextInt(7))),
+        isPaid: _random.nextBool(),
       );
     }).toList();
 

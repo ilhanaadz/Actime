@@ -13,7 +13,7 @@ class UserService {
 
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
     String? sortOrder,
@@ -21,35 +21,39 @@ class UserService {
     if (ApiConfig.useMockApi) {
       return await _mockService.getUsers(
         page: page,
-        perPage: perPage,
+        pageSize: pageSize,
         search: search,
         sortBy: sortBy,
       );
     }
 
     final queryParams = <String, String>{
-      'page': page.toString(),
-      'per_page': perPage.toString(),
+      'Page': page.toString(),
+      'PageSize': pageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
+      queryParams['Search'] = search;
     }
     if (sortBy != null) {
-      queryParams['sort_by'] = sortBy;
+      queryParams['SortBy'] = sortBy;
     }
     if (sortOrder != null) {
-      queryParams['sort_order'] = sortOrder;
+      queryParams['SortOrder'] = sortOrder;
     }
 
     return await _apiService.get<PaginatedResponse<User>>(
-      ApiConfig.users,
+      ApiConfig.user,
       queryParams: queryParams,
       fromJson: (json) => PaginatedResponse.fromJson(json, User.fromJson),
     );
   }
 
-  Future<ApiResponse<User>> getUserById(String id) async {
+  Future<ApiResponse<User>> getUserById(int id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getUserById(id);
+    }
+
     return await _apiService.get<User>(
       ApiConfig.userById(id),
       fromJson: (json) => User.fromJson(json),
@@ -57,29 +61,45 @@ class UserService {
   }
 
   Future<ApiResponse<User>> createUser({
-    required String name,
+    required String username,
     required String email,
     required String password,
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    DateTime? dateOfBirth,
   }) async {
     return await _apiService.post<User>(
-      ApiConfig.users,
+      ApiConfig.user,
       body: {
-        'name': name,
-        'email': email,
-        'password': password,
+        'Username': username,
+        'Email': email,
+        'Password': password,
+        'FirstName': firstName,
+        'LastName': lastName,
+        'PhoneNumber': phoneNumber,
+        'DateOfBirth': dateOfBirth?.toIso8601String(),
       },
       fromJson: (json) => User.fromJson(json),
     );
   }
 
   Future<ApiResponse<User>> updateUser({
-    required String id,
-    String? name,
+    required int id,
+    String? firstName,
+    String? lastName,
     String? email,
+    String? phoneNumber,
+    String? profileImageUrl,
+    DateTime? dateOfBirth,
   }) async {
     final body = <String, dynamic>{};
-    if (name != null) body['name'] = name;
-    if (email != null) body['email'] = email;
+    if (firstName != null) body['FirstName'] = firstName;
+    if (lastName != null) body['LastName'] = lastName;
+    if (email != null) body['Email'] = email;
+    if (phoneNumber != null) body['PhoneNumber'] = phoneNumber;
+    if (profileImageUrl != null) body['ProfileImageUrl'] = profileImageUrl;
+    if (dateOfBirth != null) body['DateOfBirth'] = dateOfBirth.toIso8601String();
 
     return await _apiService.put<User>(
       ApiConfig.userById(id),
@@ -88,7 +108,7 @@ class UserService {
     );
   }
 
-  Future<ApiResponse<void>> deleteUser(String id) async {
+  Future<ApiResponse<void>> deleteUser(int id) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.deleteUser(id);
     }

@@ -50,10 +50,10 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
         return;
       }
 
-      final response = await _userService.getUserEvents(
-        currentUser.id,
-        status: _selectedTabIndex == 0 ? EventStatus.upcoming : EventStatus.completed,
-      );
+      // Use different service methods based on tab
+      final response = _selectedTabIndex == 0
+          ? await _userService.getUserEvents()
+          : await _userService.getUserEventHistory();
 
       if (!mounted) return;
 

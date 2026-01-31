@@ -60,7 +60,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (_user == null) return;
 
     try {
-      final response = await _userService.getUserMemberships(_user!.id);
+      final response = await _userService.getUserMemberships();
 
       if (!mounted) return;
 

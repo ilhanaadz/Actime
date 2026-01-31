@@ -1,67 +1,124 @@
+/// User model representing an application user
+/// Maps to backend User entity
 class User {
-  final String id;
-  final String name;
+  final int id;
+  final String? firstName;
+  final String? lastName;
+  final String username;
   final String email;
-  final String? avatar;
-  final int organizationsCount;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final String? phoneNumber;
+  final String? profileImageUrl;
+  final DateTime? dateOfBirth;
+  final bool isDeleted;
+  final DateTime createdAt;
+  final DateTime? lastModifiedAt;
 
   User({
     required this.id,
-    required this.name,
+    this.firstName,
+    this.lastName,
+    required this.username,
     required this.email,
-    this.avatar,
-    this.organizationsCount = 0,
-    this.createdAt,
-    this.updatedAt,
+    this.phoneNumber,
+    this.profileImageUrl,
+    this.dateOfBirth,
+    this.isDeleted = false,
+    required this.createdAt,
+    this.lastModifiedAt,
   });
+
+  /// Get full name
+  String get fullName {
+    if (firstName != null && lastName != null) {
+      return '$firstName $lastName';
+    }
+    if (firstName != null) return firstName!;
+    if (lastName != null) return lastName!;
+    return username;
+  }
+
+  /// Get display name (prefer full name, fallback to username)
+  String get displayName => fullName.isNotEmpty ? fullName : username;
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      avatar: json['avatar'],
-      organizationsCount: json['organizations_count'] ?? json['organizationsCount'] ?? 0,
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      id: _parseInt(json['Id'] ?? json['id']) ?? 0,
+      firstName: json['FirstName'] as String? ?? json['firstName'] as String?,
+      lastName: json['LastName'] as String? ?? json['lastName'] as String?,
+      username: json['Username'] as String? ?? json['username'] as String? ?? '',
+      email: json['Email'] as String? ?? json['email'] as String? ?? '',
+      phoneNumber: json['PhoneNumber'] as String? ?? json['phoneNumber'] as String?,
+      profileImageUrl: json['ProfileImageUrl'] as String? ?? json['profileImageUrl'] as String?,
+      dateOfBirth: _parseDateTime(json['DateOfBirth'] ?? json['dateOfBirth']),
+      isDeleted: json['IsDeleted'] as bool? ?? json['isDeleted'] as bool? ?? false,
+      createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
+      lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'avatar': avatar,
-      'organizations_count': organizationsCount,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'Id': id,
+      'FirstName': firstName,
+      'LastName': lastName,
+      'Username': username,
+      'Email': email,
+      'PhoneNumber': phoneNumber,
+      'ProfileImageUrl': profileImageUrl,
+      'DateOfBirth': dateOfBirth?.toIso8601String(),
+      'IsDeleted': isDeleted,
+      'CreatedAt': createdAt.toIso8601String(),
+      'LastModifiedAt': lastModifiedAt?.toIso8601String(),
     };
   }
 
   User copyWith({
-    String? id,
-    String? name,
+    int? id,
+    String? firstName,
+    String? lastName,
+    String? username,
     String? email,
-    String? avatar,
-    int? organizationsCount,
+    String? phoneNumber,
+    String? profileImageUrl,
+    DateTime? dateOfBirth,
+    bool? isDeleted,
     DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? lastModifiedAt,
   }) {
     return User(
       id: id ?? this.id,
-      name: name ?? this.name,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      username: username ?? this.username,
       email: email ?? this.email,
-      avatar: avatar ?? this.avatar,
-      organizationsCount: organizationsCount ?? this.organizationsCount,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is User && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

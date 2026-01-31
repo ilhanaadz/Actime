@@ -80,7 +80,7 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
       final response = await _organizationService.getOrganizations(
         page: 1,
         perPage: 20,
-        sortBy: 'name',
+        sortBy: 'Name',
       );
 
       if (!mounted) return;

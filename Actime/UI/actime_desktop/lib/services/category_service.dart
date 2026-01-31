@@ -13,7 +13,7 @@ class CategoryService {
 
   Future<ApiResponse<PaginatedResponse<Category>>> getCategories({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
     String? sortOrder,
@@ -21,41 +21,58 @@ class CategoryService {
     if (ApiConfig.useMockApi) {
       return await _mockService.getCategories(
         page: page,
-        perPage: perPage,
+        pageSize: pageSize,
         search: search,
         sortBy: sortBy,
       );
     }
 
     final queryParams = <String, String>{
-      'page': page.toString(),
-      'per_page': perPage.toString(),
+      'Page': page.toString(),
+      'PageSize': pageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
+      queryParams['Search'] = search;
     }
     if (sortBy != null) {
-      queryParams['sort_by'] = sortBy;
+      queryParams['SortBy'] = sortBy;
     }
     if (sortOrder != null) {
-      queryParams['sort_order'] = sortOrder;
+      queryParams['SortOrder'] = sortOrder;
     }
 
     return await _apiService.get<PaginatedResponse<Category>>(
-      ApiConfig.categories,
+      ApiConfig.category,
       queryParams: queryParams,
       fromJson: (json) => PaginatedResponse.fromJson(json, Category.fromJson),
     );
   }
 
   Future<ApiResponse<List<Category>>> getAllCategories() async {
+    if (ApiConfig.useMockApi) {
+      final response = await _mockService.getCategories(pageSize: 100);
+      if (response.success && response.data != null) {
+        return ApiResponse(
+          success: true,
+          data: response.data!.items,
+          statusCode: response.statusCode,
+        );
+      }
+      return ApiResponse(
+        success: false,
+        message: response.message,
+        statusCode: response.statusCode,
+      );
+    }
+
     return await _apiService.get<List<Category>>(
-      ApiConfig.categories,
-      queryParams: {'per_page': '100'},
+      ApiConfig.category,
+      queryParams: {'PageSize': '100'},
       fromJson: (json) {
-        if (json is Map && json.containsKey('data')) {
-          return (json['data'] as List)
+        if (json is Map && (json.containsKey('Items') || json.containsKey('items'))) {
+          final items = json['Items'] ?? json['items'];
+          return (items as List)
               .map((item) => Category.fromJson(item))
               .toList();
         }
@@ -67,7 +84,11 @@ class CategoryService {
     );
   }
 
-  Future<ApiResponse<Category>> getCategoryById(String id) async {
+  Future<ApiResponse<Category>> getCategoryById(int id) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getCategoryById(id);
+    }
+
     return await _apiService.get<Category>(
       ApiConfig.categoryById(id),
       fromJson: (json) => Category.fromJson(json),
@@ -77,37 +98,33 @@ class CategoryService {
   Future<ApiResponse<Category>> createCategory({
     required String name,
     String? description,
-    String? icon,
   }) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.createCategory(name);
+      return await _mockService.createCategory(name, description);
     }
 
     return await _apiService.post<Category>(
-      ApiConfig.categories,
+      ApiConfig.category,
       body: {
-        'name': name,
-        'description': description,
-        'icon': icon,
+        'Name': name,
+        'Description': description,
       },
       fromJson: (json) => Category.fromJson(json),
     );
   }
 
   Future<ApiResponse<Category>> updateCategory({
-    required String id,
+    required int id,
     String? name,
     String? description,
-    String? icon,
   }) async {
     if (ApiConfig.useMockApi && name != null) {
-      return await _mockService.updateCategory(id, name);
+      return await _mockService.updateCategory(id, name, description);
     }
 
     final body = <String, dynamic>{};
-    if (name != null) body['name'] = name;
-    if (description != null) body['description'] = description;
-    if (icon != null) body['icon'] = icon;
+    if (name != null) body['Name'] = name;
+    if (description != null) body['Description'] = description;
 
     return await _apiService.put<Category>(
       ApiConfig.categoryById(id),
@@ -116,7 +133,7 @@ class CategoryService {
     );
   }
 
-  Future<ApiResponse<void>> deleteCategory(String id) async {
+  Future<ApiResponse<void>> deleteCategory(int id) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.deleteCategory(id);
     }

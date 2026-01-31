@@ -221,7 +221,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             const SizedBox(width: AppDimensions.spacingMedium),
             Expanded(
               child: Text(
-                widget.event.name,
+                widget.event.title,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

@@ -33,43 +33,50 @@ class Enrollment {
 
   factory Enrollment.fromJson(Map<String, dynamic> json) {
     return Enrollment(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      organizationId: json['organizationId'] as String,
-      user: json['user'] != null
-          ? User.fromJson(json['user'] as Map<String, dynamic>)
-          : null,
-      organization: json['organization'] != null
-          ? Organization.fromJson(json['organization'] as Map<String, dynamic>)
-          : null,
-      message: json['message'] as String?,
-      status: EnrollmentStatus.fromString(json['status'] as String? ?? 'pending'),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
-      reviewedAt: json['reviewedAt'] != null
-          ? DateTime.parse(json['reviewedAt'] as String)
-          : null,
-      reviewedBy: json['reviewedBy'] as String?,
-      rejectionReason: json['rejectionReason'] as String?,
+      id: (json['Id'] ?? json['id'])?.toString() ?? '0',
+      userId: (json['UserId'] ?? json['userId'])?.toString() ?? '0',
+      organizationId: (json['OrganizationId'] ?? json['organizationId'])?.toString() ?? '0',
+      user: json['User'] != null
+          ? User.fromJson(json['User'] as Map<String, dynamic>)
+          : json['user'] != null
+              ? User.fromJson(json['user'] as Map<String, dynamic>)
+              : null,
+      organization: json['Organization'] != null
+          ? Organization.fromJson(json['Organization'] as Map<String, dynamic>)
+          : json['organization'] != null
+              ? Organization.fromJson(json['organization'] as Map<String, dynamic>)
+              : null,
+      message: json['Message'] as String? ?? json['message'] as String?,
+      status: EnrollmentStatus.fromString(json['Status'] as String? ?? json['status'] as String? ?? 'pending'),
+      createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(json['UpdatedAt'] ?? json['updatedAt']),
+      reviewedAt: _parseDateTime(json['ReviewedAt'] ?? json['reviewedAt']),
+      reviewedBy: json['ReviewedBy'] as String? ?? json['reviewedBy'] as String?,
+      rejectionReason: json['RejectionReason'] as String? ?? json['rejectionReason'] as String?,
     );
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'userId': userId,
-      'organizationId': organizationId,
-      'user': user?.toJson(),
-      'organization': organization?.toJson(),
-      'message': message,
-      'status': status.value,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'reviewedAt': reviewedAt?.toIso8601String(),
-      'reviewedBy': reviewedBy,
-      'rejectionReason': rejectionReason,
+      'Id': id,
+      'UserId': userId,
+      'OrganizationId': organizationId,
+      'User': user?.toJson(),
+      'Organization': organization?.toJson(),
+      'Message': message,
+      'Status': status.value,
+      'CreatedAt': createdAt.toIso8601String(),
+      'UpdatedAt': updatedAt?.toIso8601String(),
+      'ReviewedAt': reviewedAt?.toIso8601String(),
+      'ReviewedBy': reviewedBy,
+      'RejectionReason': rejectionReason,
     };
   }
 

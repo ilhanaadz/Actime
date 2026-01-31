@@ -27,37 +27,44 @@ class Participant {
 
   factory Participant.fromJson(Map<String, dynamic> json) {
     return Participant(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      eventId: json['eventId'] as String,
-      user: json['user'] != null
-          ? User.fromJson(json['user'] as Map<String, dynamic>)
-          : null,
-      event: json['event'] != null
-          ? Event.fromJson(json['event'] as Map<String, dynamic>)
-          : null,
-      status: ParticipantStatus.fromString(json['status'] as String? ?? 'registered'),
-      joinedAt: DateTime.parse(json['joinedAt'] as String),
-      checkedInAt: json['checkedInAt'] != null
-          ? DateTime.parse(json['checkedInAt'] as String)
-          : null,
-      checkedOutAt: json['checkedOutAt'] != null
-          ? DateTime.parse(json['checkedOutAt'] as String)
-          : null,
+      id: (json['Id'] ?? json['id'])?.toString() ?? '0',
+      userId: (json['UserId'] ?? json['userId'])?.toString() ?? '0',
+      eventId: (json['EventId'] ?? json['eventId'])?.toString() ?? '0',
+      user: json['User'] != null
+          ? User.fromJson(json['User'] as Map<String, dynamic>)
+          : json['user'] != null
+              ? User.fromJson(json['user'] as Map<String, dynamic>)
+              : null,
+      event: json['Event'] != null
+          ? Event.fromJson(json['Event'] as Map<String, dynamic>)
+          : json['event'] != null
+              ? Event.fromJson(json['event'] as Map<String, dynamic>)
+              : null,
+      status: ParticipantStatus.fromString(json['Status'] as String? ?? json['status'] as String? ?? 'registered'),
+      joinedAt: _parseDateTime(json['JoinedAt'] ?? json['joinedAt']) ?? DateTime.now(),
+      checkedInAt: _parseDateTime(json['CheckedInAt'] ?? json['checkedInAt']),
+      checkedOutAt: _parseDateTime(json['CheckedOutAt'] ?? json['checkedOutAt']),
     );
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'userId': userId,
-      'eventId': eventId,
-      'user': user?.toJson(),
-      'event': event?.toJson(),
-      'status': status.value,
-      'joinedAt': joinedAt.toIso8601String(),
-      'checkedInAt': checkedInAt?.toIso8601String(),
-      'checkedOutAt': checkedOutAt?.toIso8601String(),
+      'Id': id,
+      'UserId': userId,
+      'EventId': eventId,
+      'User': user?.toJson(),
+      'Event': event?.toJson(),
+      'Status': status.value,
+      'JoinedAt': joinedAt.toIso8601String(),
+      'CheckedInAt': checkedInAt?.toIso8601String(),
+      'CheckedOutAt': checkedOutAt?.toIso8601String(),
     };
   }
 

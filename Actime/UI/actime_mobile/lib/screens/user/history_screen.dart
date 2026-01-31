@@ -52,8 +52,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
 
       // Load both memberships and event history
-      final membershipResponse = await _userService.getUserMemberships(currentUser.id);
-      final historyResponse = await _userService.getUserEventHistory(currentUser.id);
+      final membershipResponse = await _userService.getUserMemberships();
+      final historyResponse = await _userService.getUserEventHistory();
 
       if (!mounted) return;
 

@@ -4,3 +4,8 @@ export 'event.dart';
 export 'category.dart';
 export 'auth_response.dart';
 export 'paginated_response.dart';
+export 'location.dart';
+export 'membership.dart';
+export 'participation.dart';
+export 'review.dart';
+export 'notification.dart';

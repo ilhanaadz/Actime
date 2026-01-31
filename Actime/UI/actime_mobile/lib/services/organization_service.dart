@@ -4,6 +4,7 @@ import 'api_service.dart';
 import 'mock_api_service.dart';
 
 /// Organization (club) service
+/// Communicates with backend OrganizationController
 class OrganizationService {
   static final OrganizationService _instance = OrganizationService._internal();
   factory OrganizationService() => _instance;
@@ -13,31 +14,38 @@ class OrganizationService {
   final MockApiService _mockService = MockApiService();
 
   /// Get organizations (paginated)
+  /// Backend uses TextSearchObject for filtering
   Future<ApiResponse<PaginatedResponse<Organization>>> getOrganizations({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
+    int? perPage,
+    String? text,
     String? search,
-    String? categoryId,
     String? sortBy,
+    bool sortDescending = false,
+    bool includeTotalCount = true,
   }) async {
+    final effectivePageSize = perPage ?? pageSize;
+    final effectiveSearch = search ?? text;
+
     if (ApiConfig.useMockApi) {
       return await _mockService.getOrganizations(
         page: page,
-        perPage: perPage,
-        search: search,
-        categoryId: categoryId,
+        perPage: effectivePageSize,
+        search: effectiveSearch,
         sortBy: sortBy,
       );
     }
 
     return await _apiService.get<PaginatedResponse<Organization>>(
-      ApiConfig.organizations,
+      ApiConfig.organization,
       queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-        if (search != null) 'search': search,
-        if (categoryId != null) 'categoryId': categoryId,
-        if (sortBy != null) 'sortBy': sortBy,
+        'Page': page.toString(),
+        'PageSize': effectivePageSize.toString(),
+        'IncludeTotalCount': includeTotalCount.toString(),
+        if (effectiveSearch != null && effectiveSearch.isNotEmpty) 'Text': effectiveSearch,
+        if (sortBy != null) 'SortBy': sortBy,
+        'SortDescending': sortDescending.toString(),
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Organization.fromJson),
     );
@@ -50,49 +58,25 @@ class OrganizationService {
     }
 
     return await _apiService.get<Organization>(
-      ApiConfig.organizationById(id),
+      '${ApiConfig.organization}/$id',
       fromJson: (json) => Organization.fromJson(json),
     );
   }
 
-  /// Get organization members
-  Future<ApiResponse<PaginatedResponse<User>>> getOrganizationMembers(
-    String organizationId, {
-    int page = 1,
-    int perPage = 10,
-  }) async {
+  /// Update my organization (for organization role)
+  Future<ApiResponse<Organization>> updateMyOrganization(Map<String, dynamic> data) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getOrganizationMembers(
-        organizationId,
-        page: page,
-        perPage: perPage,
-      );
+      return await _mockService.updateOrganization('1', data);
     }
 
-    return await _apiService.get<PaginatedResponse<User>>(
-      ApiConfig.organizationMembers(organizationId),
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, User.fromJson),
-    );
-  }
-
-  /// Create organization
-  Future<ApiResponse<Organization>> createOrganization(Map<String, dynamic> data) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.createOrganization(data);
-    }
-
-    return await _apiService.post<Organization>(
-      ApiConfig.organizations,
+    return await _apiService.put<Organization>(
+      ApiConfig.organizationMy(),
       body: data,
       fromJson: (json) => Organization.fromJson(json),
     );
   }
 
-  /// Update organization
+  /// Update organization by ID (admin only)
   Future<ApiResponse<Organization>> updateOrganization(
     String id,
     Map<String, dynamic> data,
@@ -102,46 +86,31 @@ class OrganizationService {
     }
 
     return await _apiService.put<Organization>(
-      ApiConfig.organizationById(id),
+      '${ApiConfig.organization}/$id',
       body: data,
       fromJson: (json) => Organization.fromJson(json),
     );
   }
 
-  /// Delete organization
+  /// Delete organization by ID (admin only)
   Future<ApiResponse<void>> deleteOrganization(String id) async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.success(null, message: 'Organizacija je uspješno obrisana');
     }
 
-    return await _apiService.delete(ApiConfig.organizationById(id));
+    return await _apiService.delete('${ApiConfig.organization}/$id');
   }
 
-  /// Get organization event participations (events with participant counts)
-  Future<ApiResponse<PaginatedResponse<EventParticipation>>> getOrganizationParticipations(
-    String organizationId, {
-    int page = 1,
-    int perPage = 10,
-  }) async {
+  /// Delete my organization (for organization role)
+  Future<ApiResponse<void>> deleteMyOrganization() async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getOrganizationParticipations(
-        organizationId,
-        page: page,
-        perPage: perPage,
-      );
+      return ApiResponse.success(null, message: 'Organizacija je uspješno obrisana');
     }
 
-    return await _apiService.get<PaginatedResponse<EventParticipation>>(
-      ApiConfig.organizationParticipations(organizationId),
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, EventParticipation.fromJson),
-    );
+    return await _apiService.delete(ApiConfig.organizationMy());
   }
 
-  /// Get organization enrollments
+  /// Get organization enrollments (applications to join)
   Future<ApiResponse<PaginatedResponse<Enrollment>>> getOrganizationEnrollments(
     String organizationId, {
     int page = 1,
@@ -158,7 +127,7 @@ class OrganizationService {
     }
 
     return await _apiService.get<PaginatedResponse<Enrollment>>(
-      ApiConfig.organizationEnrollments(organizationId),
+      '${ApiConfig.organization}/$organizationId/enrollments',
       queryParams: {
         'page': page.toString(),
         'perPage': perPage.toString(),
@@ -169,27 +138,51 @@ class OrganizationService {
   }
 
   /// Approve enrollment
-  Future<ApiResponse<Enrollment>> approveEnrollment(String id) async {
+  Future<ApiResponse<Enrollment>> approveEnrollment(String enrollmentId) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.approveEnrollment(id);
+      return await _mockService.approveEnrollment(enrollmentId);
     }
 
     return await _apiService.post<Enrollment>(
-      '${ApiConfig.enrollments}/$id/approve',
+      '${ApiConfig.enrollments}/$enrollmentId/approve',
       fromJson: (json) => Enrollment.fromJson(json),
     );
   }
 
   /// Reject enrollment
-  Future<ApiResponse<Enrollment>> rejectEnrollment(String id, {String? reason}) async {
+  Future<ApiResponse<Enrollment>> rejectEnrollment(String enrollmentId, {String? reason}) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.rejectEnrollment(id, reason: reason);
+      return await _mockService.rejectEnrollment(enrollmentId, reason: reason);
     }
 
     return await _apiService.post<Enrollment>(
-      '${ApiConfig.enrollments}/$id/reject',
+      '${ApiConfig.enrollments}/$enrollmentId/reject',
       body: reason != null ? {'reason': reason} : null,
       fromJson: (json) => Enrollment.fromJson(json),
+    );
+  }
+
+  /// Get organization participations summary
+  Future<ApiResponse<PaginatedResponse<EventParticipation>>> getOrganizationParticipations(
+    String organizationId, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.getOrganizationParticipations(
+        organizationId,
+        page: page,
+        perPage: perPage,
+      );
+    }
+
+    return await _apiService.get<PaginatedResponse<EventParticipation>>(
+      '${ApiConfig.organization}/$organizationId/participations',
+      queryParams: {
+        'page': page.toString(),
+        'perPage': perPage.toString(),
+      },
+      fromJson: (json) => PaginatedResponse.fromJson(json, EventParticipation.fromJson),
     );
   }
 }

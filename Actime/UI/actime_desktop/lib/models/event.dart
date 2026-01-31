@@ -1,150 +1,143 @@
-enum EventStatus { active, closed, upcoming }
-
+/// Event model representing an event/activity
+/// Maps to backend Event entity
 class Event {
-  final String id;
-  final String name;
+  final int id;
+  final int organizationId;
+  final String title;
   final String? description;
-  final String? image;
-  final String? location;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final int participantsCount;
-  final int maxParticipants;
-  final EventStatus status;
-  final String? organizationId;
-  final String? organizationName;
-  final String? categoryId;
-  final String? categoryName;
-  final List<String> participantAvatars;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final DateTime start;
+  final DateTime end;
+  final int locationId;
+  final int? maxParticipants;
+  final bool isFree;
+  final double price;
+  final int eventStatusId;
+  final int activityTypeId;
+  final DateTime createdAt;
+  final DateTime? lastModifiedAt;
 
   Event({
     required this.id,
-    required this.name,
+    required this.organizationId,
+    required this.title,
     this.description,
-    this.image,
-    this.location,
-    this.startDate,
-    this.endDate,
-    this.participantsCount = 0,
-    this.maxParticipants = 0,
-    this.status = EventStatus.upcoming,
-    this.organizationId,
-    this.organizationName,
-    this.categoryId,
-    this.categoryName,
-    this.participantAvatars = const [],
-    this.createdAt,
-    this.updatedAt,
+    required this.start,
+    required this.end,
+    required this.locationId,
+    this.maxParticipants,
+    this.isFree = true,
+    this.price = 0,
+    required this.eventStatusId,
+    required this.activityTypeId,
+    required this.createdAt,
+    this.lastModifiedAt,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      description: json['description'],
-      image: json['image'],
-      location: json['location'],
-      startDate: json['start_date'] != null
-          ? DateTime.tryParse(json['start_date'])
-          : null,
-      endDate: json['end_date'] != null
-          ? DateTime.tryParse(json['end_date'])
-          : null,
-      participantsCount:
-          json['participants_count'] ?? json['participantsCount'] ?? 0,
-      maxParticipants:
-          json['max_participants'] ?? json['maxParticipants'] ?? 0,
-      status: _parseStatus(json['status']),
-      organizationId: json['organization_id']?.toString(),
-      organizationName: json['organization_name'],
-      categoryId: json['category_id']?.toString(),
-      categoryName: json['category_name'],
-      participantAvatars: json['participant_avatars'] != null
-          ? List<String>.from(json['participant_avatars'])
-          : [],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      id: _parseInt(json['Id'] ?? json['id']) ?? 0,
+      organizationId: _parseInt(json['OrganizationId'] ?? json['organizationId']) ?? 0,
+      title: json['Title'] as String? ?? json['title'] as String? ?? '',
+      description: json['Description'] as String? ?? json['description'] as String?,
+      start: _parseDateTime(json['Start'] ?? json['start']) ?? DateTime.now(),
+      end: _parseDateTime(json['End'] ?? json['end']) ?? DateTime.now(),
+      locationId: _parseInt(json['LocationId'] ?? json['locationId']) ?? 0,
+      maxParticipants: _parseInt(json['MaxParticipants'] ?? json['maxParticipants']),
+      isFree: json['IsFree'] as bool? ?? json['isFree'] as bool? ?? true,
+      price: _parseDouble(json['Price'] ?? json['price']) ?? 0,
+      eventStatusId: _parseInt(json['EventStatusId'] ?? json['eventStatusId']) ?? 0,
+      activityTypeId: _parseInt(json['ActivityTypeId'] ?? json['activityTypeId']) ?? 0,
+      createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
+      lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
     );
   }
 
-  static EventStatus _parseStatus(dynamic status) {
-    if (status == null) return EventStatus.upcoming;
-    final statusStr = status.toString().toLowerCase();
-    switch (statusStr) {
-      case 'active':
-        return EventStatus.active;
-      case 'closed':
-        return EventStatus.closed;
-      default:
-        return EventStatus.upcoming;
-    }
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'image': image,
-      'location': location,
-      'start_date': startDate?.toIso8601String(),
-      'end_date': endDate?.toIso8601String(),
-      'participants_count': participantsCount,
-      'max_participants': maxParticipants,
-      'status': status.name,
-      'organization_id': organizationId,
-      'organization_name': organizationName,
-      'category_id': categoryId,
-      'category_name': categoryName,
-      'participant_avatars': participantAvatars,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'Id': id,
+      'OrganizationId': organizationId,
+      'Title': title,
+      'Description': description,
+      'Start': start.toIso8601String(),
+      'End': end.toIso8601String(),
+      'LocationId': locationId,
+      'MaxParticipants': maxParticipants,
+      'IsFree': isFree,
+      'Price': price,
+      'EventStatusId': eventStatusId,
+      'ActivityTypeId': activityTypeId,
+      'CreatedAt': createdAt.toIso8601String(),
+      'LastModifiedAt': lastModifiedAt?.toIso8601String(),
     };
   }
 
   Event copyWith({
-    String? id,
-    String? name,
+    int? id,
+    int? organizationId,
+    String? title,
     String? description,
-    String? image,
-    String? location,
-    DateTime? startDate,
-    DateTime? endDate,
-    int? participantsCount,
+    DateTime? start,
+    DateTime? end,
+    int? locationId,
     int? maxParticipants,
-    EventStatus? status,
-    String? organizationId,
-    String? organizationName,
-    String? categoryId,
-    String? categoryName,
-    List<String>? participantAvatars,
+    bool? isFree,
+    double? price,
+    int? eventStatusId,
+    int? activityTypeId,
     DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? lastModifiedAt,
   }) {
     return Event(
       id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      image: image ?? this.image,
-      location: location ?? this.location,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      participantsCount: participantsCount ?? this.participantsCount,
-      maxParticipants: maxParticipants ?? this.maxParticipants,
-      status: status ?? this.status,
       organizationId: organizationId ?? this.organizationId,
-      organizationName: organizationName ?? this.organizationName,
-      categoryId: categoryId ?? this.categoryId,
-      categoryName: categoryName ?? this.categoryName,
-      participantAvatars: participantAvatars ?? this.participantAvatars,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      start: start ?? this.start,
+      end: end ?? this.end,
+      locationId: locationId ?? this.locationId,
+      maxParticipants: maxParticipants ?? this.maxParticipants,
+      isFree: isFree ?? this.isFree,
+      price: price ?? this.price,
+      eventStatusId: eventStatusId ?? this.eventStatusId,
+      activityTypeId: activityTypeId ?? this.activityTypeId,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
     );
   }
+
+  /// Get formatted price
+  String get formattedPrice {
+    if (isFree || price == 0) return 'Besplatno';
+    return '${price.toStringAsFixed(2)} BAM';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Event && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

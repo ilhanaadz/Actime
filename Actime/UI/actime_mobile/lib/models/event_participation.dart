@@ -16,21 +16,23 @@ class EventParticipation {
 
   factory EventParticipation.fromJson(Map<String, dynamic> json) {
     return EventParticipation(
-      eventId: json['eventId'] as String,
-      eventName: json['eventName'] as String,
-      participantsCount: json['participantsCount'] as int? ?? 0,
-      event: json['event'] != null
-          ? Event.fromJson(json['event'] as Map<String, dynamic>)
-          : null,
+      eventId: (json['EventId'] ?? json['eventId'])?.toString() ?? '0',
+      eventName: json['EventName'] as String? ?? json['eventName'] as String? ?? '',
+      participantsCount: (json['ParticipantsCount'] ?? json['participantsCount']) as int? ?? 0,
+      event: json['Event'] != null
+          ? Event.fromJson(json['Event'] as Map<String, dynamic>)
+          : json['event'] != null
+              ? Event.fromJson(json['event'] as Map<String, dynamic>)
+              : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'eventId': eventId,
-      'eventName': eventName,
-      'participantsCount': participantsCount,
-      'event': event?.toJson(),
+      'EventId': eventId,
+      'EventName': eventName,
+      'ParticipantsCount': participantsCount,
+      'Event': event?.toJson(),
     };
   }
 

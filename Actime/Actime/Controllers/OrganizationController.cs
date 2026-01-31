@@ -1,4 +1,5 @@
-﻿using Actime.Model.Entities;
+﻿using Actime.Model.Common;
+using Actime.Model.Entities;
 using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Interfaces;
@@ -15,6 +16,12 @@ namespace Actime.Controllers
         public OrganizationController(IOrganizationService organizationService) : base(organizationService)
         {
             _organizationService = organizationService ?? throw new ArgumentNullException(nameof(organizationService));
+        }
+
+        [AllowAnonymous]
+        public override Task<PagedResult<Organization>> Get([FromQuery] TextSearchObject? search = null)
+        {
+            return base.Get(search);
         }
 
         [HttpPut("my")]

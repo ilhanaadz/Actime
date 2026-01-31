@@ -17,160 +17,183 @@ class MockApiService {
 
   // Mock Users
   final List<User> _mockUsers = [
-    User(id: '1', name: 'Furkan Cürek', email: 'furkancurek@outlook.com', organizationsCount: 2),
-    User(id: '2', name: 'Armin Šišić', email: 'sisicarmin@gmail.com', organizationsCount: 6),
-    User(id: '3', name: 'Kenan Alić', email: 'kenanalic@gmail.com', organizationsCount: 3),
-    User(id: '4', name: 'Amina Hadžić', email: 'aminah@gmail.com', organizationsCount: 1),
-    User(id: '5', name: 'Emir Kovačević', email: 'emirk@outlook.com', organizationsCount: 4),
-    User(id: '6', name: 'Lamija Bašić', email: 'lamijab@gmail.com', organizationsCount: 2),
-    User(id: '7', name: 'Tarik Mujić', email: 'tarikm@gmail.com', organizationsCount: 5),
-    User(id: '8', name: 'Sara Delić', email: 'sarad@outlook.com', organizationsCount: 1),
-    User(id: '9', name: 'Haris Imamović', email: 'harisi@gmail.com', organizationsCount: 3),
-    User(id: '10', name: 'Lejla Hodžić', email: 'lejlah@gmail.com', organizationsCount: 2),
-    User(id: '11', name: 'Adnan Begović', email: 'adnanb@outlook.com', organizationsCount: 4),
-    User(id: '12', name: 'Nejra Salihović', email: 'nejras@gmail.com', organizationsCount: 1),
+    User(id: 1, username: 'furkancurek', email: 'furkancurek@outlook.com', firstName: 'Furkan', lastName: 'Cürek', createdAt: DateTime.now()),
+    User(id: 2, username: 'sisicarmin', email: 'sisicarmin@gmail.com', firstName: 'Armin', lastName: 'Šišić', createdAt: DateTime.now()),
+    User(id: 3, username: 'kenanalic', email: 'kenanalic@gmail.com', firstName: 'Kenan', lastName: 'Alić', createdAt: DateTime.now()),
+    User(id: 4, username: 'aminah', email: 'aminah@gmail.com', firstName: 'Amina', lastName: 'Hadžić', createdAt: DateTime.now()),
+    User(id: 5, username: 'emirk', email: 'emirk@outlook.com', firstName: 'Emir', lastName: 'Kovačević', createdAt: DateTime.now()),
+    User(id: 6, username: 'lamijab', email: 'lamijab@gmail.com', firstName: 'Lamija', lastName: 'Bašić', createdAt: DateTime.now()),
+    User(id: 7, username: 'tarikm', email: 'tarikm@gmail.com', firstName: 'Tarik', lastName: 'Mujić', createdAt: DateTime.now()),
+    User(id: 8, username: 'sarad', email: 'sarad@outlook.com', firstName: 'Sara', lastName: 'Delić', createdAt: DateTime.now()),
+    User(id: 9, username: 'harisi', email: 'harisi@gmail.com', firstName: 'Haris', lastName: 'Imamović', createdAt: DateTime.now()),
+    User(id: 10, username: 'lejlah', email: 'lejlah@gmail.com', firstName: 'Lejla', lastName: 'Hodžić', createdAt: DateTime.now()),
+    User(id: 11, username: 'adnanb', email: 'adnanb@outlook.com', firstName: 'Adnan', lastName: 'Begović', createdAt: DateTime.now()),
+    User(id: 12, username: 'nejras', email: 'nejras@gmail.com', firstName: 'Nejra', lastName: 'Salihović', createdAt: DateTime.now()),
   ];
 
   // Mock Organizations
   final List<Organization> _mockOrganizations = [
     Organization(
-      id: '1',
+      id: 1,
       name: 'Student Volleyball Club',
-      description: 'Volleyball is a team sport in which two teams of six players are separated by a net. Each team tries to score points by grounding a ball on the other team\'s court.',
-      phone: '+387 61 234 567',
-      address: '1894 Arlington Avenue, Sarajevo',
       email: 'club@volleyball.com',
-      membersCount: 89,
-      eventsCount: 13,
+      description: 'Volleyball is a team sport in which two teams of six players are separated by a net.',
+      phoneNumber: '+387 61 234 567',
+      userId: 1,
+      categoryId: 1,
+      addressId: 1,
+      createdAt: DateTime.now(),
     ),
     Organization(
-      id: '2',
+      id: 2,
       name: 'Hiking Adventures BiH',
-      description: 'We organize hiking trips across Bosnia and Herzegovina. Join us for unforgettable experiences in nature.',
-      phone: '+387 62 345 678',
-      address: 'Ferhadija 15, Sarajevo',
       email: 'info@hikingbih.com',
-      membersCount: 156,
-      eventsCount: 24,
+      description: 'We organize hiking trips across Bosnia and Herzegovina.',
+      phoneNumber: '+387 62 345 678',
+      userId: 2,
+      categoryId: 3,
+      addressId: 2,
+      createdAt: DateTime.now(),
     ),
     Organization(
-      id: '3',
+      id: 3,
       name: 'Tech Meetup Sarajevo',
-      description: 'A community of tech enthusiasts, developers, and entrepreneurs sharing knowledge and building connections.',
-      phone: '+387 63 456 789',
-      address: 'Titova 7, Sarajevo',
       email: 'hello@techmeetup.ba',
-      membersCount: 234,
-      eventsCount: 18,
+      description: 'A community of tech enthusiasts, developers, and entrepreneurs.',
+      phoneNumber: '+387 63 456 789',
+      userId: 3,
+      categoryId: 4,
+      addressId: 3,
+      createdAt: DateTime.now(),
     ),
     Organization(
-      id: '4',
+      id: 4,
       name: 'Basketball Academy',
-      description: 'Professional basketball training for all ages. We develop skills and teamwork in a supportive environment.',
-      phone: '+387 61 567 890',
-      address: 'Zmaja od Bosne 8, Sarajevo',
       email: 'academy@basketball.ba',
-      membersCount: 67,
-      eventsCount: 8,
+      description: 'Professional basketball training for all ages.',
+      phoneNumber: '+387 61 567 890',
+      userId: 4,
+      categoryId: 5,
+      addressId: 4,
+      createdAt: DateTime.now(),
     ),
     Organization(
-      id: '5',
+      id: 5,
       name: 'Art & Culture Society',
-      description: 'Promoting arts and culture through exhibitions, workshops, and community events.',
-      phone: '+387 62 678 901',
-      address: 'Maršala Tita 23, Sarajevo',
       email: 'contact@artculture.ba',
-      membersCount: 112,
-      eventsCount: 31,
+      description: 'Promoting arts and culture through exhibitions and workshops.',
+      phoneNumber: '+387 62 678 901',
+      userId: 5,
+      categoryId: 6,
+      addressId: 5,
+      createdAt: DateTime.now(),
     ),
   ];
 
   // Mock Events
   final List<Event> _mockEvents = [
     Event(
-      id: '1',
-      name: 'Bjelašnica hiking trip',
-      description: 'Come join us on a hiking trip to Bjelašnica mountain. We will meet at the parking lot at 8am and start our hike at 8:30am.',
-      location: 'Bjelašnica',
-      startDate: DateTime.now().add(const Duration(days: 7)),
-      participantsCount: 45,
+      id: 1,
+      organizationId: 2,
+      title: 'Bjelašnica hiking trip',
+      description: 'Come join us on a hiking trip to Bjelašnica mountain.',
+      start: DateTime.now().add(const Duration(days: 7)),
+      end: DateTime.now().add(const Duration(days: 7, hours: 6)),
+      locationId: 1,
       maxParticipants: 60,
-      status: EventStatus.upcoming,
-      organizationName: 'Hiking Adventures BiH',
+      isFree: true,
+      price: 0,
+      eventStatusId: 1,
+      activityTypeId: 1,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
     Event(
-      id: '2',
-      name: 'Volleyball tournament',
-      description: 'Annual volleyball tournament. Teams from all over Bosnia will compete for the championship.',
-      location: 'Sports Hall Sarajevo',
-      startDate: DateTime.now().add(const Duration(days: 14)),
-      participantsCount: 120,
+      id: 2,
+      organizationId: 1,
+      title: 'Volleyball tournament',
+      description: 'Annual volleyball tournament.',
+      start: DateTime.now().add(const Duration(days: 14)),
+      end: DateTime.now().add(const Duration(days: 14, hours: 8)),
+      locationId: 2,
       maxParticipants: 150,
-      status: EventStatus.upcoming,
-      organizationName: 'Student Volleyball Club',
+      isFree: false,
+      price: 20,
+      eventStatusId: 1,
+      activityTypeId: 2,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
     ),
     Event(
-      id: '3',
-      name: 'Tech Talk: Flutter Development',
-      description: 'Learn about modern mobile development with Flutter. Guest speaker from Google Developer Group.',
-      location: 'Coworking Space, Sarajevo',
-      startDate: DateTime.now().subtract(const Duration(days: 2)),
-      participantsCount: 78,
+      id: 3,
+      organizationId: 3,
+      title: 'Tech Talk: Flutter Development',
+      description: 'Learn about modern mobile development with Flutter.',
+      start: DateTime.now().subtract(const Duration(days: 2)),
+      end: DateTime.now().subtract(const Duration(days: 2)).add(const Duration(hours: 3)),
+      locationId: 3,
       maxParticipants: 80,
-      status: EventStatus.closed,
-      organizationName: 'Tech Meetup Sarajevo',
+      isFree: true,
+      price: 0,
+      eventStatusId: 3,
+      activityTypeId: 3,
       createdAt: DateTime.now().subtract(const Duration(days: 14)),
     ),
     Event(
-      id: '4',
-      name: 'Basketball training session',
-      description: 'Weekly training session for intermediate players. Focus on defense techniques.',
-      location: 'Basketball Academy Court',
-      startDate: DateTime.now(),
-      participantsCount: 24,
+      id: 4,
+      organizationId: 4,
+      title: 'Basketball training session',
+      description: 'Weekly training session for intermediate players.',
+      start: DateTime.now(),
+      end: DateTime.now().add(const Duration(hours: 2)),
+      locationId: 4,
       maxParticipants: 30,
-      status: EventStatus.active,
-      organizationName: 'Basketball Academy',
+      isFree: true,
+      price: 0,
+      eventStatusId: 2,
+      activityTypeId: 2,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     Event(
-      id: '5',
-      name: 'Art Exhibition Opening',
-      description: 'Opening night of our new exhibition featuring local artists. Wine and refreshments will be served.',
-      location: 'Gallery Collegium Artisticum',
-      startDate: DateTime.now().add(const Duration(days: 21)),
-      participantsCount: 67,
+      id: 5,
+      organizationId: 5,
+      title: 'Art Exhibition Opening',
+      description: 'Opening night of our new exhibition featuring local artists.',
+      start: DateTime.now().add(const Duration(days: 21)),
+      end: DateTime.now().add(const Duration(days: 21, hours: 4)),
+      locationId: 5,
       maxParticipants: 100,
-      status: EventStatus.upcoming,
-      organizationName: 'Art & Culture Society',
+      isFree: true,
+      price: 0,
+      eventStatusId: 1,
+      activityTypeId: 4,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
     Event(
-      id: '6',
-      name: 'Jahorina ski trip',
-      description: 'Weekend ski trip to Jahorina. All skill levels welcome. Equipment rental available.',
-      location: 'Jahorina',
-      startDate: DateTime.now().add(const Duration(days: 30)),
-      participantsCount: 32,
+      id: 6,
+      organizationId: 2,
+      title: 'Jahorina ski trip',
+      description: 'Weekend ski trip to Jahorina. All skill levels welcome.',
+      start: DateTime.now().add(const Duration(days: 30)),
+      end: DateTime.now().add(const Duration(days: 32)),
+      locationId: 6,
       maxParticipants: 50,
-      status: EventStatus.upcoming,
-      organizationName: 'Hiking Adventures BiH',
+      isFree: false,
+      price: 150,
+      eventStatusId: 1,
+      activityTypeId: 1,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
   ];
 
   // Mock Categories
   final List<Category> _mockCategories = [
-    Category(id: '1', name: 'Sports', organizationsCount: 12),
-    Category(id: '2', name: 'Volleyball', organizationsCount: 3),
-    Category(id: '3', name: 'Hiking', organizationsCount: 5),
-    Category(id: '4', name: 'Technology', organizationsCount: 8),
-    Category(id: '5', name: 'Basketball', organizationsCount: 4),
-    Category(id: '6', name: 'Art & Culture', organizationsCount: 7),
-    Category(id: '7', name: 'Music', organizationsCount: 6),
-    Category(id: '8', name: 'Education', organizationsCount: 9),
+    Category(id: 1, name: 'Sports', description: 'Sports activities and clubs'),
+    Category(id: 2, name: 'Volleyball', description: 'Volleyball clubs and events'),
+    Category(id: 3, name: 'Hiking', description: 'Hiking and outdoor activities'),
+    Category(id: 4, name: 'Technology', description: 'Tech meetups and workshops'),
+    Category(id: 5, name: 'Basketball', description: 'Basketball clubs and training'),
+    Category(id: 6, name: 'Art & Culture', description: 'Art exhibitions and cultural events'),
+    Category(id: 7, name: 'Music', description: 'Music events and concerts'),
+    Category(id: 8, name: 'Education', description: 'Educational workshops and seminars'),
   ];
 
   // AUTH
@@ -186,10 +209,12 @@ class MockApiService {
           refreshToken: 'mock_refresh_token',
           expiresAt: DateTime.now().add(const Duration(days: 7)),
           user: User(
-            id: '0',
-            name: 'Admin User',
+            id: 0,
+            username: 'admin',
             email: email,
-            organizationsCount: 0,
+            firstName: 'Admin',
+            lastName: 'User',
+            createdAt: DateTime.now(),
           ),
         ),
         statusCode: 200,
@@ -244,7 +269,7 @@ class MockApiService {
   // USERS
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
   }) async {
@@ -255,7 +280,7 @@ class MockApiService {
     // Filter by search
     if (search != null && search.isNotEmpty) {
       users = users.where((u) =>
-        u.name.toLowerCase().contains(search.toLowerCase()) ||
+        u.fullName.toLowerCase().contains(search.toLowerCase()) ||
         u.email.toLowerCase().contains(search.toLowerCase())
       ).toList();
     }
@@ -264,38 +289,45 @@ class MockApiService {
     if (sortBy != null) {
       switch (sortBy) {
         case 'name':
-          users.sort((a, b) => a.name.compareTo(b.name));
+          users.sort((a, b) => a.fullName.compareTo(b.fullName));
           break;
         case 'email':
           users.sort((a, b) => a.email.compareTo(b.email));
-          break;
-        case 'organizations_count':
-          users.sort((a, b) => b.organizationsCount.compareTo(a.organizationsCount));
           break;
       }
     }
 
     // Paginate
     final total = users.length;
-    final lastPage = (total / perPage).ceil();
-    final start = (page - 1) * perPage;
-    final end = start + perPage > total ? total : start + perPage;
-    final paginatedUsers = users.sublist(start, end);
+    final totalPages = (total / pageSize).ceil();
+    final start = (page - 1) * pageSize;
+    final end = start + pageSize > total ? total : start + pageSize;
+    final paginatedUsers = start < total ? users.sublist(start, end) : <User>[];
 
     return ApiResponse(
       success: true,
       data: PaginatedResponse(
-        data: paginatedUsers,
-        currentPage: page,
-        lastPage: lastPage > 0 ? lastPage : 1,
-        perPage: perPage,
-        total: total,
+        items: paginatedUsers,
+        totalCount: total,
+        page: page,
+        pageSize: pageSize,
       ),
       statusCode: 200,
     );
   }
 
-  Future<ApiResponse<void>> deleteUser(String id) async {
+  Future<ApiResponse<User>> getUserById(int id) async {
+    await _simulateDelay();
+
+    final user = _mockUsers.firstWhere(
+      (u) => u.id == id,
+      orElse: () => _mockUsers.first,
+    );
+
+    return ApiResponse(success: true, data: user, statusCode: 200);
+  }
+
+  Future<ApiResponse<void>> deleteUser(int id) async {
     await _simulateDelay();
     _mockUsers.removeWhere((u) => u.id == id);
     return ApiResponse(success: true, statusCode: 204);
@@ -304,7 +336,7 @@ class MockApiService {
   // ORGANIZATIONS
   Future<ApiResponse<PaginatedResponse<Organization>>> getOrganizations({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
   }) async {
@@ -323,35 +355,27 @@ class MockApiService {
         case 'name':
           orgs.sort((a, b) => a.name.compareTo(b.name));
           break;
-        case 'members_count':
-          orgs.sort((a, b) => b.membersCount.compareTo(a.membersCount));
-          break;
-        case 'events_count':
-          orgs.sort((a, b) => b.eventsCount.compareTo(a.eventsCount));
-          break;
       }
     }
 
     final total = orgs.length;
-    final lastPage = (total / perPage).ceil();
-    final start = (page - 1) * perPage;
-    final end = start + perPage > total ? total : start + perPage;
+    final start = (page - 1) * pageSize;
+    final end = start + pageSize > total ? total : start + pageSize;
     final paginatedOrgs = start < total ? orgs.sublist(start, end) : <Organization>[];
 
     return ApiResponse(
       success: true,
       data: PaginatedResponse(
-        data: paginatedOrgs,
-        currentPage: page,
-        lastPage: lastPage > 0 ? lastPage : 1,
-        perPage: perPage,
-        total: total,
+        items: paginatedOrgs,
+        totalCount: total,
+        page: page,
+        pageSize: pageSize,
       ),
       statusCode: 200,
     );
   }
 
-  Future<ApiResponse<Organization>> getOrganizationById(String id) async {
+  Future<ApiResponse<Organization>> getOrganizationById(int id) async {
     await _simulateDelay();
 
     final org = _mockOrganizations.firstWhere(
@@ -362,7 +386,7 @@ class MockApiService {
     return ApiResponse(success: true, data: org, statusCode: 200);
   }
 
-  Future<ApiResponse<void>> deleteOrganization(String id) async {
+  Future<ApiResponse<void>> deleteOrganization(int id) async {
     await _simulateDelay();
     _mockOrganizations.removeWhere((o) => o.id == id);
     return ApiResponse(success: true, statusCode: 204);
@@ -371,10 +395,10 @@ class MockApiService {
   // EVENTS
   Future<ApiResponse<PaginatedResponse<Event>>> getEvents({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
-    String? status,
+    int? eventStatusId,
     DateTime? startDate,
   }) async {
     await _simulateDelay();
@@ -383,48 +407,54 @@ class MockApiService {
 
     if (search != null && search.isNotEmpty) {
       events = events.where((e) =>
-        e.name.toLowerCase().contains(search.toLowerCase())
+        e.title.toLowerCase().contains(search.toLowerCase())
       ).toList();
     }
 
-    if (status != null) {
-      events = events.where((e) => e.status.name == status).toList();
+    if (eventStatusId != null) {
+      events = events.where((e) => e.eventStatusId == eventStatusId).toList();
     }
 
     if (sortBy != null) {
       switch (sortBy) {
-        case 'name':
-          events.sort((a, b) => a.name.compareTo(b.name));
+        case 'title':
+          events.sort((a, b) => a.title.compareTo(b.title));
           break;
-        case 'start_date':
-          events.sort((a, b) => (a.startDate ?? DateTime.now()).compareTo(b.startDate ?? DateTime.now()));
-          break;
-        case 'participants_count':
-          events.sort((a, b) => b.participantsCount.compareTo(a.participantsCount));
+        case 'start':
+          events.sort((a, b) => a.start.compareTo(b.start));
           break;
       }
     }
 
     final total = events.length;
-    final lastPage = (total / perPage).ceil();
-    final start = (page - 1) * perPage;
-    final end = start + perPage > total ? total : start + perPage;
+    final start = (page - 1) * pageSize;
+    final end = start + pageSize > total ? total : start + pageSize;
     final paginatedEvents = start < total ? events.sublist(start, end) : <Event>[];
 
     return ApiResponse(
       success: true,
       data: PaginatedResponse(
-        data: paginatedEvents,
-        currentPage: page,
-        lastPage: lastPage > 0 ? lastPage : 1,
-        perPage: perPage,
-        total: total,
+        items: paginatedEvents,
+        totalCount: total,
+        page: page,
+        pageSize: pageSize,
       ),
       statusCode: 200,
     );
   }
 
-  Future<ApiResponse<void>> deleteEvent(String id) async {
+  Future<ApiResponse<Event>> getEventById(int id) async {
+    await _simulateDelay();
+
+    final event = _mockEvents.firstWhere(
+      (e) => e.id == id,
+      orElse: () => _mockEvents.first,
+    );
+
+    return ApiResponse(success: true, data: event, statusCode: 200);
+  }
+
+  Future<ApiResponse<void>> deleteEvent(int id) async {
     await _simulateDelay();
     _mockEvents.removeWhere((e) => e.id == id);
     return ApiResponse(success: true, statusCode: 204);
@@ -433,7 +463,7 @@ class MockApiService {
   // CATEGORIES
   Future<ApiResponse<PaginatedResponse<Category>>> getCategories({
     int page = 1,
-    int perPage = 10,
+    int pageSize = 10,
     String? search,
     String? sortBy,
   }) async {
@@ -452,57 +482,66 @@ class MockApiService {
         case 'name':
           categories.sort((a, b) => a.name.compareTo(b.name));
           break;
-        case 'organizations_count':
-          categories.sort((a, b) => b.organizationsCount.compareTo(a.organizationsCount));
-          break;
       }
     }
 
     final total = categories.length;
-    final lastPage = (total / perPage).ceil();
-    final start = (page - 1) * perPage;
-    final end = start + perPage > total ? total : start + perPage;
+    final start = (page - 1) * pageSize;
+    final end = start + pageSize > total ? total : start + pageSize;
     final paginatedCategories = start < total ? categories.sublist(start, end) : <Category>[];
 
     return ApiResponse(
       success: true,
       data: PaginatedResponse(
-        data: paginatedCategories,
-        currentPage: page,
-        lastPage: lastPage > 0 ? lastPage : 1,
-        perPage: perPage,
-        total: total,
+        items: paginatedCategories,
+        totalCount: total,
+        page: page,
+        pageSize: pageSize,
       ),
       statusCode: 200,
     );
   }
 
-  Future<ApiResponse<Category>> createCategory(String name) async {
+  Future<ApiResponse<Category>> getCategoryById(int id) async {
+    await _simulateDelay();
+
+    final category = _mockCategories.firstWhere(
+      (c) => c.id == id,
+      orElse: () => _mockCategories.first,
+    );
+
+    return ApiResponse(success: true, data: category, statusCode: 200);
+  }
+
+  Future<ApiResponse<Category>> createCategory(String name, String? description) async {
     await _simulateDelay();
 
     final newCategory = Category(
-      id: '${_mockCategories.length + 1}',
+      id: _mockCategories.length + 1,
       name: name,
-      organizationsCount: 0,
+      description: description,
     );
     _mockCategories.add(newCategory);
 
     return ApiResponse(success: true, data: newCategory, statusCode: 201);
   }
 
-  Future<ApiResponse<Category>> updateCategory(String id, String name) async {
+  Future<ApiResponse<Category>> updateCategory(int id, String name, String? description) async {
     await _simulateDelay();
 
     final index = _mockCategories.indexWhere((c) => c.id == id);
     if (index != -1) {
-      _mockCategories[index] = _mockCategories[index].copyWith(name: name);
+      _mockCategories[index] = _mockCategories[index].copyWith(
+        name: name,
+        description: description,
+      );
       return ApiResponse(success: true, data: _mockCategories[index], statusCode: 200);
     }
 
     return ApiResponse(success: false, message: 'Category not found', statusCode: 404);
   }
 
-  Future<ApiResponse<void>> deleteCategory(String id) async {
+  Future<ApiResponse<void>> deleteCategory(int id) async {
     await _simulateDelay();
     _mockCategories.removeWhere((c) => c.id == id);
     return ApiResponse(success: true, statusCode: 204);

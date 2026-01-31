@@ -135,8 +135,13 @@ class ApiService {
         return ApiResponse.success(fromJson({}), statusCode: statusCode);
       }
 
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return ApiResponse.success(fromJson(data), statusCode: statusCode);
+      try {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return ApiResponse.success(fromJson(data), statusCode: statusCode);
+      } catch (e) {
+        print('Error parsing response: $e');
+        return ApiResponse.error('Greška pri parsiranju odgovora: $e', statusCode: statusCode);
+      }
     }
 
     // Handle error responses
@@ -149,6 +154,7 @@ class ApiService {
       errors = errorBody['errors'] as Map<String, dynamic>?;
     } catch (_) {
       // If body is not JSON, use default message
+      print('Error body not JSON: ${response.body}');
     }
 
     return ApiResponse.error(message, statusCode: statusCode, errors: errors);
