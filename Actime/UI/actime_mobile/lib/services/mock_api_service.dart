@@ -753,10 +753,10 @@ class MockApiService {
     }
 
     final updatedUser = _mockUsers[index].copyWith(
-      name: data['name'] as String? ?? _mockUsers[index].name,
-      phone: data['phone'] as String? ?? _mockUsers[index].phone,
-      bio: data['bio'] as String? ?? _mockUsers[index].bio,
-      address: data['address'] as String? ?? _mockUsers[index].address,
+      name: data['Name'] as String? ?? data['name'] as String? ?? _mockUsers[index].name,
+      phone: data['Phone'] as String? ?? data['phone'] as String? ?? _mockUsers[index].phone,
+      bio: data['Bio'] as String? ?? data['bio'] as String? ?? _mockUsers[index].bio,
+      address: data['Address'] as String? ?? data['address'] as String? ?? _mockUsers[index].address,
       lastModifiedAt: DateTime.now(),
     );
 
@@ -787,13 +787,13 @@ class MockApiService {
     // Apply sorting
     if (sortBy != null) {
       switch (sortBy) {
-        case 'name':
+        case 'Name':
           filteredUsers.sort((a, b) => a.name.compareTo(b.name));
           break;
-        case 'email':
+        case 'Email':
           filteredUsers.sort((a, b) => a.email.compareTo(b.email));
           break;
-        case 'createdAt':
+        case 'CreatedAt':
           filteredUsers.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           break;
       }
@@ -851,16 +851,16 @@ class MockApiService {
     // Apply sorting
     if (sortBy != null) {
       switch (sortBy) {
-        case 'name':
+        case 'Name':
           filteredOrgs.sort((a, b) => a.name.compareTo(b.name));
           break;
-        case 'membersCount':
+        case 'MembersCount':
           filteredOrgs.sort((a, b) => b.membersCount.compareTo(a.membersCount));
           break;
-        case 'eventsCount':
+        case 'EventsCount':
           filteredOrgs.sort((a, b) => b.eventsCount.compareTo(a.eventsCount));
           break;
-        case 'createdAt':
+        case 'CreatedAt':
           filteredOrgs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           break;
       }
@@ -949,11 +949,11 @@ class MockApiService {
     }
 
     final updatedOrg = _mockOrganizations[index].copyWith(
-      name: data['name'] as String? ?? _mockOrganizations[index].name,
-      description: data['description'] as String? ?? _mockOrganizations[index].description,
-      phone: data['phone'] as String? ?? _mockOrganizations[index].phone,
-      email: data['email'] as String? ?? _mockOrganizations[index].email,
-      address: data['address'] as String? ?? _mockOrganizations[index].address,
+      name: data['Name'] as String? ?? data['name'] as String? ?? _mockOrganizations[index].name,
+      description: data['Description'] as String? ?? data['description'] as String? ?? _mockOrganizations[index].description,
+      phone: data['Phone'] as String? ?? data['phone'] as String? ?? _mockOrganizations[index].phone,
+      email: data['Email'] as String? ?? data['email'] as String? ?? _mockOrganizations[index].email,
+      address: data['Address'] as String? ?? data['address'] as String? ?? _mockOrganizations[index].address,
       lastModifiedAt: DateTime.now(),
     );
 
@@ -1009,17 +1009,17 @@ class MockApiService {
     }
 
     // Apply sorting
-    switch (sortBy ?? 'startDate') {
-      case 'name':
+    switch (sortBy ?? 'StartDate') {
+      case 'Name':
         filteredEvents.sort((a, b) => a.name.compareTo(b.name));
         break;
-      case 'startDate':
+      case 'StartDate':
         filteredEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
         break;
-      case 'participantsCount':
+      case 'ParticipantsCount':
         filteredEvents.sort((a, b) => b.participantsCount.compareTo(a.participantsCount));
         break;
-      case 'createdAt':
+      case 'CreatedAt':
         filteredEvents.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
     }
@@ -1107,17 +1107,18 @@ class MockApiService {
 
     final newEvent = Event(
       id: '${_mockEvents.length + 1}',
-      name: data['name'] as String,
-      description: data['description'] as String?,
-      location: data['location'] as String?,
-      address: data['address'] as String?,
-      startDate: DateTime.parse(data['startDate'] as String),
-      endDate: data['endDate'] != null ? DateTime.parse(data['endDate'] as String) : null,
-      price: (data['price'] as num?)?.toDouble() ?? 0,
-      maxParticipants: data['maxParticipants'] as int?,
-      organizationId: data['organizationId'] as String,
-      organizationName: data['organizationName'] as String?,
-      categoryId: data['categoryId'] as String?,
+      name: data['Name'] as String? ?? data['name'] as String,
+      description: data['Description'] as String? ?? data['description'] as String?,
+      location: data['Location'] as String? ?? data['location'] as String?,
+      address: data['Address'] as String? ?? data['address'] as String?,
+      startDate: DateTime.parse(data['Start'] as String? ?? data['startDate'] as String),
+      endDate: data['End'] != null ? DateTime.parse(data['End'] as String) :
+               data['endDate'] != null ? DateTime.parse(data['endDate'] as String) : null,
+      price: (data['Price'] as num?)?.toDouble() ?? (data['price'] as num?)?.toDouble() ?? 0,
+      maxParticipants: data['MaxParticipants'] as int? ?? data['maxParticipants'] as int?,
+      organizationId: data['OrganizationId'] as String? ?? data['organizationId'] as String,
+      organizationName: data['OrganizationName'] as String? ?? data['organizationName'] as String?,
+      categoryId: data['CategoryId'] as String? ?? data['categoryId'] as String?,
       status: EventStatus.upcoming,
       createdAt: DateTime.now(),
     );
@@ -1135,12 +1136,12 @@ class MockApiService {
     }
 
     final updatedEvent = _mockEvents[index].copyWith(
-      name: data['name'] as String? ?? _mockEvents[index].name,
-      description: data['description'] as String? ?? _mockEvents[index].description,
-      location: data['location'] as String? ?? _mockEvents[index].location,
-      address: data['address'] as String? ?? _mockEvents[index].address,
-      price: (data['price'] as num?)?.toDouble() ?? _mockEvents[index].price,
-      maxParticipants: data['maxParticipants'] as int? ?? _mockEvents[index].maxParticipants,
+      name: data['Name'] as String? ?? data['name'] as String? ?? _mockEvents[index].name,
+      description: data['Description'] as String? ?? data['description'] as String? ?? _mockEvents[index].description,
+      location: data['Location'] as String? ?? data['location'] as String? ?? _mockEvents[index].location,
+      address: data['Address'] as String? ?? data['address'] as String? ?? _mockEvents[index].address,
+      price: (data['Price'] as num?)?.toDouble() ?? (data['price'] as num?)?.toDouble() ?? _mockEvents[index].price,
+      maxParticipants: data['MaxParticipants'] as int? ?? data['maxParticipants'] as int? ?? _mockEvents[index].maxParticipants,
       lastModifiedAt: DateTime.now(),
     );
 

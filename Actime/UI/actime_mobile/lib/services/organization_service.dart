@@ -157,7 +157,7 @@ class OrganizationService {
 
     return await _apiService.post<Enrollment>(
       '${ApiConfig.enrollments}/$enrollmentId/reject',
-      body: reason != null ? {'reason': reason} : null,
+      body: reason != null ? {'Reason': reason} : null,
       fromJson: (json) => Enrollment.fromJson(json),
     );
   }

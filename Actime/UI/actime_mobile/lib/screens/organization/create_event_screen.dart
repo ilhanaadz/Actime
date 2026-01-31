@@ -110,23 +110,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       }
 
       final response = await _eventService.createEvent({
-        'name': _eventNameController.text.trim(),
-        'description': _descriptionController.text.isNotEmpty
+        'Name': _eventNameController.text.trim(),
+        'Description': _descriptionController.text.isNotEmpty
             ? _descriptionController.text.trim()
             : null,
-        'location': _locationController.text.isNotEmpty
+        'Location': _locationController.text.isNotEmpty
             ? _locationController.text.trim()
             : null,
-        'startDate': startDate.toIso8601String(),
-        'price': _priceController.text.isNotEmpty
+        'Start': startDate.toIso8601String(),
+        'Price': _priceController.text.isNotEmpty
             ? double.tryParse(_priceController.text)
             : null,
-        'maxParticipants': _maxParticipantsController.text.isNotEmpty
+        'MaxParticipants': _maxParticipantsController.text.isNotEmpty
             ? int.tryParse(_maxParticipantsController.text)
             : null,
-        'organizationId': widget.organizationId,
-        'organizationName': _organization?.name,
-        'categoryId': _selectedCategoryId,
+        'OrganizationId': widget.organizationId,
+        'OrganizationName': _organization?.name,
+        'CategoryId': _selectedCategoryId,
       });
 
       if (!mounted) return;

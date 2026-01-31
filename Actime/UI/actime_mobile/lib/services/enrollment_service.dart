@@ -27,8 +27,8 @@ class EnrollmentService {
     return await _apiService.post<Enrollment>(
       ApiConfig.enrollments,
       body: {
-        'organizationId': organizationId,
-        if (message != null) 'message': message,
+        'OrganizationId': organizationId,
+        if (message != null) 'Message': message,
       },
       fromJson: (json) => Enrollment.fromJson(json),
     );

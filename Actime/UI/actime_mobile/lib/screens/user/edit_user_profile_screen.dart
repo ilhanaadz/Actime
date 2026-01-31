@@ -72,10 +72,10 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
       final response = await _userService.updateUser(
         _user!.id,
         {
-          'name': _nameController.text,
-          if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
-          if (_addressController.text.isNotEmpty) 'address': _addressController.text,
-          if (_bioController.text.isNotEmpty) 'bio': _bioController.text,
+          'Name': _nameController.text,
+          if (_phoneController.text.isNotEmpty) 'Phone': _phoneController.text,
+          if (_addressController.text.isNotEmpty) 'Address': _addressController.text,
+          if (_bioController.text.isNotEmpty) 'Bio': _bioController.text,
         },
       );
 

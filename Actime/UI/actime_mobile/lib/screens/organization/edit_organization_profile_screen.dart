@@ -96,11 +96,11 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
       final response = await _organizationService.updateOrganization(
         widget.organizationId,
         {
-          'name': _nameController.text,
-          'phone': _phoneController.text,
-          'address': _addressController.text,
-          'email': _emailController.text,
-          'description': _aboutController.text,
+          'Name': _nameController.text,
+          'Phone': _phoneController.text,
+          'Address': _addressController.text,
+          'Email': _emailController.text,
+          'Description': _aboutController.text,
         },
       );
 

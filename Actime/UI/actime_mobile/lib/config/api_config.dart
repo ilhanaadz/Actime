@@ -18,17 +18,17 @@ class ApiConfig {
   static const Duration receiveTimeout = Duration(seconds: 30);
 
   // Auth endpoints (backend: AuthController)
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String refreshToken = '/auth/refresh-token';
-  static const String logout = '/auth/logout';
-  static const String me = '/auth/me';
-  static const String completeOrganization = '/auth/complete-organization';
-  static const String confirmEmail = '/auth/confirm-email';
-  static const String resendConfirmationEmail = '/auth/resend-confirmation-email';
-  static const String forgotPassword = '/auth/forgot-password';
-  static const String resetPassword = '/auth/reset-password';
-  static const String changePassword = '/auth/change-password';
+  static const String login = '/login';
+  static const String register = '/register';
+  static const String refreshToken = '/refresh-token';
+  static const String logout = '/logout';
+  static const String me = '/me';
+  static const String completeOrganization = '/complete-organization';
+  static const String confirmEmail = '/confirm-email';
+  static const String resendConfirmationEmail = '/resend-confirmation-email';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
+  static const String changePassword = '/change-password';
 
   // User endpoints (backend: UserController)
   static const String user = '/user';

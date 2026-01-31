@@ -32,8 +32,7 @@ namespace Actime.Services.Services
             {
                 if (search.Page.HasValue && search.PageSize.HasValue)
                 {
-                    //NOTE: Skip - 1, or not? Depends on whether the page is 0 or 1 based.
-                    int skip = search.Page.Value * search.PageSize.Value;
+                    int skip = (search.Page.Value - 1) * search.PageSize.Value;
                     query = query.Skip(skip).Take(search.PageSize.Value);
                 }
                 else if (search.PageSize.HasValue)

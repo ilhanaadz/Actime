@@ -106,7 +106,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
         perPage: 10,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
         status: EventStatus.upcoming,
-        sortBy: 'startDate',
+        sortBy: 'Start',
       );
 
       if (!mounted) return;
