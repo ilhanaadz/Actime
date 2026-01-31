@@ -3,6 +3,7 @@ using Actime.Model.SearchObjects;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Actime.Services.Services
 {
@@ -14,13 +15,15 @@ namespace Actime.Services.Services
 
         protected override IQueryable<City> ApplyFilter(IQueryable<City> query, TextSearchObject search)
         {
+            query = query.Include(c => c.Country);
+
             if (!string.IsNullOrWhiteSpace(search.Text))
             {
                 var searchText = search.Text.Trim().ToLower();
 
                 query = query.Where(c =>
-                    c.Name.ToLower().Contains(searchText) 
-                    || c.Country.Name.ToLower().Contains(searchText));
+                    c.Name.ToLower().Contains(searchText)
+                    || (c.Country != null && c.Country.Name.ToLower().Contains(searchText)));
             }
 
             return base.ApplyFilter(query, search);

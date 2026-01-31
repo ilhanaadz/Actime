@@ -76,6 +76,24 @@ namespace Actime.Services.Database
                 .HasForeignKey(s => s.LocationId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Location>()
+                .HasOne(l => l.Address)
+                .WithMany()
+                .HasForeignKey(l => l.AddressId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Address>()
+                .HasOne(a => a.City)
+                .WithMany()
+                .HasForeignKey(a => a.CityId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<City>()
+                .HasOne(c => c.Country)
+                .WithMany()
+                .HasForeignKey(c => c.CountryId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             base.OnModelCreating(modelBuilder);
         }
 

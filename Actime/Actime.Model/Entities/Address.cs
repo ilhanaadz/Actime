@@ -7,6 +7,8 @@
         public required string PostalCode { get; set; }
         public string? Coordinates { get; set; }
         public int CityId { get; set; }
-        public required string CityName { get; set; }
+        public string? CityName { get; set; }
+
+        public City? City { get; set; }
     }
 }

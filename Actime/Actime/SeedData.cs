@@ -304,9 +304,9 @@ namespace Actime
             if (!context.Locations.Any())
             {
                 context.Locations.AddRange(
-                    new Location { AddressId = 1, Capacity = 100, Description = "Main hall", ContactInfo = "info@venue1.com" },
-                    new Location { AddressId = 2, Capacity = 50, Description = "Cental stadium", ContactInfo = "contact@venue2.com" },
-                    new Location { AddressId = 3, Capacity = 200, Description = "Outdoor stage", ContactInfo = "events@venue3.com" }
+                    new Location { AddressId = 1, Capacity = 100, Name = "Main hall", ContactInfo = "info@venue1.com" },
+                    new Location { AddressId = 2, Capacity = 50, Name = "Central stadium", ContactInfo = "contact@venue2.com" },
+                    new Location { AddressId = 3, Capacity = 200, Name = "Outdoor stage", ContactInfo = "events@venue3.com" }
                 );
 
                 await context.SaveChangesAsync();

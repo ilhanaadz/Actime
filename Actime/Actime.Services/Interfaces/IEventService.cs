@@ -4,7 +4,7 @@ using Actime.Model.SearchObjects;
 
 namespace Actime.Services.Interfaces
 {
-    public interface IEventService : ICrudService<Event, TextSearchObject, EventInsertRequest, EventUpdateRequest>
+    public interface IEventService : ICrudService<Event, EventSearchObject, EventInsertRequest, EventUpdateRequest>
     {
     }
 }

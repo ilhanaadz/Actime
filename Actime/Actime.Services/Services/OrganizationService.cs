@@ -31,6 +31,9 @@ namespace Actime.Services.Services
             if (request.Name != null)
                 organization.Name = request.Name;
 
+            if (request.Email != null)
+                organization.Email = request.Email;
+
             if (request.Description != null)
                 organization.Description = request.Description;
 

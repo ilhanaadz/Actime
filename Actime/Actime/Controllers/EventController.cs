@@ -8,14 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
 {
-    public class EventController : BaseCrudController<Event, TextSearchObject, EventInsertRequest, EventUpdateRequest>
+    public class EventController : BaseCrudController<Event, EventSearchObject, EventInsertRequest, EventUpdateRequest>
     {
         public EventController(IEventService eventService) : base(eventService)
         {
         }
 
         [AllowAnonymous]
-        public override Task<PagedResult<Event>> Get([FromQuery] TextSearchObject? search = null)
+        public override Task<PagedResult<Event>> Get([FromQuery] EventSearchObject? search = null)
         {
             return base.Get(search);
         }
