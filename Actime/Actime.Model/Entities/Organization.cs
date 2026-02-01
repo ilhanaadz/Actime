@@ -13,5 +13,8 @@
         public int AddressId { get; set; }
         public DateTime CreatedAt { get; init; } = DateTime.Now;
         public DateTime? LastModifiedAt { get; set; }
+
+        public string? CategoryName { get; set; }
+        public string? Address { get; set; }
     }
 }

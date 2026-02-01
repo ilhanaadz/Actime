@@ -51,25 +51,6 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 .AddEntityFrameworkStores<ActimeContext>()
 .AddDefaultTokenProviders();
 
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidIssuer = builder.Configuration["AuthSettings:ValidIssuer"],
-//            ValidAudience = builder.Configuration["AuthSettings:ValidAudience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                Encoding.UTF8.GetBytes(
-//                    builder.Configuration["AuthSettings:Key"]
-//                        ?? throw new InvalidOperationException("JWT Key is missing in configuration.")
-//                )
-//            )
-//        };
-//    });
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
