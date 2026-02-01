@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Actime.Controllers
 {
-    //NOTE: Pay attention to ApiController attribute, it enables automatic model validation and other features.
     [ApiController]
     [Route("[controller]")]
     [Authorize]

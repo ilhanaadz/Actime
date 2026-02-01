@@ -232,7 +232,7 @@ class ChangePasswordRequest {
     return {
       'CurrentPassword': currentPassword,
       'NewPassword': newPassword,
-      'ConfirmNewPassword': confirmNewPassword,
+      'ConfirmPassword': confirmNewPassword,
     };
   }
 }

@@ -88,5 +88,13 @@ namespace Actime.Services.Services
             return await _context.Organizations
                 .AnyAsync(o => o.Id == organizationId && o.UserId == userId && !o.IsDeleted);
         }
+
+        public async Task<Model.Entities.Organization?> GetByUserIdAsync(int userId)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.UserId == userId && !o.IsDeleted);
+        
+            return organization == null ? null : _mapper.Map<Model.Entities.Organization>(organization);
+        }
     }
 }

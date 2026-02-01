@@ -14,10 +14,9 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   final _userService = UserService();
   final _formKey = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _bioController = TextEditingController();
 
   User? _user;
   bool _isLoading = true;
@@ -31,10 +30,9 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
-    _bioController.dispose();
     super.dispose();
   }
 
@@ -48,10 +46,9 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
 
       if (response.success && response.data != null) {
         _user = response.data;
-        _nameController.text = _user?.name ?? '';
+        _firstNameController.text = _user?.firstName ?? '';
+        _lastNameController.text = _user?.lastName ?? '';
         _phoneController.text = _user?.phone ?? '';
-        _addressController.text = _user?.address ?? '';
-        _bioController.text = _user?.bio ?? '';
         setState(() => _isLoading = false);
       } else {
         setState(() => _isLoading = false);
@@ -69,11 +66,13 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final firstName = _firstNameController.text.trim();
+      final lastName = _lastNameController.text.trim();
+
       final response = await _userService.updateProfile({
-        'Name': _nameController.text,
-        if (_phoneController.text.isNotEmpty) 'Phone': _phoneController.text,
-        if (_addressController.text.isNotEmpty) 'Address': _addressController.text,
-        if (_bioController.text.isNotEmpty) 'Bio': _bioController.text,
+        if (firstName.isNotEmpty) 'FirstName': firstName,
+        if (lastName.isNotEmpty) 'LastName': lastName,
+        if (_phoneController.text.isNotEmpty) 'PhoneNumber': _phoneController.text,
       });
 
       if (!mounted) return;
@@ -174,9 +173,9 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Name
+                    // First Name
                     TextFormField(
-                      controller: _nameController,
+                      controller: _firstNameController,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Ime je obavezno';
@@ -184,7 +183,28 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                         return null;
                       },
                       decoration: InputDecoration(
-                        labelText: 'Ime i prezime',
+                        labelText: 'Ime',
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Last Name
+                    TextFormField(
+                      controller: _lastNameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Prezime je obavezno';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Prezime',
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
@@ -201,37 +221,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'Telefon',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Address
-                    TextFormField(
-                      controller: _addressController,
-                      decoration: InputDecoration(
-                        labelText: 'Adresa',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Bio
-                    TextFormField(
-                      controller: _bioController,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        labelText: 'O meni',
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),

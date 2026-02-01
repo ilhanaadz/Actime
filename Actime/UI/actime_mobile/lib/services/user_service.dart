@@ -1,6 +1,7 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'auth_service.dart';
 import 'mock_api_service.dart';
 
 /// User service for user-related operations
@@ -11,6 +12,7 @@ class UserService {
   UserService._internal();
 
   final ApiService _apiService = ApiService();
+  final AuthService _authService = AuthService();
   final MockApiService _mockService = MockApiService();
 
   /// Get user by ID
@@ -26,15 +28,25 @@ class UserService {
   }
 
   /// Get current user profile
+  /// Uses /me endpoint via AuthService and converts AuthResponse to User
   Future<ApiResponse<User>> getCurrentUser() async {
     if (ApiConfig.useMockApi) {
       return await _mockService.getCurrentUser();
     }
 
-    return await _apiService.get<User>(
-      ApiConfig.userProfile(),
-      fromJson: (json) => User.fromJson(json),
-    );
+    // Call /me endpoint which returns AuthResponse
+    final authResponse = await _authService.getCurrentUser();
+
+    if (!authResponse.success || authResponse.data == null) {
+      return ApiResponse.error(
+        authResponse.message ?? 'Failed to get current user',
+        statusCode: authResponse.statusCode,
+      );
+    }
+
+    // Convert AuthResponse to User using the built-in getter
+    final user = authResponse.data!.user;
+    return ApiResponse.success(user, statusCode: authResponse.statusCode);
   }
 
   /// Update user profile (own profile)

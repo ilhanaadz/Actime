@@ -7,6 +7,8 @@ using System.Security.Claims;
 
 namespace Actime.Controllers
 {
+    [ApiController]
+    [Route("")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -72,11 +74,17 @@ namespace Actime.Controllers
         {
             var refreshToken = Request.Cookies["refreshToken"];
 
-            if (string.IsNullOrEmpty(refreshToken))
-                throw new Exception("Not authenticated");
+            // If refresh token exists (web browser), refresh it and return full auth response
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var responseData = await _authService.RefreshTokenAsync(refreshToken);
+                SetRefreshTokenCookie(responseData.RefreshToken);
+                return Ok(responseData);
+            }
 
-            var response = await _authService.RefreshTokenAsync(refreshToken);
-            SetRefreshTokenCookie(response.RefreshToken);
+            // If no refresh token (mobile app with Bearer token), return user data without tokens
+            var userId = GetCurrentUserId();
+            var response = await _authService.GetCurrentUserAsync(userId);
             return Ok(response);
         }
 

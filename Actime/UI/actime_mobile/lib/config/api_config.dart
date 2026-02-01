@@ -14,8 +14,8 @@ class ApiConfig {
   static const String baseUrl = 'http://10.0.2.2:5171';
 
   // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration connectionTimeout = Duration(seconds: 60);
+  static const Duration receiveTimeout = Duration(seconds: 60);
 
   // Auth endpoints (backend: AuthController)
   static const String login = '/login';
@@ -31,52 +31,52 @@ class ApiConfig {
   static const String changePassword = '/change-password';
 
   // User endpoints (backend: UserController)
-  static const String user = '/user';
+  static const String user = '/User';
 
   // Organization endpoints (backend: OrganizationController)
-  static const String organization = '/organization';
+  static const String organization = '/Organization';
 
   // Event endpoints (backend: EventController)
-  static const String event = '/event';
+  static const String event = '/Event';
 
   // Category endpoints (backend: CategoryController)
-  static const String category = '/category';
+  static const String category = '/Category';
 
   // Favorite endpoints (backend: FavoriteController)
-  static const String favorite = '/favorite';
+  static const String favorite = '/Favorite';
 
   // Membership endpoints (backend: MembershipController)
-  static const String membership = '/membership';
+  static const String membership = '/Membership';
 
   // Enrollment endpoints (backend: EnrollmentController)
-  static const String enrollments = '/enrollment';
+  static const String enrollments = '/Enrollment';
 
   // Participation endpoints (backend: ParticipationController)
-  static const String participation = '/participation';
+  static const String participation = '/Participation';
 
   // Review endpoints (backend: ReviewController)
-  static const String review = '/review';
+  static const String review = '/Review';
 
   // Notification endpoints (backend: NotificationController)
-  static const String notification = '/notification';
+  static const String notification = '/Notification';
 
   // Schedule endpoints (backend: ScheduleController)
-  static const String schedule = '/schedule';
+  static const String schedule = '/Schedule';
 
   // Report endpoints (backend: ReportController)
-  static const String report = '/report';
+  static const String report = '/Report';
 
   // Location endpoints (backend: LocationController)
-  static const String location = '/location';
+  static const String location = '/Location';
 
   // City endpoints (backend: CityController)
-  static const String city = '/city';
+  static const String city = '/City';
 
   // Country endpoints (backend: CountryController)
-  static const String country = '/country';
+  static const String country = '/Country';
 
   // Address endpoints (backend: AddressController)
-  static const String address = '/address';
+  static const String address = '/Address';
 
   // Health check
   static const String health = '/health';

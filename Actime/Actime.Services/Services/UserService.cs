@@ -11,16 +11,13 @@ namespace Actime.Services.Services
 {
     public class UserService : BaseService<Model.Entities.User, TextSearchObject, Database.User>, IUserService
     {
-        private readonly UserManager<User> _userManager;
         private readonly ActimeContext _context;
         private readonly IMapper _mapper;
 
         public UserService(
-            UserManager<User> userManager,
             ActimeContext context,
             IMapper mapper) : base(context, mapper)
         {
-            _userManager = userManager;
             _context = context;
             _mapper = mapper;
         }
@@ -38,6 +35,9 @@ namespace Actime.Services.Services
 
             if (request.LastName != null)
                 user.LastName = request.LastName;
+
+            if (request.PhoneNumber != null)
+                user.PhoneNumber = request.PhoneNumber;
 
             if (request.ProfileImageUrl != null)
                 user.ProfileImageUrl = request.ProfileImageUrl;

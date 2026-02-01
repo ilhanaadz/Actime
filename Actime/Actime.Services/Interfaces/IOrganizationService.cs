@@ -9,5 +9,6 @@ namespace Actime.Services.Interfaces
         Task<Organization> UpdateAsync(int organizationId, int userId, OrganizationUpdateRequest request);
         Task SoftDeleteAsync(int organizationId, int deletedByUserId);
         Task<bool> UserOwnsOrganizationAsync(int userId, int organizationId);
+        Task<Organization?> GetByUserIdAsync(int userId);
     }
 }

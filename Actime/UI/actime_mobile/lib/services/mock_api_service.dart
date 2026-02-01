@@ -119,6 +119,7 @@ class MockApiService {
       isVerified: true,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 730)),
+      userId: 100,
     ),
     Organization(
       id: '2',
@@ -134,6 +135,7 @@ class MockApiService {
       isVerified: true,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 1095)),
+      userId: 101,
     ),
     Organization(
       id: '3',
@@ -149,6 +151,7 @@ class MockApiService {
       isVerified: true,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 500)),
+      userId: 102,
     ),
     Organization(
       id: '4',
@@ -165,6 +168,7 @@ class MockApiService {
       isVerified: true,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 365)),
+      userId: 103,
     ),
     Organization(
       id: '5',
@@ -180,6 +184,7 @@ class MockApiService {
       isVerified: false,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 200)),
+      userId: 104,
     ),
     Organization(
       id: '6',
@@ -195,6 +200,7 @@ class MockApiService {
       isVerified: false,
       status: OrganizationStatus.active,
       createdAt: DateTime.now().subtract(const Duration(days: 150)),
+      userId: 105,
     ),
   ];
 
@@ -202,7 +208,7 @@ class MockApiService {
   final List<Event> _mockEvents = [
     Event(
       id: '1',
-      name: 'Trening - Fudbal za početnike',
+      title: 'Trening - Fudbal za početnike',
       description: 'Besplatan trening za sve koji žele naučiti osnove fudbala. Donesi sportsku opremu!',
       location: 'Sportska dvorana Skenderija',
       address: 'Terezije bb, Sarajevo',
@@ -213,15 +219,15 @@ class MockApiService {
       participantsCount: 18,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
     ),
     Event(
       id: '2',
-      name: 'Planinarenje - Vrelo Bosne',
+      title: 'Planinarenje - Vrelo Bosne',
       description: 'Lagana šetnja do Vrela Bosne. Idealno za početnike i porodice.',
       location: 'Vrelo Bosne',
       address: 'Ilidža, Sarajevo',
@@ -232,15 +238,15 @@ class MockApiService {
       participantsCount: 32,
       organizationId: '2',
       organizationName: 'Planinarsko društvo Bjelašnica',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
     ),
     Event(
       id: '3',
-      name: 'Izložba - Sarajevski pejzaži',
+      title: 'Izložba - Sarajevski pejzaži',
       description: 'Izložba fotografija i slika sarajevskih pejzaža lokalnih umjetnika.',
       location: 'Kulturni centar Mostar',
       address: 'Stari most 1, Mostar',
@@ -251,14 +257,14 @@ class MockApiService {
       participantsCount: 45,
       organizationId: '3',
       organizationName: 'Kulturni centar Mostar',
-      categoryId: '2',
-      categoryName: 'Kultura',
+      activityTypeId: 2,
+      activityTypeName: 'Kultura',
       status: EventStatus.upcoming,
       createdAt: DateTime.now().subtract(const Duration(days: 14)),
     ),
     Event(
       id: '4',
-      name: 'Flutter Meetup #15',
+      title: 'Flutter Meetup #15',
       description: 'Mjesečni meetup Flutter developera. Tema: State management sa Riverpod.',
       location: 'IT Hub Sarajevo',
       address: 'Hamdije Kreševljakovića 3, Sarajevo',
@@ -269,15 +275,15 @@ class MockApiService {
       participantsCount: 28,
       organizationId: '4',
       organizationName: 'IT Hub Sarajevo',
-      categoryId: '3',
-      categoryName: 'Edukacija',
+      activityTypeId: 3,
+      activityTypeName: 'Edukacija',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
     Event(
       id: '5',
-      name: 'Yoga u parku',
+      title: 'Yoga u parku',
       description: 'Besplatna yoga sesija na otvorenom. Donesi svoju prostirku!',
       location: 'Veliki park',
       address: 'Veliki park, Sarajevo',
@@ -288,14 +294,14 @@ class MockApiService {
       participantsCount: 20,
       organizationId: '5',
       organizationName: 'Yoga Studio Zen',
-      categoryId: '4',
-      categoryName: 'Zdravlje',
+      activityTypeId: 4,
+      activityTypeName: 'Zdravlje',
       status: EventStatus.upcoming,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
     Event(
       id: '6',
-      name: 'Foto-tura: Baščaršija',
+      title: 'Foto-tura: Baščaršija',
       description: 'Fotografska šetnja kroz Baščaršiju. Savjeti za street fotografiju.',
       location: 'Baščaršija',
       address: 'Sebilj, Sarajevo',
@@ -306,14 +312,14 @@ class MockApiService {
       participantsCount: 8,
       organizationId: '6',
       organizationName: 'Foto klub Objektiv',
-      categoryId: '2',
-      categoryName: 'Kultura',
+      activityTypeId: 2,
+      activityTypeName: 'Kultura',
       status: EventStatus.upcoming,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
     Event(
       id: '7',
-      name: 'Hackathon 2024',
+      title: 'Hackathon 2024',
       description: '24-satni hackathon. Tema: Aplikacije za održivi razvoj.',
       location: 'IT Hub Sarajevo',
       address: 'Hamdije Kreševljakovića 3, Sarajevo',
@@ -325,15 +331,15 @@ class MockApiService {
       participantsCount: 65,
       organizationId: '4',
       organizationName: 'IT Hub Sarajevo',
-      categoryId: '3',
-      categoryName: 'Edukacija',
+      activityTypeId: 3,
+      activityTypeName: 'Edukacija',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 20)),
     ),
     Event(
       id: '8',
-      name: 'Trening završen',
+      title: 'Trening završen',
       description: 'Redovni fudbalski trening.',
       location: 'Sportska dvorana Skenderija',
       address: 'Terezije bb, Sarajevo',
@@ -343,15 +349,15 @@ class MockApiService {
       participantsCount: 22,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.completed,
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
     ),
     // Additional events for FK Sarajevo Mladi (org 1)
     Event(
       id: '9',
-      name: 'Utakmica - FK Sarajevo vs FK Željezničar',
+      title: 'Utakmica - FK Sarajevo vs FK Željezničar',
       description: 'Prijateljska utakmica omladinskih selekcija. Dođite i podržite naše mlade talente!',
       location: 'Stadion Koševo',
       address: 'Patriotske lige 35, Sarajevo',
@@ -363,15 +369,15 @@ class MockApiService {
       participantsCount: 85,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
     Event(
       id: '10',
-      name: 'Trening - Napredna grupa',
+      title: 'Trening - Napredna grupa',
       description: 'Intenzivan trening za napredne igrače. Fokus na taktici i timskoj igri.',
       location: 'Sportska dvorana Skenderija',
       address: 'Terezije bb, Sarajevo',
@@ -382,14 +388,14 @@ class MockApiService {
       participantsCount: 15,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.upcoming,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     Event(
       id: '11',
-      name: 'Ljetni kamp - Fudbal',
+      title: 'Ljetni kamp - Fudbal',
       description: 'Trodnevni ljetni kamp za mlade fudbalere. Uključuje smještaj i hranu.',
       location: 'Sportski centar Vlašić',
       address: 'Vlašić, Travnik',
@@ -401,15 +407,15 @@ class MockApiService {
       participantsCount: 28,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.upcoming,
       isFeatured: true,
       createdAt: DateTime.now().subtract(const Duration(days: 14)),
     ),
     Event(
       id: '12',
-      name: 'Trening - Prošli tjedan',
+      title: 'Trening - Prošli tjedan',
       description: 'Redovni fudbalski trening.',
       location: 'Sportska dvorana Skenderija',
       address: 'Terezije bb, Sarajevo',
@@ -419,14 +425,14 @@ class MockApiService {
       participantsCount: 19,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.completed,
       createdAt: DateTime.now().subtract(const Duration(days: 17)),
     ),
     Event(
       id: '13',
-      name: 'Mini turnir - U12',
+      title: 'Mini turnir - U12',
       description: 'Mini turnir za uzrast do 12 godina.',
       location: 'Sportska dvorana Skenderija',
       address: 'Terezije bb, Sarajevo',
@@ -436,8 +442,8 @@ class MockApiService {
       participantsCount: 32,
       organizationId: '1',
       organizationName: 'FK Sarajevo Mladi',
-      categoryId: '1',
-      categoryName: 'Sport',
+      activityTypeId: 1,
+      activityTypeName: 'Sport',
       status: EventStatus.completed,
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
     ),
@@ -670,19 +676,44 @@ class MockApiService {
       return ApiResponse.error('Unesite lozinku', statusCode: 400);
     }
 
-    final authResponse = AuthResponse(
-      id: '1',
-      email: email,
-      firstName: 'Amar',
-      lastName: 'Hadžić',
-      accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',
-      refreshToken: 'mock_refresh_token_1',
-      expiresAt: DateTime.now().add(const Duration(days: 7)),
-      roles: ['User'],
-      requiresOrganizationSetup: false,
+    // Check if logging in as organization
+    final org = _mockOrganizations.firstWhere(
+      (o) => o.email == email,
+      orElse: () => _mockOrganizations.first,
     );
 
-    return ApiResponse.success(authResponse);
+    final isOrgLogin = _mockOrganizations.any((o) => o.email == email);
+
+    if (isOrgLogin) {
+      // Login as organization
+      final authResponse = AuthResponse(
+        id: org.userId?.toString() ?? '1',
+        email: email,
+        firstName: org.name.split(' ').first,
+        lastName: org.name.split(' ').length > 1 ? org.name.split(' ').last : null,
+        accessToken: 'mock_access_token_org_${DateTime.now().millisecondsSinceEpoch}',
+        refreshToken: 'mock_refresh_token_org',
+        expiresAt: DateTime.now().add(const Duration(days: 7)),
+        roles: ['Organization'],
+        requiresOrganizationSetup: false,
+        organization: org,
+      );
+      return ApiResponse.success(authResponse);
+    } else {
+      // Login as regular user
+      final authResponse = AuthResponse(
+        id: '1',
+        email: email,
+        firstName: 'Amar',
+        lastName: 'Hadžić',
+        accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',
+        refreshToken: 'mock_refresh_token_1',
+        expiresAt: DateTime.now().add(const Duration(days: 7)),
+        roles: ['User'],
+        requiresOrganizationSetup: false,
+      );
+      return ApiResponse.success(authResponse);
+    }
   }
 
   /// Register
@@ -708,16 +739,21 @@ class MockApiService {
   Future<ApiResponse<AuthResponse>> getCurrentUserAuth() async {
     await _simulateDelay();
 
+    // For mock, return first organization as logged-in org (if any)
+    // In real scenario, this would check the actual logged-in user
+    final org = _mockOrganizations.first;
+
     final authResponse = AuthResponse(
-      id: '1',
-      email: 'amar.hadzic@email.com',
-      firstName: 'Amar',
-      lastName: 'Hadžić',
-      accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',
-      refreshToken: 'mock_refresh_token_1',
+      id: org.userId?.toString() ?? '1',
+      email: org.email,
+      firstName: org.name.split(' ').first,
+      lastName: org.name.split(' ').length > 1 ? org.name.split(' ').last : null,
+      accessToken: 'mock_access_token_org_${DateTime.now().millisecondsSinceEpoch}',
+      refreshToken: 'mock_refresh_token_org',
       expiresAt: DateTime.now().add(const Duration(days: 7)),
-      roles: ['User'],
+      roles: ['Organization'],
       requiresOrganizationSetup: false,
+      organization: org,
     );
 
     return ApiResponse.success(authResponse);
@@ -967,7 +1003,7 @@ class MockApiService {
     int page = 1,
     int perPage = 10,
     String? search,
-    String? categoryId,
+    String? activityTypeId,
     String? organizationId,
     EventStatus? status,
     String? sortBy,
@@ -988,9 +1024,9 @@ class MockApiService {
           .toList();
     }
 
-    // Apply category filter
-    if (categoryId != null && categoryId.isNotEmpty) {
-      filteredEvents = filteredEvents.where((e) => e.categoryId == categoryId).toList();
+    // Apply activity type filter
+    if (activityTypeId != null && activityTypeId.isNotEmpty) {
+      filteredEvents = filteredEvents.where((e) => e.activityTypeId == int.parse(activityTypeId)).toList();
     }
 
     // Apply organization filter (disabled for testing - show all events)
@@ -1107,7 +1143,7 @@ class MockApiService {
 
     final newEvent = Event(
       id: '${_mockEvents.length + 1}',
-      name: data['Name'] as String? ?? data['name'] as String,
+      title: data['Title'] as String? ?? data['title'] as String,
       description: data['Description'] as String? ?? data['description'] as String?,
       location: data['Location'] as String? ?? data['location'] as String?,
       address: data['Address'] as String? ?? data['address'] as String?,
@@ -1118,7 +1154,7 @@ class MockApiService {
       maxParticipants: data['MaxParticipants'] as int? ?? data['maxParticipants'] as int?,
       organizationId: data['OrganizationId'] as String? ?? data['organizationId'] as String,
       organizationName: data['OrganizationName'] as String? ?? data['organizationName'] as String?,
-      categoryId: data['CategoryId'] as String? ?? data['categoryId'] as String?,
+      activityTypeId: data['ActivityTypeId'] as int? ?? data['activityTypeId'] as int?,
       status: EventStatus.upcoming,
       createdAt: DateTime.now(),
     );
@@ -1136,7 +1172,7 @@ class MockApiService {
     }
 
     final updatedEvent = _mockEvents[index].copyWith(
-      name: data['Name'] as String? ?? data['name'] as String? ?? _mockEvents[index].name,
+      title: data['Title'] as String? ?? data['title'] as String? ?? _mockEvents[index].title,
       description: data['Description'] as String? ?? data['description'] as String? ?? _mockEvents[index].description,
       location: data['Location'] as String? ?? data['location'] as String? ?? _mockEvents[index].location,
       address: data['Address'] as String? ?? data['address'] as String? ?? _mockEvents[index].address,

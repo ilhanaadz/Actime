@@ -19,6 +19,12 @@ namespace Actime.Controllers
         }
 
         [AllowAnonymous]
+        public override Task<Organization?> GetById(int id)
+        {
+            return base.GetById(id);
+        }
+
+        [AllowAnonymous]
         public override Task<PagedResult<Organization>> Get([FromQuery] TextSearchObject? search = null)
         {
             return base.Get(search);
@@ -29,7 +35,7 @@ namespace Actime.Controllers
         public async Task<ActionResult<Organization>> UpdateMyOrganization([FromBody] OrganizationUpdateRequest request)
         {
             var userId = GetCurrentUserId();
-            var myOrg = await _organizationService.GetByIdAsync(userId);
+            var myOrg = await _organizationService.GetByUserIdAsync(userId);
 
             if (myOrg == null)
                 throw new Exception("You don't have an organization");

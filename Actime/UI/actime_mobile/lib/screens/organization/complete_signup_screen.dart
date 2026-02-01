@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'organization_profile_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
+import '../../models/models.dart';
+import '../../services/services.dart';
 
 class CompleteSignUpScreen extends StatefulWidget {
   const CompleteSignUpScreen({super.key});
@@ -10,14 +12,49 @@ class CompleteSignUpScreen extends StatefulWidget {
 }
 
 class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
-  final _categoryController = TextEditingController();
+  final _categoryService = CategoryService();
+  final _formKey = GlobalKey<FormState>();
+
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  List<Category> _categories = [];
+  String? _selectedCategoryId;
+  bool _isLoadingCategories = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _categoryService.getAllCategories();
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingCategories = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Greška pri učitavanju kategorija'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
-    _categoryController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
     _descriptionController.dispose();
@@ -55,7 +92,9 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -97,23 +136,48 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Category Dropdown
-            TextField(
-              controller: _categoryController,
-              decoration: InputDecoration(
-                labelText: 'Category',
-                hintText: 'Category',
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                suffixIcon: const Icon(Icons.keyboard_arrow_down),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF0D7C8C)),
-                ),
-              ),
-            ),
+            _isLoadingCategories
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF0D7C8C),
+                      ),
+                    ),
+                  )
+                : DropdownButtonFormField<String>(
+                    value: _selectedCategoryId,
+                    decoration: InputDecoration(
+                      labelText: 'Category',
+                      hintText: 'Odaberi kategoriju',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF0D7C8C)),
+                      ),
+                    ),
+                    items: _categories.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category.id,
+                        child: Text(category.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategoryId = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Kategorija je obavezna';
+                      }
+                      return null;
+                    },
+                  ),
             const SizedBox(height: 24),
             
             // Phone
@@ -175,14 +239,17 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Clear navigation stack and go to organization profile
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const OrganizationProfileScreen(),
-                      ),
-                      (route) => false,
-                    );
+                    // Validate form before proceeding
+                    if (_formKey.currentState!.validate()) {
+                      // Clear navigation stack and go to organization profile
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OrganizationProfileScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D7C8C),
@@ -203,6 +270,7 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

@@ -20,8 +20,10 @@ class ApiService {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParams);
+      final headers = await _getHeaders();
+
       final response = await http
-          .get(uri, headers: await _getHeaders())
+          .get(uri, headers: headers)
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse<T>(response, fromJson);
@@ -139,7 +141,6 @@ class ApiService {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         return ApiResponse.success(fromJson(data), statusCode: statusCode);
       } catch (e) {
-        print('Error parsing response: $e');
         return ApiResponse.error('Greška pri parsiranju odgovora: $e', statusCode: statusCode);
       }
     }

@@ -9,6 +9,7 @@ import '../../services/services.dart';
 import '../auth/sign_in_screen.dart';
 import '../clubs/club_detail_screen.dart';
 import 'edit_user_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -168,6 +169,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: AppDimensions.spacingXLarge),
                     _buildMyClubsSection(),
                     const SizedBox(height: AppDimensions.spacingXLarge),
+                    ActimeOutlinedButton(
+                      label: 'Promijeni lozinku',
+                      icon: Icons.lock_outline,
+                      borderColor: AppColors.primary,
+                      textColor: AppColors.primary,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChangePasswordScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppDimensions.spacingDefault),
                     ActimeOutlinedButton(
                       label: 'Odjavi se',
                       icon: Icons.logout,

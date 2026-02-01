@@ -20,7 +20,6 @@ class EditEventScreen extends StatefulWidget {
 
 class _EditEventScreenState extends State<EditEventScreen> {
   final _eventService = EventService();
-  final _categoryService = CategoryService();
   final _locationService = LocationService();
 
   final _eventNameController = TextEditingController();
@@ -31,9 +30,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   final _descriptionController = TextEditingController();
 
   Event? _event;
-  List<Category> _categories = [];
   List<Location> _locations = [];
-  String? _selectedActivityTypeId;
+  ActivityType? _selectedActivityType;
   Location? _selectedLocation;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -50,13 +48,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   Future<void> _loadEventData() async {
     try {
       final eventResponse = await _eventService.getEventById(widget.eventId);
-      final categoriesResponse = await _categoryService.getCategories();
 
       if (!mounted) return;
-
-      if (categoriesResponse.success && categoriesResponse.data != null) {
-        _categories = categoriesResponse.data!.data;
-      }
 
       if (eventResponse.success && eventResponse.data != null) {
         _event = eventResponse.data;
@@ -126,7 +119,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
     _timeController.text =
         '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
 
-    _selectedActivityTypeId = _event!.activityTypeId?.toString();
+    _selectedActivityType = ActivityType.fromId(_event!.activityTypeId);
   }
 
   @override
@@ -181,7 +174,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         'MaxParticipants': _maxParticipantsController.text.isNotEmpty
             ? int.tryParse(_maxParticipantsController.text)
             : null,
-        if (_selectedActivityTypeId != null) 'ActivityTypeId': int.tryParse(_selectedActivityTypeId!) ?? _selectedActivityTypeId,
+        if (_selectedActivityType != null) 'ActivityTypeId': _selectedActivityType!.id,
         if (_selectedLocation != null) 'LocationId': _selectedLocation!.id,
       });
 
@@ -300,7 +293,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       labelText: 'Naziv događaja',
                     ),
                     const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildCategoryDropdown(),
+                    _buildActivityTypeDropdown(),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildDateTimeRow(),
                     const SizedBox(height: AppDimensions.spacingLarge),
@@ -373,19 +366,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
     );
   }
 
-  Widget _buildCategoryDropdown() {
-    return ActimeDropdownField<String>(
-      initialValue: _selectedActivityTypeId,
-      labelText: 'Kategorija',
-      items: _categories
-          .map((category) => DropdownMenuItem(
-                value: category.id,
-                child: Text(category.name),
+  Widget _buildActivityTypeDropdown() {
+    return ActimeDropdownField<ActivityType>(
+      initialValue: _selectedActivityType,
+      labelText: 'Tip aktivnosti',
+      items: ActivityType.values
+          .map((type) => DropdownMenuItem(
+                value: type,
+                child: Text(type.displayName),
               ))
           .toList(),
       onChanged: (value) {
         setState(() {
-          _selectedActivityTypeId = value;
+          _selectedActivityType = value;
         });
       },
     );

@@ -356,6 +356,44 @@ namespace Actime.Services.Services
             }
         }
 
+        public async Task<AuthResponse> GetCurrentUserAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            if (user == null || user.IsDeleted)
+                throw new Exception("User not found");
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            Model.Entities.Organization? organizationDto = null;
+            
+            if (roles.Contains("Organization"))
+            {
+                var organization = await _context.Organizations
+                    .Include(o => o.Category)
+                    .Include(o => o.Address)
+                    .FirstOrDefaultAsync(o => o.UserId == user.Id && !o.IsDeleted);
+
+                if (organization != null)
+                    organizationDto = _mapper.Map<Model.Entities.Organization>(organization);
+            }
+
+            return new AuthResponse
+            {
+                UserId = user.Id,
+                Email = user.Email!,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                // Client already has valid Bearer token
+                AccessToken = string.Empty,
+                RefreshToken = string.Empty,
+                ExpiresAt = DateTime.MinValue,
+                Roles = roles.ToList(),
+                RequiresOrganizationSetup = roles.Contains("Organization") && organizationDto == null,
+                Organization = organizationDto
+            };
+        }
+
         #endregion
     }
 }

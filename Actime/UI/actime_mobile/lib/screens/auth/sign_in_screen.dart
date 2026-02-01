@@ -55,7 +55,7 @@ class _SignInScreenState extends State<SignInScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => OrganizationProfileScreen(organizationId: user.id),
+              builder: (context) => const OrganizationProfileScreen(),
             ),
           );
         } else {
