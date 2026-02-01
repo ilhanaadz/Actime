@@ -21,7 +21,7 @@ namespace Actime.Controllers
         [AllowAnonymous]
         public override Task<Organization?> GetById(int id)
         {
-            return base.GetById(id);
+            return _organizationService.GetByIdAsync(id);
         }
 
         [AllowAnonymous]

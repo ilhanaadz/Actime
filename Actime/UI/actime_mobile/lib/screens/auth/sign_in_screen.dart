@@ -8,6 +8,7 @@ import 'sign_up_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import '../organization/organization_profile_screen.dart';
+import '../organization/complete_signup_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -51,13 +52,23 @@ class _SignInScreenState extends State<SignInScreen> {
         final authResponse = response.data!;
         final user = authResponse.user;
         // Route based on user role
-        if (user.role == UserRole.organizer) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const OrganizationProfileScreen(),
-            ),
-          );
+        if (user.role == UserRole.organization) {
+          // Check if organization setup is required
+          if (authResponse.requiresOrganizationSetup) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CompleteSignUpScreen(),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const OrganizationProfileScreen(),
+              ),
+            );
+          }
         } else {
           Navigator.pushReplacement(
             context,

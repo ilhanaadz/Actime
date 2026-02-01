@@ -53,7 +53,7 @@ class AuthResponse {
   /// Get user role
   UserRole get role {
     if (isAdmin) return UserRole.admin;
-    if (isOrganization) return UserRole.organizer;
+    if (isOrganization) return UserRole.organization;
     return UserRole.user;
   }
 
@@ -152,7 +152,7 @@ class RegisterRequest {
     this.dateOfBirth,
     this.username,
   }) : confirmPassword = confirmPassword ?? password,
-       isOrganization = isOrganization ?? (role == UserRole.organizer);
+       isOrganization = isOrganization ?? (role == UserRole.organization);
 
   Map<String, dynamic> toJson() {
     return {

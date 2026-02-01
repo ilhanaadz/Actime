@@ -134,9 +134,9 @@ namespace Actime.Services.Services
             await _context.SaveChangesAsync();
 
             await _context.Entry(organization).Reference(o => o.Category).LoadAsync();
-
+           
             var dto = _mapper.Map<Model.Entities.Organization>(organization);
-            dto.Name = $"{organization.User.FirstName} {organization.User.LastName}".Trim();
+            PopulateOrganizationFields(dto, organization);
             return dto;
         }
 

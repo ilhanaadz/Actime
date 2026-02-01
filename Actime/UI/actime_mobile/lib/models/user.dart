@@ -1,14 +1,14 @@
 /// User role enum
 enum UserRole {
   user,
-  organizer,
+  organization,
   admin;
 
   static UserRole fromString(String? value) {
     switch (value?.toLowerCase()) {
       case 'organizer':
       case 'organization':
-        return UserRole.organizer;
+        return UserRole.organization;
       case 'admin':
         return UserRole.admin;
       default:
@@ -20,8 +20,8 @@ enum UserRole {
     switch (this) {
       case UserRole.user:
         return 'Korisnik';
-      case UserRole.organizer:
-        return 'Organizator';
+      case UserRole.organization:
+        return 'Organizacija';
       case UserRole.admin:
         return 'Administrator';
     }
@@ -109,7 +109,7 @@ class User {
           role = UserRole.admin;
         } else if (roles.contains('Organization') || roles.contains('organization') ||
                    roles.contains('Organizer') || roles.contains('organizer')) {
-          role = UserRole.organizer;
+          role = UserRole.organization;
         }
       }
     }

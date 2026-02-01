@@ -1,30 +1,49 @@
-**/.classpath
-**/.dockerignore
-**/.env
-**/.git
-**/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/azds.yaml
-**/bin
-**/charts
-**/docker-compose*
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build results
+**/bin/
+**/obj/
+**/out/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+.idea/
+
+# Test results
+**/TestResults/
+**/coverage/
+
+# NuGet
+**/packages/
+
+# Docker
 **/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
-**/secrets.dev.yaml
-**/values.dev.yaml
+**/docker-compose*
+**/.docker/
+
+# Documentation
+**/*.md
 LICENSE
-README.md
-!**/.gitignore
-!.git/HEAD
-!.git/config
-!.git/packed-refs
-!.git/refs/heads/**
+README*
+
+# UI folders (not needed for API build)
+UI/
+
+# Environment files (will be provided via docker-compose)
+.env
+.env.*
+!.env.example
+
+# Misc
+**/.DS_Store
+**/Thumbs.db
+*.log
+*.tmp
