@@ -4,6 +4,8 @@ import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../components/confirmation_dialog.dart';
+import '../../components/searchable_dropdown.dart';
+import '../../components/add_location_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 
@@ -19,9 +21,9 @@ class EditEventScreen extends StatefulWidget {
 class _EditEventScreenState extends State<EditEventScreen> {
   final _eventService = EventService();
   final _categoryService = CategoryService();
+  final _locationService = LocationService();
 
   final _eventNameController = TextEditingController();
-  final _locationController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _priceController = TextEditingController();
@@ -30,11 +32,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   Event? _event;
   List<Category> _categories = [];
-  String? _selectedCategoryId;
+  List<Location> _locations = [];
+  String? _selectedActivityTypeId;
+  Location? _selectedLocation;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
   bool _isLoadingData = true;
+  bool _isLocationsLoading = true;
 
   @override
   void initState() {
@@ -59,6 +64,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
       }
 
       setState(() => _isLoadingData = false);
+
+      // Load locations in background
+      _loadLocations();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoadingData = false);
@@ -71,11 +79,39 @@ class _EditEventScreenState extends State<EditEventScreen> {
     }
   }
 
+  Future<void> _loadLocations() async {
+    setState(() => _isLocationsLoading = true);
+    try {
+      _locations = await _locationService.getAllLocations();
+      // If event has locationId, find and select the location
+      if (_event?.locationId != null) {
+        _selectedLocation = _locations.firstWhere(
+          (l) => l.id == _event!.locationId,
+          orElse: () => _locations.first,
+        );
+      }
+    } catch (e) {
+      // Ignore error, locations will be empty
+    }
+    if (mounted) {
+      setState(() => _isLocationsLoading = false);
+    }
+  }
+
+  Future<void> _showAddLocationModal() async {
+    final newLocation = await AddLocationModal.show(context);
+    if (newLocation != null) {
+      setState(() {
+        _locations.add(newLocation);
+        _selectedLocation = newLocation;
+      });
+    }
+  }
+
   void _populateFields() {
     if (_event == null) return;
 
     _eventNameController.text = _event!.name;
-    _locationController.text = _event!.location ?? '';
     _descriptionController.text = _event!.description ?? '';
     _priceController.text = _event!.price?.toString() ?? '';
     _maxParticipantsController.text = _event!.maxParticipants?.toString() ?? '';
@@ -90,13 +126,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
     _timeController.text =
         '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
 
-    _selectedCategoryId = _event!.categoryId;
+    _selectedActivityTypeId = _event!.activityTypeId?.toString();
   }
 
   @override
   void dispose() {
     _eventNameController.dispose();
-    _locationController.dispose();
     _dateController.dispose();
     _timeController.dispose();
     _priceController.dispose();
@@ -135,12 +170,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
       }
 
       final response = await _eventService.updateEvent(widget.eventId, {
-        'Name': _eventNameController.text.trim(),
+        'Title': _eventNameController.text.trim(),
         'Description': _descriptionController.text.isNotEmpty
             ? _descriptionController.text.trim()
-            : null,
-        'Location': _locationController.text.isNotEmpty
-            ? _locationController.text.trim()
             : null,
         'Start': startDate.toIso8601String(),
         'Price': _priceController.text.isNotEmpty
@@ -149,7 +181,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
         'MaxParticipants': _maxParticipantsController.text.isNotEmpty
             ? int.tryParse(_maxParticipantsController.text)
             : null,
-        'CategoryId': _selectedCategoryId,
+        if (_selectedActivityTypeId != null) 'ActivityTypeId': int.tryParse(_selectedActivityTypeId!) ?? _selectedActivityTypeId,
+        if (_selectedLocation != null) 'LocationId': _selectedLocation!.id,
       });
 
       if (!mounted) return;
@@ -271,11 +304,18 @@ class _EditEventScreenState extends State<EditEventScreen> {
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildDateTimeRow(),
                     const SizedBox(height: AppDimensions.spacingLarge),
-                    ActimeTextField(
-                      controller: _locationController,
+                    SearchableDropdown<Location>(
                       labelText: 'Lokacija',
-                      suffixIcon: const Icon(Icons.location_on_outlined,
-                          color: AppColors.primary),
+                      hintText: 'Odaberi lokaciju',
+                      selectedValue: _selectedLocation,
+                      items: _locations,
+                      itemLabel: (location) => location.name,
+                      itemSubtitle: (location) => location.address?.displayAddress ?? '',
+                      isLoading: _isLocationsLoading,
+                      isOutlined: false,
+                      onChanged: (location) => setState(() => _selectedLocation = location),
+                      onAddNew: _showAddLocationModal,
+                      addNewLabel: 'Dodaj novu lokaciju',
                     ),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildPriceParticipantsRow(),
@@ -335,7 +375,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   Widget _buildCategoryDropdown() {
     return ActimeDropdownField<String>(
-      initialValue: _selectedCategoryId,
+      initialValue: _selectedActivityTypeId,
       labelText: 'Kategorija',
       items: _categories
           .map((category) => DropdownMenuItem(
@@ -345,7 +385,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
           .toList(),
       onChanged: (value) {
         setState(() {
-          _selectedCategoryId = value;
+          _selectedActivityTypeId = value;
         });
       },
     );

@@ -34,25 +34,6 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   String _selectedPaymentMethod = 'paypal';
   bool _isProcessing = false;
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
-    }
-  }
-
   Future<void> _handleCheckout() async {
     setState(() => _isProcessing = true);
 
@@ -214,11 +195,6 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         const SizedBox(height: AppDimensions.spacingMedium),
         Row(
           children: [
-            CircleIconContainer.small(
-              icon: _getCategoryIcon(widget.event.categoryName),
-              iconColor: AppColors.orange,
-            ),
-            const SizedBox(width: AppDimensions.spacingMedium),
             Expanded(
               child: Text(
                 widget.event.title,

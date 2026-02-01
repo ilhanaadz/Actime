@@ -4,6 +4,8 @@ import '../../constants/constants.dart';
 import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../components/circle_icon_container.dart';
+import '../../components/searchable_dropdown.dart';
+import '../../components/add_location_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 
@@ -19,10 +21,9 @@ class CreateEventScreen extends StatefulWidget {
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final _eventService = EventService();
   final _organizationService = OrganizationService();
-  final _categoryService = CategoryService();
+  final _locationService = LocationService();
 
   final _eventNameController = TextEditingController();
-  final _locationController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _priceController = TextEditingController();
@@ -30,12 +31,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _descriptionController = TextEditingController();
 
   Organization? _organization;
-  List<Category> _categories = [];
-  String? _selectedCategoryId;
+  List<Location> _locations = [];
+  ActivityType? _selectedActivityType;
+  Location? _selectedLocation;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
   bool _isLoadingData = true;
+  bool _isLocationsLoading = true;
 
   @override
   void initState() {
@@ -46,7 +49,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Future<void> _loadInitialData() async {
     try {
       final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
-      final categoriesResponse = await _categoryService.getCategories();
 
       if (!mounted) return;
 
@@ -54,24 +56,44 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         _organization = orgResponse.data;
       }
 
-      if (categoriesResponse.success && categoriesResponse.data != null) {
-        _categories = categoriesResponse.data!.data;
-        if (_categories.isNotEmpty) {
-          _selectedCategoryId = _categories.first.id;
-        }
-      }
+      // Set default activity type
+      _selectedActivityType = ActivityType.values.first;
 
       setState(() => _isLoadingData = false);
+
+      // Load locations in background
+      _loadLocations();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoadingData = false);
     }
   }
 
+  Future<void> _loadLocations() async {
+    setState(() => _isLocationsLoading = true);
+    try {
+      _locations = await _locationService.getAllLocations();
+    } catch (e) {
+      // Ignore error, locations will be empty
+    }
+    if (mounted) {
+      setState(() => _isLocationsLoading = false);
+    }
+  }
+
+  Future<void> _showAddLocationModal() async {
+    final newLocation = await AddLocationModal.show(context);
+    if (newLocation != null) {
+      setState(() {
+        _locations.add(newLocation);
+        _selectedLocation = newLocation;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _eventNameController.dispose();
-    _locationController.dispose();
     _dateController.dispose();
     _timeController.dispose();
     _priceController.dispose();
@@ -95,6 +117,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
+    if (_selectedLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Odaberite lokaciju događaja')),
+      );
+      return;
+    }
+
+    if (_selectedActivityType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Odaberite tip aktivnosti')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -109,24 +145,28 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         );
       }
 
+      // End date defaults to 2 hours after start
+      final endDate = startDate.add(const Duration(hours: 2));
+
+      final price = _priceController.text.isNotEmpty
+          ? double.tryParse(_priceController.text) ?? 0.0
+          : 0.0;
+
       final response = await _eventService.createEvent({
-        'Name': _eventNameController.text.trim(),
+        'Title': _eventNameController.text.trim(),
         'Description': _descriptionController.text.isNotEmpty
             ? _descriptionController.text.trim()
             : null,
-        'Location': _locationController.text.isNotEmpty
-            ? _locationController.text.trim()
-            : null,
+        'LocationId': _selectedLocation!.id,
         'Start': startDate.toIso8601String(),
-        'Price': _priceController.text.isNotEmpty
-            ? double.tryParse(_priceController.text)
-            : null,
+        'End': endDate.toIso8601String(),
+        'Price': price,
+        'IsFree': price == 0,
         'MaxParticipants': _maxParticipantsController.text.isNotEmpty
             ? int.tryParse(_maxParticipantsController.text)
             : null,
-        'OrganizationId': widget.organizationId,
-        'OrganizationName': _organization?.name,
-        'CategoryId': _selectedCategoryId,
+        'OrganizationId': int.parse(widget.organizationId),
+        'ActivityTypeId': _selectedActivityType!.id,
       });
 
       if (!mounted) return;
@@ -201,14 +241,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       labelText: 'Naziv događaja',
                     ),
                     const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildCategoryDropdown(),
+                    _buildActivityTypeDropdown(),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildDateTimeRow(),
                     const SizedBox(height: AppDimensions.spacingLarge),
-                    ActimeTextField(
-                      controller: _locationController,
+                    SearchableDropdown<Location>(
                       labelText: 'Lokacija',
-                      suffixIcon: const Icon(Icons.location_on_outlined, color: AppColors.primary),
+                      hintText: 'Odaberi lokaciju',
+                      selectedValue: _selectedLocation,
+                      items: _locations,
+                      itemLabel: (location) => location.name,
+                      itemSubtitle: (location) => location.address?.displayAddress ?? '',
+                      isLoading: _isLocationsLoading,
+                      onChanged: (location) => setState(() => _selectedLocation = location),
+                      onAddNew: _showAddLocationModal,
+                      addNewLabel: 'Dodaj novu lokaciju',
                     ),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildPriceParticipantsRow(),
@@ -286,19 +333,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
-  Widget _buildCategoryDropdown() {
-    return ActimeDropdownField<String>(
-      initialValue: _selectedCategoryId,
-      labelText: 'Kategorija',
-      items: _categories
-          .map((category) => DropdownMenuItem(
-                value: category.id,
-                child: Text(category.name),
+  Widget _buildActivityTypeDropdown() {
+    return ActimeDropdownField<ActivityType>(
+      initialValue: _selectedActivityType,
+      labelText: 'Tip aktivnosti',
+      items: ActivityType.values
+          .map((type) => DropdownMenuItem(
+                value: type,
+                child: Text(type.displayName),
               ))
           .toList(),
       onChanged: (value) {
         setState(() {
-          _selectedCategoryId = value;
+          _selectedActivityType = value;
         });
       },
     );

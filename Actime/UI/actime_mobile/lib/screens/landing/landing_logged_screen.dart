@@ -319,7 +319,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
   }
 
   Widget _buildEventCard(Event event) {
-    final icon = _getCategoryIcon(event.categoryName);
+    final icon = Icons.event;
 
     return GestureDetector(
       onTap: () => _navigateToEventDetail(event),

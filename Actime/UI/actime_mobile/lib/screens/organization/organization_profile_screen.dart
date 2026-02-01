@@ -26,7 +26,16 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   String? _error;
 
   String get _organizationId {
-    return widget.organizationId ?? _authService.currentUser?.id ?? '1';
+    // For organization users, get the organization ID from auth response
+    if (widget.organizationId != null) {
+      return widget.organizationId!;
+    }
+    // If logged in as organization, use organization.id
+    if (_authService.isOrganization && _authService.currentAuth?.organization?.id != null) {
+      return _authService.currentAuth!.organization!.id;
+    }
+    // Fallback to user id
+    return _authService.currentUser?.id ?? '1';
   }
 
   @override

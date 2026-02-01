@@ -51,10 +51,10 @@ class LocationService {
   /// Create location
   Future<ApiResponse<Location>> createLocation({
     required String name,
+    required int addressId,
+    int? capacity,
     String? description,
-    int? addressId,
-    double? latitude,
-    double? longitude,
+    String? contactInfo,
   }) async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.error('Mock nije dostupan');
@@ -64,10 +64,10 @@ class LocationService {
       ApiConfig.location,
       body: {
         'Name': name,
+        'AddressId': addressId,
+        if (capacity != null) 'Capacity': capacity,
         if (description != null) 'Description': description,
-        if (addressId != null) 'AddressId': addressId,
-        if (latitude != null) 'Latitude': latitude,
-        if (longitude != null) 'Longitude': longitude,
+        if (contactInfo != null) 'ContactInfo': contactInfo,
       },
       fromJson: (json) => Location.fromJson(json),
     );
@@ -77,10 +77,10 @@ class LocationService {
   Future<ApiResponse<Location>> updateLocation(
     int id, {
     String? name,
-    String? description,
     int? addressId,
-    double? latitude,
-    double? longitude,
+    int? capacity,
+    String? description,
+    String? contactInfo,
   }) async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.error('Mock nije dostupan');
@@ -90,10 +90,10 @@ class LocationService {
       ApiConfig.locationById(id),
       body: {
         if (name != null) 'Name': name,
-        if (description != null) 'Description': description,
         if (addressId != null) 'AddressId': addressId,
-        if (latitude != null) 'Latitude': latitude,
-        if (longitude != null) 'Longitude': longitude,
+        if (capacity != null) 'Capacity': capacity,
+        if (description != null) 'Description': description,
+        if (contactInfo != null) 'ContactInfo': contactInfo,
       },
       fromJson: (json) => Location.fromJson(json),
     );

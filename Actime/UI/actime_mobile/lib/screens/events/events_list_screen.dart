@@ -132,25 +132,6 @@ class _EventsListScreenState extends State<EventsListScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
-    }
-  }
-
   String _formatDate(DateTime date) {
     return DateFormat('dd.MM.yyyy.').format(date);
   }
@@ -287,7 +268,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
             date: _formatDate(event.startDate),
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
-            icon: _getCategoryIcon(event.categoryName),
+            icon: Icons.event,
             isFavorite: _favoriteEventIds.contains(event.id),
             onTap: () => _navigateToDetail(context, event),
             onFavoriteTap: () => _toggleFavorite(event),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
+import '../../components/searchable_dropdown.dart';
+import '../../components/add_address_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 
@@ -17,17 +19,23 @@ class EditOrganizationProfileScreen extends StatefulWidget {
 
 class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileScreen> {
   final _organizationService = OrganizationService();
+  final _categoryService = CategoryService();
+  final _addressService = AddressService();
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
   final _emailController = TextEditingController();
   final _aboutController = TextEditingController();
 
   Organization? _organization;
+  List<Category> _categories = [];
+  List<Address> _addresses = [];
+  String? _selectedCategoryId;
+  Address? _selectedAddress;
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isAddressesLoading = true;
   String? _error;
 
   @override
@@ -40,7 +48,6 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
     _emailController.dispose();
     _aboutController.dispose();
     super.dispose();
@@ -53,20 +60,29 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
     });
 
     try {
-      final response = await _organizationService.getOrganizationById(widget.organizationId);
+      // Load categories and organization in parallel
+      final results = await Future.wait([
+        _categoryService.getAllCategories(),
+        _organizationService.getOrganizationById(widget.organizationId),
+      ]);
 
       if (!mounted) return;
+
+      _categories = results[0] as List<Category>;
+      final response = results[1] as ApiResponse<Organization>;
 
       if (response.success && response.data != null) {
         _organization = response.data;
         _nameController.text = _organization?.name ?? '';
         _phoneController.text = _organization?.phone ?? '';
-        _addressController.text = _organization?.address ?? '';
         _emailController.text = _organization?.email ?? '';
         _aboutController.text = _organization?.description ?? '';
+        _selectedCategoryId = _organization?.categoryId;
         setState(() {
           _isLoading = false;
         });
+        // Load addresses in background
+        _loadAddresses();
       } else {
         setState(() {
           _error = response.message ?? 'Greska pri ucitavanju';
@@ -82,6 +98,37 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
     }
   }
 
+  Future<void> _loadAddresses() async {
+    setState(() => _isAddressesLoading = true);
+    try {
+      _addresses = await _addressService.getAllAddresses();
+      // If organization has addressId, find and select the address
+      if (_organization?.addressId != null) {
+        final matchingAddress = _addresses.where(
+          (a) => a.id == _organization!.addressId,
+        );
+        if (matchingAddress.isNotEmpty) {
+          _selectedAddress = matchingAddress.first;
+        }
+      }
+    } catch (e) {
+      // Ignore error, addresses will be empty
+    }
+    if (mounted) {
+      setState(() => _isAddressesLoading = false);
+    }
+  }
+
+  Future<void> _showAddAddressModal() async {
+    final newAddress = await AddAddressModal.show(context);
+    if (newAddress != null) {
+      setState(() {
+        _addresses.add(newAddress);
+        _selectedAddress = newAddress;
+      });
+    }
+  }
+
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -93,16 +140,15 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
     });
 
     try {
-      final response = await _organizationService.updateOrganization(
-        widget.organizationId,
-        {
-          'Name': _nameController.text,
-          'Phone': _phoneController.text,
-          'Address': _addressController.text,
-          'Email': _emailController.text,
-          'Description': _aboutController.text,
-        },
-      );
+      // Use updateMyOrganization for organization users editing their own profile
+      final response = await _organizationService.updateMyOrganization({
+        'Name': _nameController.text,
+        'PhoneNumber': _phoneController.text,
+        'Email': _emailController.text,
+        'Description': _aboutController.text,
+        if (_selectedCategoryId != null) 'CategoryId': int.tryParse(_selectedCategoryId!) ?? _selectedCategoryId,
+        if (_selectedAddress != null) 'AddressId': _selectedAddress!.id,
+      });
 
       if (!mounted) return;
 
@@ -153,7 +199,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 12),
-            _buildChangeItem('Address', _addressController.text),
+            _buildChangeItem('Address', _selectedAddress?.displayAddress ?? ''),
             _buildChangeItem('E-mail', _emailController.text),
             _buildChangeItem('About us', _aboutController.text),
           ],
@@ -362,13 +408,11 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
             ),
             const SizedBox(height: 24),
 
-            // Category (read-only)
-            TextFormField(
-              initialValue: _organization?.categoryName ?? '',
-              readOnly: true,
+            // Category dropdown
+            DropdownButtonFormField<String>(
+              value: _selectedCategoryId,
               decoration: InputDecoration(
                 labelText: 'Category',
-                suffixIcon: const Icon(Icons.keyboard_arrow_down),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
                 ),
@@ -376,6 +420,23 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
                   borderSide: BorderSide(color: AppColors.primary),
                 ),
               ),
+              items: _categories.map((category) {
+                return DropdownMenuItem<String>(
+                  value: category.id,
+                  child: Text(category.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategoryId = value;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Kategorija je obavezna';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 24),
 
@@ -396,17 +457,18 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
             const SizedBox(height: 24),
 
             // Address
-            TextFormField(
-              controller: _addressController,
-              decoration: InputDecoration(
-                labelText: 'Address',
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-              ),
+            SearchableDropdown<Address>(
+              labelText: 'Address',
+              hintText: 'Odaberi adresu',
+              selectedValue: _selectedAddress,
+              items: _addresses,
+              itemLabel: (address) => address.street,
+              itemSubtitle: (address) => address.city?.name ?? address.cityName ?? '',
+              isLoading: _isAddressesLoading,
+              isOutlined: false,
+              onChanged: (address) => setState(() => _selectedAddress = address),
+              onAddNew: _showAddAddressModal,
+              addNewLabel: 'Dodaj novu adresu',
             ),
             const SizedBox(height: 24),
 

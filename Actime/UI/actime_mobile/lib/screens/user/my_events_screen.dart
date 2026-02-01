@@ -81,25 +81,6 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
     return DateFormat('dd.MM.yyyy.').format(date);
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final currentUser = _authService.currentUser;
@@ -215,7 +196,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
             date: _formatDate(event.startDate),
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
-            icon: _getCategoryIcon(event.categoryName),
+            icon: Icons.event,
             showFavorite: false,
             onTap: () {
               Navigator.push(

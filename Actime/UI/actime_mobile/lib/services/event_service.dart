@@ -216,10 +216,12 @@ class EventService {
     }
 
     return await _apiService.get<PaginatedResponse<Event>>(
-      '${ApiConfig.event}/organization/$organizationId',
+      ApiConfig.event,
       queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
+        'Page': page.toString(),
+        'PageSize': perPage.toString(),
+        'OrganizationId': organizationId,
+        'IncludeTotalCount': 'true',
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
     );

@@ -342,21 +342,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
         child: Row(
           children: [
-            // Event icon
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getCategoryIcon(event.categoryName),
-                color: Colors.orange,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
             // Event info
             Expanded(
               child: Column(
@@ -372,7 +357,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    event.categoryName ?? 'Dogadaj',
+                    event.activityTypeName ?? 'Dogadjaj',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,
@@ -390,24 +375,5 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
-    }
   }
 }

@@ -25,10 +25,12 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
   final _eventService = EventService();
+  final _favoriteService = FavoriteService();
 
   Event? _event;
   bool _isLoading = true;
   bool _isJoining = false;
+  bool _isFavorite = false;
   String? _error;
 
   @override
@@ -49,8 +51,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       if (!mounted) return;
 
       if (response.success && response.data != null) {
+        _event = response.data;
+        await _checkFavoriteStatus();
         setState(() {
-          _event = response.data;
           _isLoading = false;
         });
       } else {
@@ -65,6 +68,29 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         _error = 'Došlo je do greške. Pokušajte ponovo.';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _checkFavoriteStatus() async {
+    if (_event == null) return;
+    final isFav = await _favoriteService.isEventFavorite(_event!.id);
+    if (mounted) {
+      setState(() => _isFavorite = isFav);
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_event == null) return;
+    final newStatus = await _favoriteService.toggleEventFavorite(_event!);
+    if (mounted) {
+      setState(() => _isFavorite = newStatus);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newStatus
+              ? 'Dodano u favorite'
+              : 'Uklonjeno iz favorita'),
+        ),
+      );
     }
   }
 
@@ -174,25 +200,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.event;
-    }
-  }
-
   String _formatDate(DateTime date) {
     return DateFormat('dd.MM.yyyy.').format(date);
   }
@@ -259,7 +266,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             _buildTitleSection(),
             const SizedBox(height: AppDimensions.spacingSmall),
             Text(
-              _event!.categoryName ?? 'Događaj',
+              _event!.activityTypeName ?? 'Događaj',
               style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppDimensions.spacingLarge),
@@ -297,11 +304,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       children: [
         Row(
           children: [
-            CircleIconContainer(
-              icon: _getCategoryIcon(_event!.categoryName),
-              iconColor: AppColors.orange,
-            ),
-            const SizedBox(width: AppDimensions.spacingMedium),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -354,8 +356,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.favorite_border, color: AppColors.primary),
-          onPressed: () {},
+          icon: Icon(
+            _isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: _isFavorite ? Colors.red : AppColors.primary,
+          ),
+          onPressed: _toggleFavorite,
         ),
       ],
     );

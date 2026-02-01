@@ -14,5 +14,8 @@ export 'review_service.dart';
 export 'notification_service.dart';
 export 'membership_service.dart';
 export 'location_service.dart';
+export 'address_service.dart';
+export 'city_service.dart';
+export 'country_service.dart';
 export 'favorite_service.dart';
 export 'enrollment_service.dart';

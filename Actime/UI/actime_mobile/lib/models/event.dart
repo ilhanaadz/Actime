@@ -7,21 +7,31 @@ enum EventStatus {
   cancelled;
 
   static EventStatus fromString(String? value) {
-    switch (value?.toLowerCase()) {
+    if (value == null) return EventStatus.upcoming; // Default to upcoming instead of draft
+
+    switch (value.toLowerCase()) {
       case 'upcoming':
+      case '1': // Common numeric mapping
         return EventStatus.upcoming;
       case 'ongoing':
       case 'active':
+      case 'inprogress':
+      case '2':
         return EventStatus.ongoing;
       case 'completed':
       case 'finished':
+      case 'done':
+      case '3':
         return EventStatus.completed;
       case 'cancelled':
       case 'canceled':
+      case '4':
         return EventStatus.cancelled;
       case 'draft':
-      default:
+      case '0':
         return EventStatus.draft;
+      default:
+        return EventStatus.upcoming; // Default to upcoming for unknown statuses
     }
   }
 
@@ -45,7 +55,7 @@ enum EventStatus {
 /// Maps to backend Event entity
 class Event {
   final String id;
-  final String name;
+  final String title;
   final String? description;
   final String? location;
   final String? address;
@@ -57,8 +67,8 @@ class Event {
   final int participantsCount;
   final String organizationId;
   final String? organizationName;
-  final String? categoryId;
-  final String? categoryName;
+  final int? activityTypeId;
+  final String? activityTypeName;
   final EventStatus status;
   final bool isFeatured;
   final bool isFree;
@@ -70,11 +80,10 @@ class Event {
   // Backend field aliases
   final int? locationId;
   final int? eventStatusId;
-  final int? activityTypeId;
 
   Event({
     required this.id,
-    required this.name,
+    required this.title,
     this.description,
     this.location,
     this.address,
@@ -86,8 +95,8 @@ class Event {
     this.participantsCount = 0,
     required this.organizationId,
     this.organizationName,
-    this.categoryId,
-    this.categoryName,
+    this.activityTypeId,
+    this.activityTypeName,
     this.status = EventStatus.upcoming,
     this.isFeatured = false,
     bool? isFree,
@@ -97,11 +106,10 @@ class Event {
     this.lastModifiedAt,
     this.locationId,
     this.eventStatusId,
-    this.activityTypeId,
   }) : isFree = isFree ?? (price == 0);
 
-  /// Alias for name (backwards compatibility)
-  String get title => name;
+  /// Alias for title (backwards compatibility)
+  String get name => title;
 
   /// Alias for startDate
   DateTime get start => startDate;
@@ -115,8 +123,8 @@ class Event {
 
     return Event(
       id: (json['Id'] ?? json['id'])?.toString() ?? '0',
-      name: json['Name'] as String? ?? json['name'] as String? ??
-            json['Title'] as String? ?? json['title'] as String? ?? '',
+      title: json['Title'] as String? ?? json['title'] as String? ??
+            json['Name'] as String? ?? json['name'] as String? ?? '',
       description: json['Description'] as String? ?? json['description'] as String?,
       location: json['Location'] as String? ?? json['location'] as String?,
       address: json['Address'] as String? ?? json['address'] as String?,
@@ -130,9 +138,11 @@ class Event {
       participantsCount: _parseInt(json['ParticipantsCount'] ?? json['participantsCount']) ?? 0,
       organizationId: (json['OrganizationId'] ?? json['organizationId'])?.toString() ?? '0',
       organizationName: json['OrganizationName'] as String? ?? json['organizationName'] as String?,
-      categoryId: (json['CategoryId'] ?? json['categoryId'])?.toString(),
-      categoryName: json['CategoryName'] as String? ?? json['categoryName'] as String?,
-      status: EventStatus.fromString(json['Status'] as String? ?? json['status'] as String?),
+      activityTypeId: _parseInt(json['ActivityTypeId'] ?? json['activityTypeId']),
+      activityTypeName: json['ActivityTypeName'] as String? ?? json['activityTypeName'] as String?,
+      status: EventStatus.fromString(
+        (json['Status'] ?? json['status'] ?? json['EventStatusId'] ?? json['eventStatusId'])?.toString(),
+      ),
       isFeatured: json['IsFeatured'] as bool? ?? json['isFeatured'] as bool? ?? false,
       isFree: isFreeValue ?? (price == 0),
       isEnrolled: json['IsEnrolled'] as bool? ?? json['isEnrolled'] as bool? ?? false,
@@ -141,7 +151,6 @@ class Event {
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
       locationId: _parseInt(json['LocationId'] ?? json['locationId']),
       eventStatusId: _parseInt(json['EventStatusId'] ?? json['eventStatusId']),
-      activityTypeId: _parseInt(json['ActivityTypeId'] ?? json['activityTypeId']),
     );
   }
 
@@ -170,8 +179,7 @@ class Event {
   Map<String, dynamic> toJson() {
     return {
       'Id': id,
-      'Name': name,
-      'Title': name,
+      'Title': title,
       'Description': description,
       'Location': location,
       'Address': address,
@@ -185,8 +193,8 @@ class Event {
       'ParticipantsCount': participantsCount,
       'OrganizationId': organizationId,
       'OrganizationName': organizationName,
-      'CategoryId': categoryId,
-      'CategoryName': categoryName,
+      'ActivityTypeId': activityTypeId,
+      'ActivityTypeName': activityTypeName,
       'Status': status.name,
       'IsFeatured': isFeatured,
       'IsFree': isFree,
@@ -196,13 +204,12 @@ class Event {
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
       'LocationId': locationId,
       'EventStatusId': eventStatusId,
-      'ActivityTypeId': activityTypeId,
     };
   }
 
   Event copyWith({
     String? id,
-    String? name,
+    String? title,
     String? description,
     String? location,
     String? address,
@@ -214,8 +221,8 @@ class Event {
     int? participantsCount,
     String? organizationId,
     String? organizationName,
-    String? categoryId,
-    String? categoryName,
+    int? activityTypeId,
+    String? activityTypeName,
     EventStatus? status,
     bool? isFeatured,
     bool? isFree,
@@ -225,11 +232,10 @@ class Event {
     DateTime? lastModifiedAt,
     int? locationId,
     int? eventStatusId,
-    int? activityTypeId,
   }) {
     return Event(
       id: id ?? this.id,
-      name: name ?? this.name,
+      title: title ?? this.title,
       description: description ?? this.description,
       location: location ?? this.location,
       address: address ?? this.address,
@@ -241,8 +247,8 @@ class Event {
       participantsCount: participantsCount ?? this.participantsCount,
       organizationId: organizationId ?? this.organizationId,
       organizationName: organizationName ?? this.organizationName,
-      categoryId: categoryId ?? this.categoryId,
-      categoryName: categoryName ?? this.categoryName,
+      activityTypeId: activityTypeId ?? this.activityTypeId,
+      activityTypeName: activityTypeName ?? this.activityTypeName,
       status: status ?? this.status,
       isFeatured: isFeatured ?? this.isFeatured,
       isFree: isFree ?? this.isFree,
@@ -252,7 +258,6 @@ class Event {
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
       locationId: locationId ?? this.locationId,
       eventStatusId: eventStatusId ?? this.eventStatusId,
-      activityTypeId: activityTypeId ?? this.activityTypeId,
     );
   }
 
@@ -263,8 +268,9 @@ class Event {
   }
 
   /// Check if event has available spots
+  /// Treats null or 0 maxParticipants as unlimited
   bool get hasAvailableSpots {
-    if (maxParticipants == null) return true;
+    if (maxParticipants == null || maxParticipants == 0) return true;
     return participantsCount < maxParticipants!;
   }
 

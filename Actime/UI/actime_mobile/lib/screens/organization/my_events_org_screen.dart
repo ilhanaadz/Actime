@@ -320,7 +320,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             date: _formatDate(event.startDate),
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
-            icon: _getCategoryIcon(event.categoryName),
+            icon: Icons.event,
             showFavorite: false,
             showEditButton: true,
             showDeleteButton: true,
