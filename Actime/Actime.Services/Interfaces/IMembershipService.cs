@@ -6,5 +6,6 @@ namespace Actime.Services.Interfaces
 {
     public interface IMembershipService : ICrudService<Membership, MembershipSearchObject, MembershipInsertRequest, MembershipUpdateRequest>
     {
+        Task<bool> CancelMembershipByOrganizationAsync(int userId, int organizationId);
     }
 }

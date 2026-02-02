@@ -9,5 +9,8 @@
         public DateTime? EndDate { get; set; }
         public int MembershipStatusId { get; set; }
         public bool IsDeleted { get; set; }
+
+        public User? User { get; set; }
+        public Organization? Organization { get; set; }
     }
 }

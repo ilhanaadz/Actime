@@ -21,7 +21,8 @@ namespace Actime.Controllers
         [AllowAnonymous]
         public override Task<Organization?> GetById(int id)
         {
-            return _organizationService.GetByIdAsync(id);
+            var currentUserId = GetCurrentUserIdOrNull();
+            return _organizationService.GetByIdForUserAsync(id, currentUserId);
         }
 
         [AllowAnonymous]
@@ -88,6 +89,16 @@ namespace Actime.Controllers
 
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                 throw new Exception("Invalid token");
+
+            return userId;
+        }
+
+        private int? GetCurrentUserIdOrNull()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                return null;
 
             return userId;
         }

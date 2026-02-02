@@ -11,5 +11,7 @@
         public DateTime? EndDateTo { get; set; }
         public bool? IsActive { get; set; }
         public bool IncludeDeleted { get; set; } = false;
+        public bool IncludeUser { get; set; } = false;
+        public bool IncludeOrganization { get; set; } = false;
     }
 }

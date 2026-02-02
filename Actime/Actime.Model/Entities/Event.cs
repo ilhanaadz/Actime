@@ -16,5 +16,17 @@
         public int ActivityTypeId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime LastModifiedAt { get; set; }
+
+        public string? OrganizationName { get; set; }
+        public string? OrganizationLogoUrl { get; set; }
+        public string? Location { get; set; }
+        public string? ActivityTypeName { get; set; }
+        public int ParticipantsCount { get; set; }
+
+        /// <summary>
+        /// Indicates if the current user is enrolled in this event.
+        /// Populated based on CurrentUserId from search object.
+        /// </summary>
+        public bool IsEnrolled { get; set; }
     }
 }

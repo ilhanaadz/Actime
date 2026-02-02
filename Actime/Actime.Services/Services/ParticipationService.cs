@@ -111,7 +111,7 @@ namespace Actime.Services.Services
             return false; // Return false in order to disable hard delete
         }
 
-        protected override Task OnCreating(Database.Participation entity, ParticipationInsertRequest request)
+        protected override async Task OnCreating(Database.Participation entity, ParticipationInsertRequest request)
         {
             entity.CreatedAt = DateTime.Now;
 
@@ -120,7 +120,26 @@ namespace Actime.Services.Services
                 entity.RegistrationDate = DateTime.Now;
             }
 
-            return Task.CompletedTask;
+            // If AttendanceStatusId is not set (0), determine based on event
+            if (entity.AttendanceStatusId == 0)
+            {
+                var eventEntity = await _context.Set<Database.Event>()
+                    .FirstOrDefaultAsync(e => e.Id == entity.EventId);
+
+                if (eventEntity != null && eventEntity.IsFree)
+                {
+                    // Free event: set as Going and Paid
+                    entity.AttendanceStatusId = 2;  // Going
+                    entity.PaymentStatusId = 2;     // Paid
+                    entity.PaymentMethodId = 6;     // Other
+                }
+                else
+                {
+                    // Paid event: set as PendingResponse
+                    entity.AttendanceStatusId = 1;  // PendingResponse
+                    entity.PaymentStatusId = 1;     // Pending
+                }
+            }
         }
 
         protected override async Task OnCreated(Database.Participation entity)
@@ -242,6 +261,46 @@ namespace Actime.Services.Services
                 .ToListAsync();
 
             return _mapper.Map<List<Model.Entities.Participation>>(participations);
+        }
+
+        public async Task<bool> CancelParticipationAsync(int eventId, int userId)
+        {
+            var participation = await _context.Set<Database.Participation>()
+                .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId && !x.IsDeleted);
+
+            if (participation == null)
+                return false;
+
+            // Soft delete the participation
+            participation.IsDeleted = true;
+            participation.DeletedAt = DateTime.Now;
+
+            // Update attendance status to NotGoing (4)
+            participation.AttendanceStatusId = 4;
+
+            await _context.SaveChangesAsync();
+
+            // Send notification
+            var eventData = await _context.Set<Database.Event>()
+                .Where(e => e.Id == eventId)
+                .Select(e => new { e.Title })
+                .FirstOrDefaultAsync();
+
+            if (eventData != null)
+            {
+                var message = $"You have cancelled your participation for event '{eventData.Title}'.";
+
+                var notificationDto = new NotificationInsertRequest
+                {
+                    UserId = userId,
+                    Message = message,
+                    IsRead = false
+                };
+
+                await _notificationService.CreateAsync(notificationDto);
+            }
+
+            return true;
         }
     }
 }

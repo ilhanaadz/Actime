@@ -10,5 +10,6 @@ namespace Actime.Services.Interfaces
         Task<bool> UpdatePaymentStatusAsync(int id, int paymentStatusId);
         Task<int> GetEventParticipantCountAsync(int eventId);
         Task<List<Participation>> GetUserParticipationsAsync(int userId);
+        Task<bool> CancelParticipationAsync(int eventId, int userId);
     }
 }

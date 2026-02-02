@@ -21,6 +21,7 @@ namespace Actime.Services.Database
             modelBuilder.Entity<PaymentMethod>().HasQueryFilter(pm => !pm.IsDeleted);
             modelBuilder.Entity<Report>().HasQueryFilter(r => !r.IsDeleted);
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<GalleryImage>().HasQueryFilter(g => !g.IsDeleted);
 
             modelBuilder.Entity<Event>()
                 .HasOne(e => e.Organization)
@@ -119,5 +120,6 @@ namespace Actime.Services.Database
         public DbSet<ReportType> ReportTypes { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<GalleryImage> GalleryImages { get; set; }
     }
 }

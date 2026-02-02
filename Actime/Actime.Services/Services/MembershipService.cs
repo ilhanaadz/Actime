@@ -3,6 +3,7 @@ using Actime.Model.SearchObjects;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Actime.Services.Services
 {
@@ -14,6 +15,16 @@ namespace Actime.Services.Services
 
         protected override IQueryable<Membership> ApplyFilter(IQueryable<Membership> query, MembershipSearchObject search)
         {
+            if (search.IncludeUser)
+            {
+                query = query.Include(x => x.User);
+            }
+
+            if (search.IncludeOrganization)
+            {
+                query = query.Include(x => x.Organization);
+            }
+
             if (!search.IncludeDeleted)
             {
                 query = query.Where(x => !x.IsDeleted);
@@ -78,6 +89,28 @@ namespace Actime.Services.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        public async Task<bool> CancelMembershipByOrganizationAsync(int userId, int organizationId)
+        {
+            // Find pending (1) or active (2) membership
+            var membership = await _context.Set<Membership>()
+                .FirstOrDefaultAsync(m =>
+                    m.UserId == userId &&
+                    m.OrganizationId == organizationId &&
+                    (m.MembershipStatusId == 1 || m.MembershipStatusId == 2) && // Pending or Active
+                    !m.IsDeleted);
+
+            if (membership == null)
+                return false;
+
+            // Set membership status to cancelled (4)
+            membership.MembershipStatusId = 4;
+            membership.EndDate = DateTime.Now;
+            membership.LastModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

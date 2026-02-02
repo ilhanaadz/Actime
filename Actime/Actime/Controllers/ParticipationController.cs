@@ -48,5 +48,15 @@ namespace Actime.Controllers
             var participations = await _participationService.GetUserParticipationsAsync(userId);
             return Ok(participations);
         }
+
+        [HttpDelete("event/{eventId}/user/{userId}")]
+        public async Task<ActionResult<bool>> CancelParticipation(int eventId, int userId)
+        {
+            var result = await _participationService.CancelParticipationAsync(eventId, userId);
+            if (!result)
+                return NotFound();
+
+            return Ok(result);
+        }
     }
 }

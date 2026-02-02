@@ -1,4 +1,6 @@
-﻿namespace Actime.Model.Requests
+﻿using Actime.Model.Constants;
+
+namespace Actime.Model.Requests
 {
     public class EventInsertRequest
     {
@@ -9,8 +11,13 @@
         public DateTime End { get; set; }
         public int LocationId { get; set; }
         public int? MaxParticipants { get; set; }
-         public bool IsFree { get; set; }
+        public bool IsFree { get; set; }
         public decimal Price { get; set; }
         public int ActivityTypeId { get; set; }
+
+        /// <summary>
+        /// Event status. Defaults to Pending if not specified.
+        /// </summary>
+        public int EventStatusId { get; set; } = (int)EventStatus.Pending;
     }
 }

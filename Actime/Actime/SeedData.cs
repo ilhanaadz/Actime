@@ -306,7 +306,14 @@ namespace Actime
                 context.Locations.AddRange(
                     new Location { AddressId = 1, Capacity = 100, Name = "Main hall", ContactInfo = "info@venue1.com" },
                     new Location { AddressId = 2, Capacity = 50, Name = "Central stadium", ContactInfo = "contact@venue2.com" },
-                    new Location { AddressId = 3, Capacity = 200, Name = "Outdoor stage", ContactInfo = "events@venue3.com" }
+                    new Location { AddressId = 3, Capacity = 200, Name = "Outdoor stage", ContactInfo = "events@venue3.com" },
+                    new Location { AddressId = 4, Capacity = 30, Name = "Mountain Base Camp", ContactInfo = "camp@hiking.com" },
+                    new Location { AddressId = 5, Capacity = 500, Name = "City Arena", ContactInfo = "arena@city.com" },
+                    new Location { AddressId = 6, Capacity = 80, Name = "Community Center", ContactInfo = "community@center.com" },
+                    new Location { AddressId = 7, Capacity = 150, Name = "Sports Complex", ContactInfo = "sports@complex.com" },
+                    new Location { AddressId = 8, Capacity = 40, Name = "Training Ground", ContactInfo = "training@ground.com" },
+                    new Location { AddressId = 9, Capacity = 60, Name = "Fitness Studio", ContactInfo = "studio@fitness.com" },
+                    new Location { AddressId = 10, Capacity = 250, Name = "Conference Hall", ContactInfo = "conference@hall.com" }
                 );
 
                 await context.SaveChangesAsync();
@@ -314,65 +321,943 @@ namespace Actime
 
             if (!context.Events.Any())
             {
-                context.Events.Add(
+                var events = new List<Event>
+                {
+                    // Global Hiking Club events (OrganizationId = 1)
                     new Event
                     {
                         OrganizationId = 1,
                         Title = "Annual Hiking Trip",
-                        Description = "Explore nature with us.",
+                        Description = "Explore nature with us on our flagship annual event. Join experienced guides through scenic mountain trails.",
                         Start = DateTime.Now.AddDays(10),
                         End = DateTime.Now.AddDays(12),
                         LocationId = 1,
                         MaxParticipants = 50,
                         IsFree = false,
                         Price = 100,
+                        EventStatusId = 2, // Upcoming
+                        ActivityTypeId = 2  // MultiDayTrip
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Weekend Mountain Adventure",
+                        Description = "A challenging weekend hike for experienced hikers. Beautiful views guaranteed!",
+                        Start = DateTime.Now.AddDays(3),
+                        End = DateTime.Now.AddDays(4),
+                        LocationId = 4,
+                        MaxParticipants = 25,
+                        IsFree = false,
+                        Price = 75,
+                        EventStatusId = 2,
+                        ActivityTypeId = 2
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Beginner's Nature Walk",
+                        Description = "Perfect for newcomers! Easy trails with nature education.",
+                        Start = DateTime.Now.AddDays(5),
+                        End = DateTime.Now.AddDays(5).AddHours(6),
+                        LocationId = 1,
+                        MaxParticipants = 40,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 1  // SingleDayTrip
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Night Hike Under the Stars",
+                        Description = "Experience the magic of hiking at night with professional guides.",
+                        Start = DateTime.Now.AddDays(7),
+                        End = DateTime.Now.AddDays(7).AddHours(5),
+                        LocationId = 4,
+                        MaxParticipants = 20,
+                        IsFree = false,
+                        Price = 30,
                         EventStatusId = 2,
                         ActivityTypeId = 1
-                    }
-                );
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Summer Camp Adventure",
+                        Description = "Week-long camping and hiking adventure for all skill levels.",
+                        Start = DateTime.Now.AddDays(20),
+                        End = DateTime.Now.AddDays(27),
+                        LocationId = 4,
+                        MaxParticipants = 30,
+                        IsFree = false,
+                        Price = 350,
+                        EventStatusId = 2,
+                        ActivityTypeId = 15  // Camp
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Photography Hike",
+                        Description = "Combine hiking with nature photography lessons from a professional.",
+                        Start = DateTime.Now.AddDays(14),
+                        End = DateTime.Now.AddDays(14).AddHours(8),
+                        LocationId = 1,
+                        MaxParticipants = 15,
+                        IsFree = false,
+                        Price = 45,
+                        EventStatusId = 2,
+                        ActivityTypeId = 13  // Workshop
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Trail Maintenance Volunteering",
+                        Description = "Help us maintain our beautiful trails! Tools and lunch provided.",
+                        Start = DateTime.Now.AddDays(8),
+                        End = DateTime.Now.AddDays(8).AddHours(6),
+                        LocationId = 4,
+                        MaxParticipants = 50,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 6  // Volunteering
+                    },
+                    // Past events for Global Hiking Club
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Spring Forest Exploration",
+                        Description = "Discover the beauty of spring in our local forests.",
+                        Start = DateTime.Now.AddDays(-30),
+                        End = DateTime.Now.AddDays(-30).AddHours(6),
+                        LocationId = 1,
+                        MaxParticipants = 35,
+                        IsFree = false,
+                        Price = 25,
+                        EventStatusId = 4,  // Completed
+                        ActivityTypeId = 1
+                    },
+                    new Event
+                    {
+                        OrganizationId = 1,
+                        Title = "Winter Hiking Challenge",
+                        Description = "Brave the cold with our winter hiking event!",
+                        Start = DateTime.Now.AddDays(-60),
+                        End = DateTime.Now.AddDays(-59),
+                        LocationId = 4,
+                        MaxParticipants = 20,
+                        IsFree = false,
+                        Price = 60,
+                        EventStatusId = 4,
+                        ActivityTypeId = 2
+                    },
 
+                    // Sport for All Association events (OrganizationId = 2)
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Weekly Football Training",
+                        Description = "Regular training session for all skill levels. Improve your game!",
+                        Start = DateTime.Now.AddDays(2),
+                        End = DateTime.Now.AddDays(2).AddHours(2),
+                        LocationId = 2,
+                        MaxParticipants = 30,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3  // Training
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Inter-Club Football Match",
+                        Description = "Friendly match against neighboring sports club.",
+                        Start = DateTime.Now.AddDays(6),
+                        End = DateTime.Now.AddDays(6).AddHours(3),
+                        LocationId = 5,
+                        MaxParticipants = 50,
+                        IsFree = false,
+                        Price = 10,
+                        EventStatusId = 2,
+                        ActivityTypeId = 4  // Match
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Youth Football Tournament",
+                        Description = "Annual youth tournament for ages 10-16. Multiple age categories.",
+                        Start = DateTime.Now.AddDays(15),
+                        End = DateTime.Now.AddDays(16),
+                        LocationId = 5,
+                        MaxParticipants = 200,
+                        IsFree = false,
+                        Price = 15,
+                        EventStatusId = 2,
+                        ActivityTypeId = 11  // Competition
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Sports Day Celebration",
+                        Description = "Annual celebration of sports with games, activities, and prizes!",
+                        Start = DateTime.Now.AddDays(25),
+                        End = DateTime.Now.AddDays(25).AddHours(8),
+                        LocationId = 5,
+                        MaxParticipants = 300,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 12  // Celebration
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Coaching Workshop",
+                        Description = "Learn modern coaching techniques from certified professionals.",
+                        Start = DateTime.Now.AddDays(9),
+                        End = DateTime.Now.AddDays(9).AddHours(4),
+                        LocationId = 6,
+                        MaxParticipants = 40,
+                        IsFree = false,
+                        Price = 50,
+                        EventStatusId = 2,
+                        ActivityTypeId = 13
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Team Building Sports Day",
+                        Description = "Corporate team building through various sports activities.",
+                        Start = DateTime.Now.AddDays(12),
+                        End = DateTime.Now.AddDays(12).AddHours(6),
+                        LocationId = 7,
+                        MaxParticipants = 100,
+                        IsFree = false,
+                        Price = 35,
+                        EventStatusId = 2,
+                        ActivityTypeId = 9  // TeamBuilding
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Charity Football Match",
+                        Description = "Play for a cause! All proceeds go to local children's hospital.",
+                        Start = DateTime.Now.AddDays(18),
+                        End = DateTime.Now.AddDays(18).AddHours(4),
+                        LocationId = 5,
+                        MaxParticipants = 100,
+                        IsFree = false,
+                        Price = 20,
+                        EventStatusId = 2,
+                        ActivityTypeId = 7  // Fundraising
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "New Member Recruitment Day",
+                        Description = "Open day for anyone interested in joining our sports community!",
+                        Start = DateTime.Now.AddDays(4),
+                        End = DateTime.Now.AddDays(4).AddHours(5),
+                        LocationId = 6,
+                        MaxParticipants = 150,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 14  // RecruitmentEvent
+                    },
+                    // Past events for Sport for All
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Spring Football League Finals",
+                        Description = "Season finale with exciting matches and awards ceremony.",
+                        Start = DateTime.Now.AddDays(-14),
+                        End = DateTime.Now.AddDays(-14).AddHours(6),
+                        LocationId = 5,
+                        MaxParticipants = 200,
+                        IsFree = false,
+                        Price = 15,
+                        EventStatusId = 4,
+                        ActivityTypeId = 11
+                    },
+                    new Event
+                    {
+                        OrganizationId = 2,
+                        Title = "Monthly Members Meeting",
+                        Description = "Regular meeting to discuss club matters and upcoming events.",
+                        Start = DateTime.Now.AddDays(-7),
+                        End = DateTime.Now.AddDays(-7).AddHours(2),
+                        LocationId = 6,
+                        MaxParticipants = 50,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 4,
+                        ActivityTypeId = 5  // Meeting
+                    },
+
+                    // FitLife Gym events (OrganizationId = 3)
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Morning Yoga Session",
+                        Description = "Start your day with energizing yoga. All levels welcome!",
+                        Start = DateTime.Now.AddDays(1),
+                        End = DateTime.Now.AddDays(1).AddHours(1.5),
+                        LocationId = 9,
+                        MaxParticipants = 25,
+                        IsFree = false,
+                        Price = 12,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "HIIT Bootcamp",
+                        Description = "High-intensity interval training for maximum results!",
+                        Start = DateTime.Now.AddDays(2),
+                        End = DateTime.Now.AddDays(2).AddHours(1),
+                        LocationId = 3,
+                        MaxParticipants = 30,
+                        IsFree = false,
+                        Price = 15,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Volleyball Tournament",
+                        Description = "Indoor volleyball competition. Teams of 6 required.",
+                        Start = DateTime.Now.AddDays(11),
+                        End = DateTime.Now.AddDays(11).AddHours(5),
+                        LocationId = 7,
+                        MaxParticipants = 60,
+                        IsFree = false,
+                        Price = 20,
+                        EventStatusId = 2,
+                        ActivityTypeId = 11
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Nutrition Workshop",
+                        Description = "Learn about proper nutrition for fitness goals.",
+                        Start = DateTime.Now.AddDays(13),
+                        End = DateTime.Now.AddDays(13).AddHours(3),
+                        LocationId = 10,
+                        MaxParticipants = 50,
+                        IsFree = false,
+                        Price = 25,
+                        EventStatusId = 2,
+                        ActivityTypeId = 13
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Boxing Basics",
+                        Description = "Introduction to boxing techniques and fitness boxing.",
+                        Start = DateTime.Now.AddDays(5),
+                        End = DateTime.Now.AddDays(5).AddHours(2),
+                        LocationId = 9,
+                        MaxParticipants = 20,
+                        IsFree = false,
+                        Price = 18,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Gym Open Day",
+                        Description = "Free access to all facilities! Try any class for free.",
+                        Start = DateTime.Now.AddDays(7),
+                        End = DateTime.Now.AddDays(7).AddHours(10),
+                        LocationId = 3,
+                        MaxParticipants = 200,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 10  // Promotion
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Personal Training Session",
+                        Description = "One-on-one session with certified personal trainer.",
+                        Start = DateTime.Now.AddDays(3),
+                        End = DateTime.Now.AddDays(3).AddHours(1),
+                        LocationId = 9,
+                        MaxParticipants = 5,
+                        IsFree = false,
+                        Price = 40,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Fitness Challenge Month Kickoff",
+                        Description = "Start of our monthly fitness challenge. Prizes for winners!",
+                        Start = DateTime.Now.AddDays(1),
+                        End = DateTime.Now.AddDays(1).AddHours(2),
+                        LocationId = 3,
+                        MaxParticipants = 100,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 11
+                    },
+                    // Past events for FitLife Gym
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Weight Loss Challenge Finale",
+                        Description = "Celebration of our 8-week weight loss challenge participants.",
+                        Start = DateTime.Now.AddDays(-21),
+                        End = DateTime.Now.AddDays(-21).AddHours(3),
+                        LocationId = 10,
+                        MaxParticipants = 80,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 4,
+                        ActivityTypeId = 12
+                    },
+                    new Event
+                    {
+                        OrganizationId = 3,
+                        Title = "Marathon Training Program Start",
+                        Description = "12-week training program for upcoming city marathon.",
+                        Start = DateTime.Now.AddDays(-45),
+                        End = DateTime.Now.AddDays(-45).AddHours(2),
+                        LocationId = 8,
+                        MaxParticipants = 40,
+                        IsFree = false,
+                        Price = 80,
+                        EventStatusId = 4,
+                        ActivityTypeId = 3
+                    }
+                };
+
+                await context.Events.AddRangeAsync(events);
                 await context.SaveChangesAsync();
             }
 
             if (!context.Memberships.Any())
             {
-                context.Memberships.Add(new Membership { UserId = 2, OrganizationId = 1, MembershipStatusId = 2 });
+                var memberships = new List<Membership>
+                {
+                    // Global Hiking Club members (OrganizationId = 1)
+                    new Membership { UserId = 2, OrganizationId = 1, MembershipStatusId = 2 },  // jane.khan - Active
+                    new Membership { UserId = 3, OrganizationId = 1, MembershipStatusId = 2 },  // mia.connor - Active
+                    new Membership { UserId = 4, OrganizationId = 1, MembershipStatusId = 2 },  // joe.garcia - Active
+                    new Membership { UserId = 5, OrganizationId = 1, MembershipStatusId = 1 },  // jack.tanaka - Pending
+                    new Membership { UserId = 6, OrganizationId = 1, MembershipStatusId = 2 },  // michael.popov - Active
+                    new Membership { UserId = 7, OrganizationId = 1, MembershipStatusId = 3 },  // lea.muller - Suspended
+
+                    // Sport for All Association members (OrganizationId = 2)
+                    new Membership { UserId = 2, OrganizationId = 2, MembershipStatusId = 2 },  // jane.khan - Active
+                    new Membership { UserId = 4, OrganizationId = 2, MembershipStatusId = 2 },  // joe.garcia - Active
+                    new Membership { UserId = 5, OrganizationId = 2, MembershipStatusId = 2 },  // jack.tanaka - Active
+                    new Membership { UserId = 8, OrganizationId = 2, MembershipStatusId = 2 },  // sara.zahra - Active
+                    new Membership { UserId = 9, OrganizationId = 2, MembershipStatusId = 2 },  // dino.silva - Active
+                    new Membership { UserId = 10, OrganizationId = 2, MembershipStatusId = 1 }, // ema.patel - Pending
+                    new Membership { UserId = 11, OrganizationId = 2, MembershipStatusId = 2 }, // una.andersson - Active
+
+                    // FitLife Gym members (OrganizationId = 3)
+                    new Membership { UserId = 3, OrganizationId = 3, MembershipStatusId = 2 },  // mia.connor - Active
+                    new Membership { UserId = 6, OrganizationId = 3, MembershipStatusId = 2 },  // michael.popov - Active
+                    new Membership { UserId = 7, OrganizationId = 3, MembershipStatusId = 2 },  // lea.muller - Active
+                    new Membership { UserId = 8, OrganizationId = 3, MembershipStatusId = 2 },  // sara.zahra - Active
+                    new Membership { UserId = 9, OrganizationId = 3, MembershipStatusId = 1 },  // dino.silva - Pending
+                    new Membership { UserId = 10, OrganizationId = 3, MembershipStatusId = 2 }, // ema.patel - Active
+                    new Membership { UserId = 11, OrganizationId = 3, MembershipStatusId = 5 }  // una.andersson - Expired
+                };
+
+                await context.Memberships.AddRangeAsync(memberships);
                 await context.SaveChangesAsync();
             }
 
             if (!context.Participations.Any())
             {
-                context.Participations.Add(new Participation { UserId = 2, EventId = 1, AttendanceStatusId = 2 });
+                var participations = new List<Participation>
+                {
+                    // Annual Hiking Trip (EventId = 1)
+                    new Participation { UserId = 2, EventId = 1, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 3, EventId = 1, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 4, EventId = 1, AttendanceStatusId = 3 },  // joe.garcia - Maybe
+                    new Participation { UserId = 6, EventId = 1, AttendanceStatusId = 2 },  // michael.popov - Going
+
+                    // Weekend Mountain Adventure (EventId = 2)
+                    new Participation { UserId = 2, EventId = 2, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 3, EventId = 2, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 6, EventId = 2, AttendanceStatusId = 2 },  // michael.popov - Going
+
+                    // Beginner's Nature Walk (EventId = 3)
+                    new Participation { UserId = 5, EventId = 3, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 7, EventId = 3, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 8, EventId = 3, AttendanceStatusId = 3 },  // sara.zahra - Maybe
+
+                    // Night Hike Under the Stars (EventId = 4)
+                    new Participation { UserId = 2, EventId = 4, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 4, EventId = 4, AttendanceStatusId = 2 },  // joe.garcia - Going
+
+                    // Summer Camp Adventure (EventId = 5)
+                    new Participation { UserId = 2, EventId = 5, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 3, EventId = 5, AttendanceStatusId = 3 },  // mia.connor - Maybe
+                    new Participation { UserId = 6, EventId = 5, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 4, EventId = 5, AttendanceStatusId = 1 },  // joe.garcia - PendingResponse
+
+                    // Photography Hike (EventId = 6)
+                    new Participation { UserId = 3, EventId = 6, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 7, EventId = 6, AttendanceStatusId = 2 },  // lea.muller - Going
+
+                    // Trail Maintenance Volunteering (EventId = 7)
+                    new Participation { UserId = 2, EventId = 7, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 4, EventId = 7, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 6, EventId = 7, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 5, EventId = 7, AttendanceStatusId = 3 },  // jack.tanaka - Maybe
+
+                    // Past events participations
+                    // Spring Forest Exploration (EventId = 8)
+                    new Participation { UserId = 2, EventId = 8, AttendanceStatusId = 5 },  // jane.khan - Attended
+                    new Participation { UserId = 3, EventId = 8, AttendanceStatusId = 5 },  // mia.connor - Attended
+                    new Participation { UserId = 4, EventId = 8, AttendanceStatusId = 6 },  // joe.garcia - Missed
+
+                    // Winter Hiking Challenge (EventId = 9)
+                    new Participation { UserId = 2, EventId = 9, AttendanceStatusId = 5 },  // jane.khan - Attended
+                    new Participation { UserId = 6, EventId = 9, AttendanceStatusId = 5 },  // michael.popov - Attended
+
+                    // Weekly Football Training (EventId = 10)
+                    new Participation { UserId = 4, EventId = 10, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 5, EventId = 10, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 8, EventId = 10, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 9, EventId = 10, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 11, EventId = 10, AttendanceStatusId = 3 }, // una.andersson - Maybe
+
+                    // Inter-Club Football Match (EventId = 11)
+                    new Participation { UserId = 4, EventId = 11, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 5, EventId = 11, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 8, EventId = 11, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 9, EventId = 11, AttendanceStatusId = 2 },  // dino.silva - Going
+
+                    // Youth Football Tournament (EventId = 12)
+                    new Participation { UserId = 5, EventId = 12, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 9, EventId = 12, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 11, EventId = 12, AttendanceStatusId = 2 }, // una.andersson - Going
+
+                    // Sports Day Celebration (EventId = 13)
+                    new Participation { UserId = 2, EventId = 13, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 4, EventId = 13, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 5, EventId = 13, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 8, EventId = 13, AttendanceStatusId = 3 },  // sara.zahra - Maybe
+                    new Participation { UserId = 9, EventId = 13, AttendanceStatusId = 2 },  // dino.silva - Going
+
+                    // Coaching Workshop (EventId = 14)
+                    new Participation { UserId = 4, EventId = 14, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 11, EventId = 14, AttendanceStatusId = 2 }, // una.andersson - Going
+
+                    // Team Building Sports Day (EventId = 15)
+                    new Participation { UserId = 5, EventId = 15, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 8, EventId = 15, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 9, EventId = 15, AttendanceStatusId = 2 },  // dino.silva - Going
+
+                    // Charity Football Match (EventId = 16)
+                    new Participation { UserId = 2, EventId = 16, AttendanceStatusId = 2 },  // jane.khan - Going
+                    new Participation { UserId = 4, EventId = 16, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 5, EventId = 16, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 9, EventId = 16, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 11, EventId = 16, AttendanceStatusId = 3 }, // una.andersson - Maybe
+
+                    // New Member Recruitment Day (EventId = 17)
+                    new Participation { UserId = 10, EventId = 17, AttendanceStatusId = 2 }, // ema.patel - Going
+
+                    // Past Sport for All events
+                    // Spring Football League Finals (EventId = 18)
+                    new Participation { UserId = 4, EventId = 18, AttendanceStatusId = 5 },  // joe.garcia - Attended
+                    new Participation { UserId = 5, EventId = 18, AttendanceStatusId = 5 },  // jack.tanaka - Attended
+                    new Participation { UserId = 9, EventId = 18, AttendanceStatusId = 5 },  // dino.silva - Attended
+
+                    // Monthly Members Meeting (EventId = 19)
+                    new Participation { UserId = 2, EventId = 19, AttendanceStatusId = 5 },  // jane.khan - Attended
+                    new Participation { UserId = 4, EventId = 19, AttendanceStatusId = 5 },  // joe.garcia - Attended
+                    new Participation { UserId = 8, EventId = 19, AttendanceStatusId = 6 },  // sara.zahra - Missed
+
+                    // FitLife Gym events
+                    // Morning Yoga Session (EventId = 20)
+                    new Participation { UserId = 3, EventId = 20, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 7, EventId = 20, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 8, EventId = 20, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 10, EventId = 20, AttendanceStatusId = 3 }, // ema.patel - Maybe
+
+                    // HIIT Bootcamp (EventId = 21)
+                    new Participation { UserId = 3, EventId = 21, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 6, EventId = 21, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 8, EventId = 21, AttendanceStatusId = 2 },  // sara.zahra - Going
+
+                    // Volleyball Tournament (EventId = 22)
+                    new Participation { UserId = 3, EventId = 22, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 6, EventId = 22, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 7, EventId = 22, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 8, EventId = 22, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 10, EventId = 22, AttendanceStatusId = 2 }, // ema.patel - Going
+
+                    // Nutrition Workshop (EventId = 23)
+                    new Participation { UserId = 3, EventId = 23, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 7, EventId = 23, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 10, EventId = 23, AttendanceStatusId = 2 }, // ema.patel - Going
+
+                    // Boxing Basics (EventId = 24)
+                    new Participation { UserId = 6, EventId = 24, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 9, EventId = 24, AttendanceStatusId = 2 },  // dino.silva - Going
+
+                    // Gym Open Day (EventId = 25)
+                    new Participation { UserId = 2, EventId = 25, AttendanceStatusId = 3 },  // jane.khan - Maybe
+                    new Participation { UserId = 5, EventId = 25, AttendanceStatusId = 2 },  // jack.tanaka - Going
+                    new Participation { UserId = 11, EventId = 25, AttendanceStatusId = 2 }, // una.andersson - Going
+
+                    // Personal Training Session (EventId = 26)
+                    new Participation { UserId = 6, EventId = 26, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 10, EventId = 26, AttendanceStatusId = 2 }, // ema.patel - Going
+
+                    // Fitness Challenge Month Kickoff (EventId = 27)
+                    new Participation { UserId = 3, EventId = 27, AttendanceStatusId = 2 },  // mia.connor - Going
+                    new Participation { UserId = 6, EventId = 27, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 7, EventId = 27, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 8, EventId = 27, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 10, EventId = 27, AttendanceStatusId = 2 }, // ema.patel - Going
+
+                    // Past FitLife Gym events
+                    // Weight Loss Challenge Finale (EventId = 28)
+                    new Participation { UserId = 3, EventId = 28, AttendanceStatusId = 5 },  // mia.connor - Attended
+                    new Participation { UserId = 7, EventId = 28, AttendanceStatusId = 5 },  // lea.muller - Attended
+                    new Participation { UserId = 8, EventId = 28, AttendanceStatusId = 5 },  // sara.zahra - Attended
+                    new Participation { UserId = 10, EventId = 28, AttendanceStatusId = 6 }, // ema.patel - Missed
+
+                    // Marathon Training Program Start (EventId = 29)
+                    new Participation { UserId = 6, EventId = 29, AttendanceStatusId = 5 },  // michael.popov - Attended
+                    new Participation { UserId = 8, EventId = 29, AttendanceStatusId = 5 }   // sara.zahra - Attended
+                };
+
+                await context.Participations.AddRangeAsync(participations);
                 await context.SaveChangesAsync();
             }
 
             if (!context.Reviews.Any())
             {
-                context.Reviews.Add(new Review
+                var reviews = new List<Review>
                 {
-                    UserId = 2,
-                    OrganizationId = 1,
-                    Score = 5,
-                    Text = "Great organization with amazing events!",
-                    CreatedAt = DateTime.Now
-                });
+                    // Reviews for Global Hiking Club (OrganizationId = 1)
+                    new Review
+                    {
+                        UserId = 2,
+                        OrganizationId = 1,
+                        Score = 5,
+                        Text = "Great organization with amazing events! The guides are very professional and knowledgeable.",
+                        CreatedAt = DateTime.Now.AddDays(-30)
+                    },
+                    new Review
+                    {
+                        UserId = 3,
+                        OrganizationId = 1,
+                        Score = 5,
+                        Text = "Best hiking club in the region! I've made so many friends here.",
+                        CreatedAt = DateTime.Now.AddDays(-25)
+                    },
+                    new Review
+                    {
+                        UserId = 4,
+                        OrganizationId = 1,
+                        Score = 4,
+                        Text = "Very well organized events. Would love to see more beginner-friendly options.",
+                        CreatedAt = DateTime.Now.AddDays(-20)
+                    },
+                    new Review
+                    {
+                        UserId = 6,
+                        OrganizationId = 1,
+                        Score = 5,
+                        Text = "The annual hiking trip was unforgettable! Can't wait for next year.",
+                        CreatedAt = DateTime.Now.AddDays(-15)
+                    },
 
+                    // Reviews for Sport for All Association (OrganizationId = 2)
+                    new Review
+                    {
+                        UserId = 2,
+                        OrganizationId = 2,
+                        Score = 4,
+                        Text = "Great community for sports lovers. The football training is excellent!",
+                        CreatedAt = DateTime.Now.AddDays(-28)
+                    },
+                    new Review
+                    {
+                        UserId = 4,
+                        OrganizationId = 2,
+                        Score = 5,
+                        Text = "Amazing coaching staff and facilities. Highly recommended!",
+                        CreatedAt = DateTime.Now.AddDays(-22)
+                    },
+                    new Review
+                    {
+                        UserId = 5,
+                        OrganizationId = 2,
+                        Score = 5,
+                        Text = "The youth tournament was perfectly organized. My kids loved it!",
+                        CreatedAt = DateTime.Now.AddDays(-18)
+                    },
+                    new Review
+                    {
+                        UserId = 8,
+                        OrganizationId = 2,
+                        Score = 4,
+                        Text = "Good variety of events. The charity matches are a wonderful initiative.",
+                        CreatedAt = DateTime.Now.AddDays(-12)
+                    },
+                    new Review
+                    {
+                        UserId = 9,
+                        OrganizationId = 2,
+                        Score = 5,
+                        Text = "Best sports club I've ever been part of! Friendly atmosphere and professional training.",
+                        CreatedAt = DateTime.Now.AddDays(-8)
+                    },
+                    new Review
+                    {
+                        UserId = 11,
+                        OrganizationId = 2,
+                        Score = 4,
+                        Text = "Great facilities and well-maintained equipment. Would recommend to anyone.",
+                        CreatedAt = DateTime.Now.AddDays(-5)
+                    },
+
+                    // Reviews for FitLife Gym (OrganizationId = 3)
+                    new Review
+                    {
+                        UserId = 3,
+                        OrganizationId = 3,
+                        Score = 5,
+                        Text = "Excellent gym with modern equipment. The trainers are very supportive!",
+                        CreatedAt = DateTime.Now.AddDays(-26)
+                    },
+                    new Review
+                    {
+                        UserId = 6,
+                        OrganizationId = 3,
+                        Score = 4,
+                        Text = "Good variety of classes. The HIIT bootcamp is intense but effective!",
+                        CreatedAt = DateTime.Now.AddDays(-21)
+                    },
+                    new Review
+                    {
+                        UserId = 7,
+                        OrganizationId = 3,
+                        Score = 5,
+                        Text = "Love the yoga sessions! Perfect way to start my mornings.",
+                        CreatedAt = DateTime.Now.AddDays(-16)
+                    },
+                    new Review
+                    {
+                        UserId = 8,
+                        OrganizationId = 3,
+                        Score = 5,
+                        Text = "The nutrition workshop changed my approach to fitness. Highly valuable!",
+                        CreatedAt = DateTime.Now.AddDays(-10)
+                    },
+                    new Review
+                    {
+                        UserId = 10,
+                        OrganizationId = 3,
+                        Score = 4,
+                        Text = "Clean facilities and friendly staff. The personal training is worth the price.",
+                        CreatedAt = DateTime.Now.AddDays(-6)
+                    },
+                    new Review
+                    {
+                        UserId = 11,
+                        OrganizationId = 3,
+                        Score = 3,
+                        Text = "Good gym overall. Sometimes it gets too crowded during peak hours.",
+                        CreatedAt = DateTime.Now.AddDays(-3)
+                    }
+                };
+
+                await context.Reviews.AddRangeAsync(reviews);
                 await context.SaveChangesAsync();
             }
 
             if (!context.Schedules.Any())
             {
-                context.Schedules.Add(new Schedule
+                var schedules = new List<Schedule>
                 {
-                    OrganizationId = 1,
-                    DayOfWeek = "Monday",
-                    StartTime = TimeOnly.Parse("08:00"),
-                    EndTime = TimeOnly.Parse("16:00"),
-                    ActivityTypeId = 1,
-                    LocationId = 1,
-                    Description = "Weekly hike."
-                });
+                    // Global Hiking Club schedules (OrganizationId = 1)
+                    new Schedule
+                    {
+                        OrganizationId = 1,
+                        DayOfWeek = "Saturday",
+                        StartTime = TimeOnly.Parse("08:00"),
+                        EndTime = TimeOnly.Parse("16:00"),
+                        ActivityTypeId = 1,  // SingleDayTrip
+                        LocationId = 1,
+                        Description = "Weekly Saturday hike for all levels."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 1,
+                        DayOfWeek = "Sunday",
+                        StartTime = TimeOnly.Parse("07:00"),
+                        EndTime = TimeOnly.Parse("12:00"),
+                        ActivityTypeId = 1,
+                        LocationId = 4,
+                        Description = "Morning nature walk - beginner friendly."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 1,
+                        DayOfWeek = "Wednesday",
+                        StartTime = TimeOnly.Parse("18:00"),
+                        EndTime = TimeOnly.Parse("20:00"),
+                        ActivityTypeId = 5,  // Meeting
+                        LocationId = 1,
+                        Description = "Weekly planning meeting for upcoming events."
+                    },
 
+                    // Sport for All Association schedules (OrganizationId = 2)
+                    new Schedule
+                    {
+                        OrganizationId = 2,
+                        DayOfWeek = "Monday",
+                        StartTime = TimeOnly.Parse("17:00"),
+                        EndTime = TimeOnly.Parse("19:00"),
+                        ActivityTypeId = 3,  // Training
+                        LocationId = 2,
+                        Description = "Football training - intermediate level."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 2,
+                        DayOfWeek = "Wednesday",
+                        StartTime = TimeOnly.Parse("17:00"),
+                        EndTime = TimeOnly.Parse("19:00"),
+                        ActivityTypeId = 3,
+                        LocationId = 2,
+                        Description = "Football training - advanced level."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 2,
+                        DayOfWeek = "Friday",
+                        StartTime = TimeOnly.Parse("16:00"),
+                        EndTime = TimeOnly.Parse("18:00"),
+                        ActivityTypeId = 3,
+                        LocationId = 5,
+                        Description = "Youth football training (ages 10-16)."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 2,
+                        DayOfWeek = "Saturday",
+                        StartTime = TimeOnly.Parse("10:00"),
+                        EndTime = TimeOnly.Parse("12:00"),
+                        ActivityTypeId = 4,  // Match
+                        LocationId = 5,
+                        Description = "Weekend friendly matches."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 2,
+                        DayOfWeek = "Thursday",
+                        StartTime = TimeOnly.Parse("19:00"),
+                        EndTime = TimeOnly.Parse("21:00"),
+                        ActivityTypeId = 5,
+                        LocationId = 6,
+                        Description = "Monthly members meeting (first Thursday of month)."
+                    },
+
+                    // FitLife Gym schedules (OrganizationId = 3)
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Monday",
+                        StartTime = TimeOnly.Parse("06:30"),
+                        EndTime = TimeOnly.Parse("07:30"),
+                        ActivityTypeId = 3,
+                        LocationId = 9,
+                        Description = "Morning yoga class."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Tuesday",
+                        StartTime = TimeOnly.Parse("18:00"),
+                        EndTime = TimeOnly.Parse("19:00"),
+                        ActivityTypeId = 3,
+                        LocationId = 3,
+                        Description = "HIIT bootcamp session."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Wednesday",
+                        StartTime = TimeOnly.Parse("06:30"),
+                        EndTime = TimeOnly.Parse("07:30"),
+                        ActivityTypeId = 3,
+                        LocationId = 9,
+                        Description = "Morning yoga class."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Thursday",
+                        StartTime = TimeOnly.Parse("18:00"),
+                        EndTime = TimeOnly.Parse("19:00"),
+                        ActivityTypeId = 3,
+                        LocationId = 3,
+                        Description = "HIIT bootcamp session."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Friday",
+                        StartTime = TimeOnly.Parse("06:30"),
+                        EndTime = TimeOnly.Parse("07:30"),
+                        ActivityTypeId = 3,
+                        LocationId = 9,
+                        Description = "Morning yoga class."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Friday",
+                        StartTime = TimeOnly.Parse("17:00"),
+                        EndTime = TimeOnly.Parse("18:30"),
+                        ActivityTypeId = 3,
+                        LocationId = 9,
+                        Description = "Boxing basics class."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Saturday",
+                        StartTime = TimeOnly.Parse("09:00"),
+                        EndTime = TimeOnly.Parse("11:00"),
+                        ActivityTypeId = 4,
+                        LocationId = 7,
+                        Description = "Volleyball practice and games."
+                    },
+                    new Schedule
+                    {
+                        OrganizationId = 3,
+                        DayOfWeek = "Sunday",
+                        StartTime = TimeOnly.Parse("10:00"),
+                        EndTime = TimeOnly.Parse("12:00"),
+                        ActivityTypeId = 13,  // Workshop
+                        LocationId = 10,
+                        Description = "Monthly nutrition and wellness workshop."
+                    }
+                };
+
+                await context.Schedules.AddRangeAsync(schedules);
                 await context.SaveChangesAsync();
             }
         }

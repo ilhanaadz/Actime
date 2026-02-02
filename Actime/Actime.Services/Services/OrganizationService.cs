@@ -22,6 +22,7 @@ namespace Actime.Services.Services
                 .Include(o => o.Address)
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
+                .Include(o => o.Memberships)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             if (entity == null)
@@ -80,7 +81,8 @@ namespace Actime.Services.Services
                 .Include(o => o.Category)
                 .Include(o => o.Address)
                     .ThenInclude(a => a.City)
-                        .ThenInclude(c => c.Country);
+                        .ThenInclude(c => c.Country)
+                .Include(o => o.Memberships);
 
             if (!string.IsNullOrWhiteSpace(search?.Text))
             {
@@ -174,6 +176,7 @@ namespace Actime.Services.Services
                 .Include(o => o.Address)
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
+                .Include(o => o.Memberships)
                 .FirstOrDefaultAsync(o => o.UserId == userId && !o.IsDeleted);
 
             if (organization == null)
@@ -185,7 +188,27 @@ namespace Actime.Services.Services
             return dto;
         }
 
-        private void PopulateOrganizationFields(Model.Entities.Organization dto, Organization entity)
+        public async Task<Model.Entities.Organization?> GetByIdForUserAsync(int organizationId, int? currentUserId)
+        {
+            var entity = await _context.Organizations
+                .Include(o => o.User)
+                .Include(o => o.Category)
+                .Include(o => o.Address)
+                    .ThenInclude(a => a.City)
+                        .ThenInclude(c => c.Country)
+                .Include(o => o.Memberships)
+                .FirstOrDefaultAsync(o => o.Id == organizationId);
+
+            if (entity == null)
+                return null;
+
+            var dto = _mapper.Map<Model.Entities.Organization>(entity);
+            PopulateOrganizationFields(dto, entity, currentUserId);
+
+            return dto;
+        }
+
+        private void PopulateOrganizationFields(Model.Entities.Organization dto, Organization entity, int? currentUserId = null)
         {
             if (entity.Category != null)
             {
@@ -207,6 +230,32 @@ namespace Actime.Services.Services
                 }
 
                 dto.Address = string.Join(", ", addressParts);
+            }
+
+            // Count only active memberships (MembershipStatusId = 2 is active)
+            dto.MembersCount = entity.Memberships?.Count(m => m.MembershipStatusId == 2) ?? 0;
+
+            // Check if current user is an active member and get their membership status
+            if (currentUserId.HasValue && entity.Memberships != null)
+            {
+                var userMembership = entity.Memberships
+                    .FirstOrDefault(m => m.UserId == currentUserId.Value);
+
+                if (userMembership != null)
+                {
+                    dto.MembershipStatusId = userMembership.MembershipStatusId;
+                    dto.IsMember = userMembership.MembershipStatusId == 2; // 2 = active membership
+                }
+                else
+                {
+                    dto.MembershipStatusId = null;
+                    dto.IsMember = false;
+                }
+            }
+            else
+            {
+                dto.MembershipStatusId = null;
+                dto.IsMember = false;
             }
         }
     }

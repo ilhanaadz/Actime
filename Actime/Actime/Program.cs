@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 //NOTE: Explore lifetimes: https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes
 builder.Services.AddMapster();
 builder.Services.AddTransient<ICityService, CityService>();
-builder.Services.AddTransient<ICountryService, CountryService>(); //NOTE: Check lifetime if it's base service.
+builder.Services.AddTransient<ICountryService, CountryService>();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IAddressService, AddressService>();
 builder.Services.AddTransient<ILocationService, LocationService>();
@@ -30,8 +30,12 @@ builder.Services.AddTransient<IParticipationService, ParticipationService>();
 builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
-builder.Services.AddScoped<IEmailService, EmailService>();  // Check scope
+builder.Services.AddTransient<IGalleryImageService, GalleryImageService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEventRecommenderService, EventRecommenderService>();
+
+builder.Services.AddHostedService<EventRecommenderBackgroundService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -46,7 +50,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.User.RequireUniqueEmail = true;
-    
 })
 .AddEntityFrameworkStores<ActimeContext>()
 .AddDefaultTokenProviders();
@@ -73,10 +76,43 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
         ClockSkew = TimeSpan.Zero
     };
+
+    // Return JSON error responses instead of HTML/plain text
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            // Skip the default behavior
+            context.HandleResponse();
+
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+
+            var result = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                message = "Neautorizovan pristup. Molimo prijavite se."
+            });
+
+            return context.Response.WriteAsync(result);
+        },
+        OnForbidden = context =>
+        {
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+
+            var result = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                message = "Nemate dozvolu za pristup ovom resursu."
+            });
+
+            return context.Response.WriteAsync(result);
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -92,12 +128,31 @@ using (var scope = app.Services.CreateScope())
     await SeedData.Initialize(db, services);
 }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Add global exception handler to return JSON errors
+app.UseExceptionHandler(errorApp =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        if (error != null)
+        {
+            var result = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                message = error.Error.Message
+            });
+
+            await context.Response.WriteAsync(result);
+        }
+    });
+});
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
@@ -105,5 +160,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
