@@ -148,6 +148,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
+builder.Services.AddSignalR();
+
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();

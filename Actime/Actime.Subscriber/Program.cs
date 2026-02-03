@@ -9,7 +9,7 @@ using var provider = services.BuildServiceProvider();
 var bus = provider.GetRequiredService<IBus>();
 
 await bus.PubSub.SubscribeAsync<Event>(
-    "event",
+    "notification-service",
     HandleTextMessage
 );
 

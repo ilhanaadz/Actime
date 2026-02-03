@@ -35,14 +35,24 @@ class EventService {
         case 'pending':
           effectiveStatusId = 1;
           break;
-        case 'active':
+        case 'upcoming':
           effectiveStatusId = 2;
           break;
-        case 'closed':
+        case 'inprogress':
+        case 'in progress':
           effectiveStatusId = 3;
           break;
-        case 'cancelled':
+        case 'completed':
           effectiveStatusId = 4;
+          break;
+        case 'cancelled':
+          effectiveStatusId = 5;
+          break;
+        case 'postponed':
+          effectiveStatusId = 6;
+          break;
+        case 'rescheduled':
+          effectiveStatusId = 7;
           break;
       }
     }

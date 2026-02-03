@@ -60,9 +60,18 @@ namespace Actime.Services.Services
         {
             if (!string.IsNullOrWhiteSpace(search.SortBy))
             {
-                query = search.SortDescending
-                    ? query.OrderByDescending(e => EF.Property<object>(e, search.SortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, search.SortBy));
+                // Get the actual property name with correct casing
+                var propertyName = typeof(TEntity).GetProperty(search.SortBy,
+                    System.Reflection.BindingFlags.IgnoreCase |
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.Instance)?.Name;
+
+                if (propertyName != null)
+                {
+                    query = search.SortDescending
+                        ? query.OrderByDescending(e => EF.Property<object>(e, propertyName))
+                        : query.OrderBy(e => EF.Property<object>(e, propertyName));
+                }
             }
 
             return query;

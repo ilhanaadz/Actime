@@ -172,11 +172,17 @@ class Event {
       case 1:
         return EventStatus.pending;
       case 2:
-        return EventStatus.active;
+        return EventStatus.upcoming;
       case 3:
-        return EventStatus.closed;
+        return EventStatus.inProgress;
       case 4:
+        return EventStatus.completed;
+      case 5:
         return EventStatus.cancelled;
+      case 6:
+        return EventStatus.postponed;
+      case 7:
+        return EventStatus.rescheduled;
       default:
         return EventStatus.pending;
     }
@@ -189,11 +195,17 @@ class Event {
       case 1:
         return 'pending';
       case 2:
-        return 'active';
+        return 'upcoming';
       case 3:
-        return 'closed';
+        return 'inProgress';
       case 4:
+        return 'completed';
+      case 5:
         return 'cancelled';
+      case 6:
+        return 'postponed';
+      case 7:
+        return 'rescheduled';
       default:
         return 'unknown';
     }
@@ -208,10 +220,13 @@ class Event {
   int get hashCode => id.hashCode;
 }
 
-/// Event status enum
+/// Event status enum matching backend EventStatus
 enum EventStatus {
-  pending,
-  active,
-  closed,
-  cancelled,
+  pending,      // 1
+  upcoming,     // 2
+  inProgress,   // 3
+  completed,    // 4
+  cancelled,    // 5
+  postponed,    // 6
+  rescheduled,  // 7
 }

@@ -40,12 +40,22 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
     }
   }
 
-  String? _getStatusFilter() {
+  int? _getStatusFilter() {
     switch (_selectedFilter) {
-      case 'Active':
-        return 'active';
-      case 'Closed':
-        return 'closed';
+      case 'Pending':
+        return 1;
+      case 'Upcoming':
+        return 2;
+      case 'In Progress':
+        return 3;
+      case 'Completed':
+        return 4;
+      case 'Cancelled':
+        return 5;
+      case 'Postponed':
+        return 6;
+      case 'Rescheduled':
+        return 7;
       default:
         return null;
     }
@@ -63,7 +73,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
         perPage: 10,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
         sortBy: _sortBy,
-        status: _getStatusFilter(),
+        eventStatusId: _getStatusFilter(),
         startDate: _filterDate,
       );
 
@@ -444,21 +454,33 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
     String label;
 
     switch (status) {
-      case EventStatus.active:
-        bgColor = Colors.green;
-        label = 'Active';
-        break;
-      case EventStatus.closed:
-        bgColor = Colors.grey;
-        label = 'Closed';
-        break;
       case EventStatus.pending:
+        bgColor = Colors.orange;
+        label = 'Pending';
+        break;
+      case EventStatus.upcoming:
         bgColor = const Color(0xFF0D7C8C);
         label = 'Upcoming';
+        break;
+      case EventStatus.inProgress:
+        bgColor = Colors.green;
+        label = 'In Progress';
+        break;
+      case EventStatus.completed:
+        bgColor = Colors.grey;
+        label = 'Completed';
         break;
       case EventStatus.cancelled:
         bgColor = Colors.red;
         label = 'Cancelled';
+        break;
+      case EventStatus.postponed:
+        bgColor = Colors.amber;
+        label = 'Postponed';
+        break;
+      case EventStatus.rescheduled:
+        bgColor = Colors.blue;
+        label = 'Rescheduled';
         break;
     }
 
