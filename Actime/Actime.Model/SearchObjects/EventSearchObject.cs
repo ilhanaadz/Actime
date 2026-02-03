@@ -16,5 +16,7 @@ namespace Actime.Model.SearchObjects
         /// Set by controller from authenticated user context.
         /// </summary>
         public int? CurrentUserId { get; set; }
+
+        public DateTime? FilterDate { get; set; }
     }
 }

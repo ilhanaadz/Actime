@@ -137,6 +137,11 @@ namespace Actime.Services.Services
                 query = query.Where(e => e.EventStatusId != (int)Model.Constants.EventStatus.Pending);
             }
 
+            if (search.FilterDate != null)
+            {
+                query = query.Where(e => e.Start == search.FilterDate);
+            }
+
             return query;
         }
 
