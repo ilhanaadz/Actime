@@ -19,7 +19,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   int _currentPage = 1;
   int _totalPages = 1;
-  String _sortBy = 'name';
+  String _sortBy = 'FirstName';
   bool _isLoading = true;
   String? _error;
   List<User> _users = [];
@@ -33,6 +33,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   void _onSearchChanged() {
     if (_searchController.text.isEmpty || _searchController.text.length >= 2) {
+      setState(() => _currentPage = 1);
       _loadUsers();
     }
   }
@@ -130,7 +131,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             searchController: _searchController,
             sortItems: [
               const PopupMenuItem(
-                value: 'name',
+                value: 'FirstName',
                 child: Row(
                   children: [
                     Icon(Icons.sort_by_alpha, size: 18),
@@ -140,7 +141,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 ),
               ),
               const PopupMenuItem(
-                value: 'email',
+                value: 'Email',
                 child: Row(
                   children: [
                     Icon(Icons.email, size: 18),
@@ -151,7 +152,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               ),
             ],
             onSortSelected: (value) {
-              setState(() => _sortBy = value);
+              setState(() {
+                _sortBy = value;
+                _currentPage = 1;
+              });
               _loadUsers();
             },
           ),

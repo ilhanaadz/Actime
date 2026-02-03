@@ -34,6 +34,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
 
   void _onSearchChanged() {
     if (_searchController.text.isEmpty || _searchController.text.length >= 2) {
+      setState(() => _currentPage = 1);
       _loadOrganizations();
     }
   }
@@ -174,7 +175,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
           searchController: _searchController,
           sortItems: [
             const PopupMenuItem(
-              value: 'name',
+              value: 'Name',
               child: Row(
                 children: [
                   Icon(Icons.sort_by_alpha, size: 18),
@@ -184,7 +185,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
               ),
             ),
             const PopupMenuItem(
-              value: 'members_count',
+              value: 'MembersCount',
               child: Row(
                 children: [
                   Icon(Icons.people, size: 18),
@@ -194,7 +195,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
               ),
             ),
             const PopupMenuItem(
-              value: 'events_count',
+              value: 'EventsCount',
               child: Row(
                 children: [
                   Icon(Icons.event, size: 18),
@@ -205,7 +206,10 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
             ),
           ],
           onSortSelected: (value) {
-            setState(() => _sortBy = value);
+            setState(() {
+              _sortBy = value;
+              _currentPage = 1;
+            });
             _loadOrganizations();
           },
         ),

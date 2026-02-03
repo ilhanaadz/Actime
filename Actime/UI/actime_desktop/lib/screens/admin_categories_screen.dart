@@ -20,7 +20,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
   int _currentPage = 1;
   int _totalPages = 1;
-  String _sortBy = 'name';
+  String _sortBy = 'Name';
   bool _isLoading = true;
   String? _error;
   List<Category> _categories = [];
@@ -34,6 +34,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
   void _onSearchChanged() {
     if (_searchController.text.isEmpty || _searchController.text.length >= 2) {
+      setState(() => _currentPage = 1);     
       _loadCategories();
     }
   }
@@ -204,7 +205,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
             searchController: _searchController,
             sortItems: [
               const PopupMenuItem(
-                value: 'name',
+                value: 'Name',
                 child: Row(
                   children: [
                     Icon(Icons.sort_by_alpha, size: 18),
@@ -214,7 +215,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                 ),
               ),
               const PopupMenuItem(
-                value: 'organizations_count',
+                value: 'OrganizationsCount',
                 child: Row(
                   children: [
                     Icon(Icons.apartment, size: 18),
@@ -225,7 +226,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               ),
             ],
             onSortSelected: (value) {
-              setState(() => _sortBy = value);
+              setState(() {
+                _currentPage = 1;
+                _sortBy = value;
+              });
               _loadCategories();
             },
           ),

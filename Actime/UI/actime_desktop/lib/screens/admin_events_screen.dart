@@ -36,6 +36,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
 
   void _onSearchChanged() {
     if (_searchController.text.isEmpty || _searchController.text.length >= 2) {
+      setState(() => _currentPage = 1);
       _loadEvents();
     }
   }
@@ -156,7 +157,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
             searchController: _searchController,
             sortItems: [
               const PopupMenuItem(
-                value: 'start_date',
+                value: 'Start',
                 child: Row(
                   children: [
                     Icon(Icons.calendar_today, size: 18),
@@ -166,7 +167,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                 ),
               ),
               const PopupMenuItem(
-                value: 'name',
+                value: 'Title',
                 child: Row(
                   children: [
                     Icon(Icons.sort_by_alpha, size: 18),
@@ -176,7 +177,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                 ),
               ),
               const PopupMenuItem(
-                value: 'participants_count',
+                value: 'ParticipantsCount',
                 child: Row(
                   children: [
                     Icon(Icons.people, size: 18),
@@ -187,7 +188,10 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
               ),
             ],
             onSortSelected: (value) {
-              setState(() => _sortBy = value);
+              setState(() { 
+                _sortBy = value;
+                _currentPage = 1;
+              });
               _loadEvents();
             },
             additionalActions: Row(

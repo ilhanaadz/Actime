@@ -39,7 +39,7 @@ class OrganizationService {
     };
 
     if (search != null && search.isNotEmpty) {
-      queryParams['Search'] = search;
+      queryParams['Text'] = search;
     }
     if (sortBy != null) {
       queryParams['SortBy'] = sortBy;
