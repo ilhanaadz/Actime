@@ -1,4 +1,5 @@
-﻿using Actime.Model.Entities;
+﻿using Actime.Model.Common;
+using Actime.Model.Entities;
 using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Interfaces;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 namespace Actime.Controllers
 {
     [Authorize]
-    public class UserController : BaseController<User, TextSearchObject>
+    public class UserController : BaseController<User, UserSearchObject>
     {
         private readonly IUserService _userService;
 
