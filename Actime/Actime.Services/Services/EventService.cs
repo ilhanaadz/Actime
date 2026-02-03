@@ -28,6 +28,7 @@ namespace Actime.Services.Services
                 .AsQueryable();
 
             query = ApplyFilter(query, search);
+            query = ApplySorting(query, search);
 
             int? totalCount = search.IncludeTotalCount ? await query.CountAsync() : null;
 
@@ -77,6 +78,7 @@ namespace Actime.Services.Services
         private Model.Entities.Event MapEventWithRelations(Database.Event entity, int? currentUserId)
         {
             var mapped = _mapper.Map<Model.Entities.Event>(entity);
+            
             mapped.OrganizationName = entity.Organization?.Name;
             mapped.OrganizationLogoUrl = entity.Organization?.LogoUrl;
             mapped.Location = entity.Location?.Name;

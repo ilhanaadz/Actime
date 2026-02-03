@@ -1,15 +1,14 @@
-﻿using Actime.Model.Common;
+﻿using Actime.Model.Constants;
 using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
 using MapsterMapper;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Actime.Services.Services
 {
-    public class UserService : BaseService<Model.Entities.User, TextSearchObject, Database.User>, IUserService
+    public class UserService : BaseService<Model.Entities.User, UserSearchObject, Database.User>, IUserService
     {
         private readonly ActimeContext _context;
         private readonly IMapper _mapper;
@@ -81,6 +80,26 @@ namespace Actime.Services.Services
         {
             return await _context.Users
                 .AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        }
+
+        protected override IQueryable<User> ApplyFilter(IQueryable<User> query, UserSearchObject search)
+        {
+            search ??= new UserSearchObject();
+
+            if (!string.IsNullOrEmpty(search.Text))
+            {
+                query = query.Where(u => (u.FirstName != null && u.FirstName.ToLower().Contains(search.Text.ToLower())) ||
+                                        (u.LastName != null && u.LastName.ToLower().Contains(search.Text.ToLower())));
+            }
+
+            if (!search.IncludeOrganizations)
+            {
+                query = query.Where(u => !_context.Organizations.Any(o => o.UserId == u.Id && !o.IsDeleted));
+            }
+
+            query = query.Where(u => !_context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == (int)Role.Admin));
+
+            return query;
         }
     }
 }
