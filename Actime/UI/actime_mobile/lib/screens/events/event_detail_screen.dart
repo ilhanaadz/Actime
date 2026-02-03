@@ -25,6 +25,7 @@ class EventDetailScreen extends StatefulWidget {
 class _EventDetailScreenState extends State<EventDetailScreen> {
   final _eventService = EventService();
   final _favoriteService = FavoriteService();
+  final _authService = AuthService();
 
   Event? _event;
   bool _isLoading = true;
@@ -128,6 +129,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        // Refresh user data to update event counts
+        await _authService.getCurrentUser();
         // Refresh event data
         _loadEvent();
       } else {
@@ -170,6 +173,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        // Refresh user data to update event counts
+        await _authService.getCurrentUser();
         // Refresh event data
         _loadEvent();
       } else {
@@ -350,13 +355,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
           ),
         ),
-        IconButton(
-          icon: Icon(
-            _isFavorite ? Icons.favorite : Icons.favorite_border,
-            color: _isFavorite ? Colors.red : AppColors.primary,
+        // Hide favorite button if logged in as organization
+        if (!_authService.isOrganization)
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : AppColors.primary,
+            ),
+            onPressed: _toggleFavorite,
           ),
-          onPressed: _toggleFavorite,
-        ),
       ],
     );
   }
@@ -387,6 +394,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildJoinButton() {
+    // Hide join button if logged in as organization
+    if (_authService.isOrganization) {
+      return const SizedBox.shrink();
+    }
+
     final isUpcoming = _event!.status == EventStatus.upcoming;
     final isPassed = _event!.status == EventStatus.completed ||
         _event!.status == EventStatus.cancelled ||

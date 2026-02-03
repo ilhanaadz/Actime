@@ -18,7 +18,7 @@ class UserProfileScreen extends StatefulWidget {
   State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindingObserver {
   final _authService = AuthService();
   final _userService = UserService();
 
@@ -29,7 +29,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadUserProfile();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data when app comes back to foreground
+      _loadUserProfile();
+    }
   }
 
   Future<void> _loadUserProfile() async {
@@ -156,16 +171,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         text: _user!.bio!,
                       ),
                     ],
-                    const SizedBox(height: AppDimensions.spacingDefault),
-                    ProfileInfoRow(
-                      icon: Icons.event,
-                      text: '${_user?.eventsCount ?? 0} događaja',
-                    ),
-                    const SizedBox(height: AppDimensions.spacingDefault),
-                    ProfileInfoRow(
-                      icon: Icons.groups,
-                      text: '${_user?.organizationsCount ?? 0} klubova',
-                    ),
+                    // const SizedBox(height: AppDimensions.spacingDefault),
+                    // ProfileInfoRow(
+                    //   icon: Icons.event,
+                    //   text: '${_user?.eventsCount ?? 0} događaja',
+                    // ),
                     const SizedBox(height: AppDimensions.spacingXLarge),
                     _buildMyClubsSection(),
                     const SizedBox(height: AppDimensions.spacingXLarge),

@@ -19,3 +19,4 @@ export 'city_service.dart';
 export 'country_service.dart';
 export 'favorite_service.dart';
 export 'enrollment_service.dart';
+export 'pdf_report_service.dart';

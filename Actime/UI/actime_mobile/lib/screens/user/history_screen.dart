@@ -22,6 +22,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final _userService = UserService();
   final _authService = AuthService();
+  final _participationService = ParticipationService();
   final _eventService = EventService();
 
   List<Enrollment> _memberships = [];
@@ -52,10 +53,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return;
       }
 
-      // Load memberships, upcoming events, and event history
+      // Load memberships and user participated events using new endpoint
       final membershipResponse = await _userService.getUserMemberships();
-      final upcomingResponse = await _userService.getUserEvents();
-      final historyResponse = await _userService.getUserEventHistory();
+      final eventsResponse = await _participationService.getParticipatedEvents(
+        int.parse(currentUser.id),
+      );
 
       if (!mounted) return;
 
@@ -63,24 +65,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (membershipResponse.success && membershipResponse.data != null) {
           _memberships = membershipResponse.data!.data;
         }
-
-        // Combine upcoming and past events
-        final List<Event> allEvents = [];
-        if (upcomingResponse.success && upcomingResponse.data != null) {
-          allEvents.addAll(upcomingResponse.data!.data);
+        if (eventsResponse.success && eventsResponse.data != null) {
+          // Sort events by start date (newest first)
+          _events = eventsResponse.data!;
+          _events.sort((a, b) => b.startDate.compareTo(a.startDate));
         }
-        if (historyResponse.success && historyResponse.data != null) {
-          // Add history events that are not already in upcoming
-          for (final event in historyResponse.data!.data) {
-            if (!allEvents.any((e) => e.id == event.id)) {
-              allEvents.add(event);
-            }
-          }
-        }
-        // Sort by start date (newest first)
-        allEvents.sort((a, b) => b.startDate.compareTo(a.startDate));
-        _events = allEvents;
-
         _isLoading = false;
       });
     } catch (e) {
@@ -155,6 +144,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _cancelMembership(Enrollment membership) async {
     final response = await _userService.cancelMembership(membership.id);
     if (response.success) {
+      // Refresh user data to update organization counts
+      await _authService.getCurrentUser();
       await _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -223,6 +214,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _cancelEvent(Event event) async {
     final response = await _eventService.leaveEvent(event.id);
     if (response.success) {
+      // Refresh user data to update event counts
+      await _authService.getCurrentUser();
       await _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -399,7 +392,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             MaterialPageRoute(
               builder: (context) => ClubDetailScreen(organizationId: org.id),
             ),
-          );
+          ).then((_) => _loadData());
         }
       },
       child: Container(
@@ -566,7 +559,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           MaterialPageRoute(
             builder: (context) => EventDetailScreen(eventId: event.id),
           ),
-        );
+        ).then((_) => _loadData());
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

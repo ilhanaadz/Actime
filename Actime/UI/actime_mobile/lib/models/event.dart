@@ -175,7 +175,7 @@ class Event {
     this.lastModifiedAt,
     this.locationId,
     this.eventStatusId,
-  }) : isFree = isFree ?? (price == 0);
+  }) : isFree = (isFree ?? false) || (price == 0);
 
   /// Alias for title (backwards compatibility)
   String get name => title;
@@ -214,7 +214,7 @@ class Event {
         (json['Status'] ?? json['status'] ?? json['EventStatusId'] ?? json['eventStatusId'])?.toString(),
       ),
       isFeatured: json['IsFeatured'] as bool? ?? json['isFeatured'] as bool? ?? false,
-      isFree: isFreeValue ?? (price == 0),
+      isFree: (isFreeValue ?? false) || (price == 0),
       isEnrolled: json['IsEnrolled'] as bool? ?? json['isEnrolled'] as bool? ?? false,
       imageUrl: json['ImageUrl'] as String? ?? json['imageUrl'] as String?,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),

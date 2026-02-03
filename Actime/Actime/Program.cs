@@ -31,9 +31,18 @@ builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IGalleryImageService, GalleryImageService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEventRecommenderService, EventRecommenderService>();
+
+builder.Services.AddSingleton<IEventRecommenderService, EventRecommenderService>();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IEmailService, DummyEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, EmailService>();
+}
 
 builder.Services.AddHostedService<EventRecommenderBackgroundService>();
 

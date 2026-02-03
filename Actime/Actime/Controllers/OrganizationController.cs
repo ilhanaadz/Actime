@@ -83,6 +83,14 @@ namespace Actime.Controllers
             return NoContent();
         }
 
+        [HttpGet("{id:int}/participations")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PagedResult<EventParticipation>>> GetOrganizationParticipations(int id, [FromQuery] int page = 1, [FromQuery] int perPage = 10)
+        {
+            var result = await _organizationService.GetOrganizationParticipationsAsync(id, page, perPage);
+            return Ok(result);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

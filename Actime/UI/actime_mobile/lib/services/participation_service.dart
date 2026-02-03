@@ -2,6 +2,7 @@ import '../config/api_config.dart';
 import '../models/api_response.dart';
 import '../models/paginated_response.dart';
 import '../models/participation.dart';
+import '../models/event.dart';
 import 'api_service.dart';
 
 /// Participation service
@@ -119,6 +120,19 @@ class ParticipationService {
         final list = json['items'] as List? ?? json as List? ?? [];
         return list.map((item) => Participation.fromJson(item as Map<String, dynamic>)).toList();
       },
+    );
+  }
+
+  /// Get user participated events (returns list of events user has participated in)
+  /// Uses the new endpoint: GET /api/Participation/event/{userId}
+  Future<ApiResponse<List<Event>>> getParticipatedEvents(int userId) async {
+    if (ApiConfig.useMockApi) {
+      return ApiResponse.success([]);
+    }
+
+    return await _apiService.get<List<Event>>(
+      ApiConfig.participationEventByUser(userId),
+      fromJson: (json) => parseListResponse(json, Event.fromJson),
     );
   }
 

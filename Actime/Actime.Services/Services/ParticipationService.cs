@@ -263,6 +263,18 @@ namespace Actime.Services.Services
             return _mapper.Map<List<Model.Entities.Participation>>(participations);
         }
 
+        public async Task<List<Model.Entities.Event>> GetUserParticipatedEventsAsync(int userId)
+        {
+            var events = await _context.Set<Database.Participation>()
+                .Where(x => x.UserId == userId && !x.IsDeleted)
+                    .Include(x => x.Event)
+                .OrderByDescending(x => x.RegistrationDate)
+                .Select(x => x.Event)
+                .ToListAsync();
+
+            return _mapper.Map<List<Model.Entities.Event>>(events);
+        }
+
         public async Task<bool> CancelParticipationAsync(int eventId, int userId)
         {
             var participation = await _context.Set<Database.Participation>()

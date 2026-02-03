@@ -1,12 +1,9 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../constants/participation_constants.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
 import 'mock_api_service.dart';
-import 'token_service.dart';
 
 /// Participant model for event participants
 class Participant {
@@ -309,29 +306,9 @@ class EventService {
       return ApiResponse.error('Morate biti prijavljeni');
     }
 
-    try {
-      final tokenService = TokenService();
-      final token = await tokenService.getAccessToken();
-      final uri = Uri.parse('${ApiConfig.fullUrl}${ApiConfig.recommendedEvents(userId, top: top)}');
-
-      final response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      ).timeout(ApiConfig.connectionTimeout);
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final List<dynamic> data = jsonDecode(response.body);
-        final events = data.map((e) => Event.fromJson(e as Map<String, dynamic>)).toList();
-        return ApiResponse.success(events, statusCode: response.statusCode);
-      }
-
-      return ApiResponse.error('Greška pri dohvatanju preporuka', statusCode: response.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Došlo je do greške: $e');
-    }
+    return await _apiService.get<List<Event>>(
+      ApiConfig.recommendedEvents(userId, top: top),
+      fromJson: (json) => parseListResponse(json, Event.fromJson),
+    );
   }
 }

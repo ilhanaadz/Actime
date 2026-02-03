@@ -1,8 +1,10 @@
-﻿namespace Actime.Services.Interfaces
+﻿using Actime.Model.Entities;
+
+namespace Actime.Services.Interfaces
 {
     public interface IEventRecommenderService
     {
         void TrainModel();
-        List<int> RecommendEvents(int userId, int numberOfResults);
+        List<Event> RecommendEvents(int userId, int numberOfResults);
     }
 }

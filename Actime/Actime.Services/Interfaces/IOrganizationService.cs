@@ -1,4 +1,5 @@
-﻿using Actime.Model.Entities;
+﻿using Actime.Model.Common;
+using Actime.Model.Entities;
 using Actime.Model.Requests;
 using Actime.Model.SearchObjects;
 
@@ -11,5 +12,6 @@ namespace Actime.Services.Interfaces
         Task<bool> UserOwnsOrganizationAsync(int userId, int organizationId);
         Task<Organization?> GetByUserIdAsync(int userId);
         Task<Organization?> GetByIdForUserAsync(int organizationId, int? currentUserId);
+        Task<PagedResult<EventParticipation>> GetOrganizationParticipationsAsync(int organizationId, int page = 1, int perPage = 10);
     }
 }

@@ -20,6 +20,7 @@ class PeopleOrgScreen extends StatefulWidget {
 
 class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
   final _organizationService = OrganizationService();
+  final _pdfReportService = PdfReportService();
 
   int _selectedTab = 0; // 0 = Participations, 1 = Enrollments
   int _selectedTimeFilter = 0; // 0 = Events, 1 = Months, 2 = Years
@@ -28,6 +29,7 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
   List<Membership> _pendingEnrollments = [];
   int _totalParticipations = 0;
   bool _isLoading = true;
+  bool _isGeneratingReport = false;
   String? _error;
 
   @override
@@ -75,6 +77,108 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _generateParticipationsReport() async {
+    setState(() => _isGeneratingReport = true);
+
+    try {
+      // Fetch organization details for name/logo
+      final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
+
+      if (!orgResponse.success || orgResponse.data == null) {
+        throw Exception('Failed to load organization details');
+      }
+
+      final org = orgResponse.data!;
+
+      // Generate PDF
+      final response = await _pdfReportService.generateParticipationsReport(
+        organizationId: widget.organizationId,
+        organizationName: org.name,
+        organizationLogoUrl: org.logoUrl,
+        participations: _participations,
+        totalParticipations: _totalParticipations,
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Izvještaj uspješno generisan'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      } else {
+        _showErrorSnackbar(response.message ?? 'Greška pri generisanju izvještaja');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackbar('Greška: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingReport = false);
+      }
+    }
+  }
+
+  Future<void> _generateEnrollmentsReport() async {
+    setState(() => _isGeneratingReport = true);
+
+    try {
+      final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
+
+      if (!orgResponse.success || orgResponse.data == null) {
+        throw Exception('Failed to load organization details');
+      }
+
+      final org = orgResponse.data!;
+
+      final response = await _pdfReportService.generateEnrollmentsReport(
+        organizationId: widget.organizationId,
+        organizationName: org.name,
+        organizationLogoUrl: org.logoUrl,
+        enrollments: _approvedEnrollments,
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Izvještaj uspješno generisan'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      } else {
+        _showErrorSnackbar(response.message ?? 'Greška pri generisanju izvještaja');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackbar('Greška: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingReport = false);
+      }
+    }
+  }
+
+  void _handleGenerateReport() {
+    if (_selectedTab == 0) {
+      _generateParticipationsReport();
+    } else {
+      _generateEnrollmentsReport();
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -228,8 +332,6 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
             ],
           ),
         ),
-        // Time filters
-        _buildTimeFilters(),
         const SizedBox(height: 8),
         // Participations list
         Expanded(
@@ -306,50 +408,6 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeFilters() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _buildFilterChip('Events', 0),
-          const SizedBox(width: 8),
-          _buildFilterChip('Months', 1),
-          const SizedBox(width: 8),
-          _buildFilterChip('Years', 2),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, int index) {
-    final isActive = _selectedTimeFilter == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTimeFilter = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? AppColors.primary : Colors.grey.shade300,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? Colors.white : Colors.grey,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
         ),
       ),
     );
@@ -463,47 +521,7 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
           ),
         ),
         const Divider(height: 1),
-        // Column headers
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Text(
-                  'Individual',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  'Months',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  'Years',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        const SizedBox(height: 8),
         // Enrolled users list
         Expanded(
           child: RefreshIndicator(
@@ -588,20 +606,26 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Generate report coming soon')),
-          );
-        },
-        child: const Row(
+        onTap: _isGeneratingReport ? null : _handleGenerateReport,
+        child: Row(
           children: [
-            Icon(Icons.description_outlined, size: 20, color: AppColors.primary),
-            SizedBox(width: 8),
+            if (_isGeneratingReport)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              )
+            else
+              const Icon(Icons.description_outlined, size: 20, color: AppColors.primary),
+            const SizedBox(width: 8),
             Text(
-              'Generate report',
+              _isGeneratingReport ? 'Generisanje izvještaja...' : 'Generate report',
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.primary,
+                color: _isGeneratingReport ? AppColors.textMuted : AppColors.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),

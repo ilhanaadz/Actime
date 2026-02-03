@@ -204,6 +204,7 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
         children: [
           _buildSearchFilterRow(),
           const Divider(height: 1),
+          const SizedBox(height: 16),
           Expanded(
             child: _buildContent(),
           ),

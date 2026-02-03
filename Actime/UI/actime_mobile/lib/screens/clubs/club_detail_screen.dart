@@ -28,6 +28,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   final _organizationService = OrganizationService();
   final _userService = UserService();
   final _reviewService = ReviewService();
+  final _authService = AuthService();
 
   Organization? _organization;
   List<Review> _reviews = [];
@@ -123,6 +124,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        // Refresh user data to update organization counts
+        await _authService.getCurrentUser();
         // Refresh organization data
         _loadOrganization();
       } else {
@@ -556,7 +559,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
               organizationName: _organization!.name,
             ),
           ),
-        ).then((_) => _loadOrganization());
+        ).then((_) async {
+          // Refresh user data to update organization counts
+          await _authService.getCurrentUser();
+          _loadOrganization();
+        });
       },
     );
   }

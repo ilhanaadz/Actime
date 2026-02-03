@@ -1,30 +1,37 @@
 ﻿using Actime.Model.Entities;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
+using MapsterMapper;
 using Microsoft.ML;
 using Microsoft.ML.Trainers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Actime.Services.Services
 {
     public class EventRecommenderService : IEventRecommenderService
     {
         private readonly MLContext _mlContext;
-        private readonly ActimeContext _context;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IMapper _mapper;
 
         private ITransformer? _model;
         private readonly object _modelLock = new();
 
-        public EventRecommenderService(ActimeContext context)
+        public EventRecommenderService(IServiceScopeFactory scopeFactory, IMapper mapper)
         {
             _mlContext = new MLContext(seed: 42);
-            _context = context;
+            _scopeFactory = scopeFactory;
+            _mapper = mapper;
         }
 
         public void TrainModel()
         {
             lock (_modelLock)
             {
-                var interactions = _context.Participations
+                using var scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ActimeContext>();
+
+                var interactions = context.Participations
                     .Select(x => new EventInteraction
                     {
                         UserId = (uint)x.UserId,
@@ -63,26 +70,51 @@ namespace Actime.Services.Services
             }
         }
 
-        public List<int> RecommendEvents(int userId, int numberOfResults)
+        public List<Model.Entities.Event> RecommendEvents(int userId, int numberOfResults)
         {
-            var model = _model;
-            if (model == null)
-                return new List<int>();
+            if (_model == null)
+            {
+                lock (_modelLock)
+                {
+                    if (_model == null)
+                        TrainModel();
+                }
+            }
 
-            var userEventIds = _context.Participations
-                .Where(x => x.UserId == userId)
-                .Select(x => x.EventId)
+            if (_model == null)
+                return new();
+
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ActimeContext>();
+
+            var userEventIds = context.Participations
+                .Where(p => p.UserId == userId)
+                .Select(p => p.EventId)
                 .ToHashSet();
 
-            var candidateEventIds = _context.Events
+            // Cold start fallback
+            if (!userEventIds.Any())
+            {
+                var popularEvents = context.Events
+                    .OrderByDescending(e => e.Participations.Count)
+                    .Take(numberOfResults)
+                    .ToList();
+
+                return _mapper.Map<List<Model.Entities.Event>>(popularEvents);
+            }
+
+            var candidateEventIds = context.Events
                 .Where(e => !userEventIds.Contains(e.Id))
                 .Select(e => e.Id)
                 .ToList();
 
-            var predictionEngine =
-                _mlContext.Model.CreatePredictionEngine<EventInteraction, EventPrediction>(model);
+            if (!candidateEventIds.Any())
+                return new();
 
-            return candidateEventIds
+            var predictionEngine =
+                _mlContext.Model.CreatePredictionEngine<EventInteraction, EventPrediction>(_model);
+
+            var topEventIds = candidateEventIds
                 .Select(eventId => new
                 {
                     EventId = eventId,
@@ -96,6 +128,12 @@ namespace Actime.Services.Services
                 .Take(numberOfResults)
                 .Select(x => x.EventId)
                 .ToList();
+
+            var topEvents = context.Events
+                .Where(e => topEventIds.Contains(e.Id))
+                .ToList();
+
+            return _mapper.Map<List<Model.Entities.Event>>(topEvents);
         }
     }
 }

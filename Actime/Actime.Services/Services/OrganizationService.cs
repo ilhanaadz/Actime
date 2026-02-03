@@ -258,5 +258,34 @@ namespace Actime.Services.Services
                 dto.IsMember = false;
             }
         }
+
+        public async Task<Model.Common.PagedResult<Model.Entities.EventParticipation>> GetOrganizationParticipationsAsync(int organizationId, int page = 1, int perPage = 10)
+        {
+            var query = _context.Events
+                .Where(e => e.OrganizationId == organizationId && !e.IsDeleted)
+                .Include(e => e.Participations.Where(p => !p.IsDeleted))
+                .OrderByDescending(e => e.Start);
+
+            var totalCount = await query.CountAsync();
+
+            var skip = (page - 1) * perPage;
+            var events = await query
+                .Skip(skip)
+                .Take(perPage)
+                .ToListAsync();
+
+            var participations = events.Select(e => new Model.Entities.EventParticipation
+            {
+                EventId = e.Id,
+                EventName = e.Title,
+                ParticipantsCount = e.Participations?.Count ?? 0
+            }).ToList();
+
+            return new Model.Common.PagedResult<Model.Entities.EventParticipation>
+            {
+                Items = participations,
+                TotalCount = totalCount
+            };
+        }
     }
 }

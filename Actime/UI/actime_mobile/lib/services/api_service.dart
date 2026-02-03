@@ -4,6 +4,18 @@ import '../config/api_config.dart';
 import '../models/api_response.dart';
 import 'token_service.dart';
 
+/// Helper function to parse list responses
+/// Use this when the API returns an array directly (not wrapped in an object)
+List<T> parseListResponse<T>(
+  dynamic json,
+  T Function(Map<String, dynamic>) itemFromJson,
+) {
+  if (json is! List) {
+    throw Exception('Expected list response but got ${json.runtimeType}');
+  }
+  return json.map((item) => itemFromJson(item as Map<String, dynamic>)).toList();
+}
+
 /// Core API service for making HTTP requests
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -13,10 +25,11 @@ class ApiService {
   final TokenService _tokenService = TokenService();
 
   /// GET request
+  /// Unified method that handles both single objects and lists automatically
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, String>? queryParams,
-    required T Function(Map<String, dynamic>) fromJson,
+    required T Function(dynamic) fromJson,
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParams);
@@ -26,7 +39,7 @@ class ApiService {
           .get(uri, headers: headers)
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleResponse<T>(response, fromJson);
+      return _handleUnifiedResponse<T>(response, fromJson);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
@@ -36,7 +49,7 @@ class ApiService {
   Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic>? body,
-    required T Function(Map<String, dynamic>) fromJson,
+    required T Function(dynamic) fromJson,
   }) async {
     try {
       final uri = _buildUri(endpoint);
@@ -48,7 +61,7 @@ class ApiService {
           )
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleResponse<T>(response, fromJson);
+      return _handleUnifiedResponse<T>(response, fromJson);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
@@ -58,7 +71,7 @@ class ApiService {
   Future<ApiResponse<T>> put<T>(
     String endpoint, {
     Map<String, dynamic>? body,
-    required T Function(Map<String, dynamic>) fromJson,
+    required T Function(dynamic) fromJson,
   }) async {
     try {
       final uri = _buildUri(endpoint);
@@ -70,7 +83,7 @@ class ApiService {
           )
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleResponse<T>(response, fromJson);
+      return _handleUnifiedResponse<T>(response, fromJson);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
@@ -125,21 +138,30 @@ class ApiService {
     return headers;
   }
 
-  /// Handle HTTP response
-  ApiResponse<T> _handleResponse<T>(
+  /// Unified response handler that works with both objects and lists
+  /// The fromJson function receives decoded data (Map, List, or primitive)
+  /// and is responsible for converting it to the appropriate type T
+  ApiResponse<T> _handleUnifiedResponse<T>(
     http.Response response,
-    T Function(Map<String, dynamic>) fromJson,
+    T Function(dynamic) fromJson,
   ) {
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 300) {
       if (response.body.isEmpty) {
-        return ApiResponse.success(fromJson({}), statusCode: statusCode);
+        try {
+          // For empty response, try to create default value
+          return ApiResponse.success(fromJson(null), statusCode: statusCode);
+        } catch (e) {
+          return ApiResponse.error('Prazan odgovor', statusCode: statusCode);
+        }
       }
 
       try {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return ApiResponse.success(fromJson(data), statusCode: statusCode);
+        final data = jsonDecode(response.body);
+        // Pass decoded data (can be Map, List, or primitive) to fromJson
+        final result = fromJson(data);
+        return ApiResponse.success(result, statusCode: statusCode);
       } catch (e) {
         return ApiResponse.error('Greška pri parsiranju odgovora: $e', statusCode: statusCode);
       }

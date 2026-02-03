@@ -8,9 +8,9 @@ class ApiConfig {
   static const bool useMockApi = false;
 
   // Base URL for the API - Update this to match your backend server
-  // For Android emulator use: http://10.0.2.2:5000
-  // For iOS simulator use: http://localhost:5000
-  // For physical device use your computer's IP: http://192.168.x.x:5000
+  // For Android emulator use: http://10.0.2.2:8080
+  // For iOS simulator use: http://localhost:8080
+  // For physical device use your computer's IP: http://192.168.x.x:8080
   static const String baseUrl = 'http://10.0.2.2:5171';
 
   // Timeouts
@@ -78,6 +78,9 @@ class ApiConfig {
   // Address endpoints (backend: AddressController)
   static const String address = '/Address';
 
+  // Recommendation endpoints (backend: RecommendationController)
+  static const String recommendations = '/api/recommendations';
+
   // Health check
   static const String health = '/health';
 
@@ -103,6 +106,8 @@ class ApiConfig {
 
   // Membership endpoints
   static String membershipById(int id) => '$membership/$id';
+  static String membershipByOrganization(int organizationId) =>
+      '$membership/organization/$organizationId';
 
   // Participation endpoints
   static String participationById(int id) => '$participation/$id';
@@ -113,6 +118,7 @@ class ApiConfig {
   static String participationEventCount(int eventId) =>
       '$participation/event/$eventId/count';
   static String participationByUser(int userId) => '$participation/user/$userId';
+  static String participationEventByUser(int userId) => '$participation/event/$userId';
 
   // Review endpoints
   static String reviewById(int id) => '$review/$id';
@@ -151,4 +157,8 @@ class ApiConfig {
 
   // Address endpoints
   static String addressById(int id) => '$address/$id';
+
+  // Recommendation endpoints
+  static String recommendedEvents(int userId, {int top = 5}) =>
+      '$recommendations/events/$userId?top=$top';
 }
