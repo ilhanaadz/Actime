@@ -11,20 +11,15 @@ namespace Actime.Services.Services
         private readonly MLContext _mlContext;
         private readonly ActimeContext _context;
 
-        // Thread-safe model reference
         private ITransformer? _model;
         private readonly object _modelLock = new();
 
         public EventRecommenderService(ActimeContext context)
         {
-            _mlContext = new MLContext();
+            _mlContext = new MLContext(seed: 42);
             _context = context;
         }
 
-        /// <summary>
-        /// Trains or retrains the recommendation model.
-        /// Thread-safe: locks only during training.
-        /// </summary>
         public void TrainModel()
         {
             lock (_modelLock)
@@ -34,41 +29,42 @@ namespace Actime.Services.Services
                     {
                         UserId = (uint)x.UserId,
                         EventId = (uint)x.EventId,
-                        Label = 1
+                        Label = 1f
                     })
                     .ToList();
 
                 if (!interactions.Any())
-                    return; // no data to train
+                    return;
 
                 var data = _mlContext.Data.LoadFromEnumerable(interactions);
 
-                var options = new MatrixFactorizationTrainer.Options
-                {
-                    MatrixColumnIndexColumnName = nameof(EventInteraction.UserId),
-                    MatrixRowIndexColumnName = nameof(EventInteraction.EventId),
-                    LabelColumnName = nameof(EventInteraction.Label),
-                    LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
-                    Alpha = 0.01,
-                    Lambda = 0.025,
-                    NumberOfIterations = 100
-                };
+                var pipeline =
+                    _mlContext.Transforms.Conversion.MapValueToKey(
+                        outputColumnName: "UserIdEncoded",
+                        inputColumnName: nameof(EventInteraction.UserId))
 
-                var estimator = _mlContext.Recommendation()
-                    .Trainers
-                    .MatrixFactorization(options);
+                    .Append(_mlContext.Transforms.Conversion.MapValueToKey(
+                        outputColumnName: "EventIdEncoded",
+                        inputColumnName: nameof(EventInteraction.EventId)))
 
-                _model = estimator.Fit(data);
+                    .Append(_mlContext.Recommendation().Trainers.MatrixFactorization(
+                        new MatrixFactorizationTrainer.Options
+                        {
+                            MatrixColumnIndexColumnName = "UserIdEncoded",
+                            MatrixRowIndexColumnName = "EventIdEncoded",
+                            LabelColumnName = nameof(EventInteraction.Label),
+                            LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
+                            Alpha = 0.01,
+                            Lambda = 0.025,
+                            NumberOfIterations = 100
+                        }));
+
+                _model = pipeline.Fit(data);
             }
         }
 
-        /// <summary>
-        /// Returns recommended event IDs for a given user.
-        /// Pure inference, does not block other threads.
-        /// </summary>
         public List<int> RecommendEvents(int userId, int numberOfResults)
         {
-            // Capture the current model reference for thread-safety
             var model = _model;
             if (model == null)
                 return new List<int>();
@@ -83,8 +79,8 @@ namespace Actime.Services.Services
                 .Select(e => e.Id)
                 .ToList();
 
-            var predictionEngine = _mlContext.Model
-                .CreatePredictionEngine<EventInteraction, EventPrediction>(model);
+            var predictionEngine =
+                _mlContext.Model.CreatePredictionEngine<EventInteraction, EventPrediction>(model);
 
             return candidateEventIds
                 .Select(eventId => new

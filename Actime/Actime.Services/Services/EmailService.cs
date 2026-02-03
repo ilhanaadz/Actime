@@ -1,13 +1,8 @@
 ﻿using Actime.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Actime.Services.Services
 {
@@ -103,6 +98,7 @@ namespace Actime.Services.Services
                     Body = htmlBody,
                     IsBodyHtml = true
                 };
+
                 message.To.Add(to);
 
                 await client.SendMailAsync(message);
