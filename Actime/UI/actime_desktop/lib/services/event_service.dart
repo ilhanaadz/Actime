@@ -23,7 +23,6 @@ class EventService {
     int? organizationId,
     int? activityTypeId,
     DateTime? startDate,
-    DateTime? endDate,
   }) async {
     // Use perPage if provided, otherwise use pageSize
     final effectivePageSize = perPage ?? pageSize;
@@ -92,10 +91,7 @@ class EventService {
       queryParams['ActivityTypeId'] = activityTypeId.toString();
     }
     if (startDate != null) {
-      queryParams['StartDate'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['EndDate'] = endDate.toIso8601String();
+      queryParams['FilterDate'] = startDate.toIso8601String();
     }
 
     return await _apiService.get<PaginatedResponse<Event>>(

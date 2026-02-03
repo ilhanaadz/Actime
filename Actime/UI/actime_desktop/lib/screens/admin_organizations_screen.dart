@@ -184,26 +184,6 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                 ],
               ),
             ),
-            const PopupMenuItem(
-              value: 'MembersCount',
-              child: Row(
-                children: [
-                  Icon(Icons.people, size: 18),
-                  SizedBox(width: 12),
-                  Text('Sort by Members'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'EventsCount',
-              child: Row(
-                children: [
-                  Icon(Icons.event, size: 18),
-                  SizedBox(width: 12),
-                  Text('Sort by Events'),
-                ],
-              ),
-            ),
           ],
           onSortSelected: (value) {
             setState(() {

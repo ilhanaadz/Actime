@@ -21,7 +21,7 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
   int _currentPage = 1;
   int _totalPages = 1;
   String _selectedFilter = 'All';
-  String _sortBy = 'start_date';
+  String _sortBy = 'Start';
   DateTime? _filterDate;
   bool _isLoading = true;
   String? _error;
@@ -173,16 +173,6 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                     Icon(Icons.sort_by_alpha, size: 18),
                     SizedBox(width: 12),
                     Text('Sort by Name'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'ParticipantsCount',
-                child: Row(
-                  children: [
-                    Icon(Icons.people, size: 18),
-                    SizedBox(width: 12),
-                    Text('Sort by Participants'),
                   ],
                 ),
               ),
