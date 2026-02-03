@@ -23,6 +23,7 @@ namespace Actime.Services.Services
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
                 .Include(o => o.Memberships)
+                .Include(o => o.Events)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             if (entity == null)
@@ -82,7 +83,8 @@ namespace Actime.Services.Services
                 .Include(o => o.Address)
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
-                .Include(o => o.Memberships);
+                .Include(o => o.Memberships)
+                .Include(o => o.Events);
 
             if (!string.IsNullOrWhiteSpace(search?.Text))
             {
@@ -177,6 +179,7 @@ namespace Actime.Services.Services
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
                 .Include(o => o.Memberships)
+                .Include(o => o.Events)
                 .FirstOrDefaultAsync(o => o.UserId == userId && !o.IsDeleted);
 
             if (organization == null)
@@ -197,6 +200,7 @@ namespace Actime.Services.Services
                     .ThenInclude(a => a.City)
                         .ThenInclude(c => c.Country)
                 .Include(o => o.Memberships)
+                .Include(o => o.Events)
                 .FirstOrDefaultAsync(o => o.Id == organizationId);
 
             if (entity == null)
@@ -234,6 +238,9 @@ namespace Actime.Services.Services
 
             // Count only active memberships (MembershipStatusId = 2 is active)
             dto.MembersCount = entity.Memberships?.Count(m => m.MembershipStatusId == 2) ?? 0;
+
+            // Count events (excluding deleted events)
+            dto.EventsCount = entity.Events?.Count(e => !e.IsDeleted) ?? 0;
 
             // Check if current user is an active member and get their membership status
             if (currentUserId.HasValue && entity.Memberships != null)

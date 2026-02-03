@@ -18,6 +18,7 @@ class ParticipationService {
     final queryParams = <String, String>{
       'Page': page.toString(),
       'PageSize': pageSize.toString(),
+      'IncludeTotalCount': 'true',
     };
 
     if (userId != null) {

@@ -17,6 +17,7 @@
         public string? CategoryName { get; set; }
         public string? Address { get; set; }
         public int MembersCount { get; set; }
+        public int EventsCount { get; set; }
         public bool IsMember { get; set; }
         public int? MembershipStatusId { get; set; }
     }

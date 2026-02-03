@@ -17,6 +17,7 @@ class LocationService {
     final queryParams = <String, String>{
       'Page': page.toString(),
       'PageSize': pageSize.toString(),
+      'IncludeTotalCount': 'true',
     };
 
     if (search != null && search.isNotEmpty) {

@@ -18,6 +18,7 @@ class ReviewService {
     final queryParams = <String, String>{
       'Page': page.toString(),
       'PageSize': pageSize.toString(),
+      'IncludeTotalCount': 'true',
     };
 
     if (organizationId != null) {
@@ -42,6 +43,7 @@ class ReviewService {
     final queryParams = <String, String>{
       'Page': page.toString(),
       'PageSize': pageSize.toString(),
+      'IncludeTotalCount': 'true',
     };
 
     return await _apiService.get<PaginatedResponse<Review>>(

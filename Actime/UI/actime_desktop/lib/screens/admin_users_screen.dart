@@ -149,16 +149,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ],
                 ),
               ),
-              const PopupMenuItem(
-                value: 'organizations_count',
-                child: Row(
-                  children: [
-                    Icon(Icons.apartment, size: 18),
-                    SizedBox(width: 12),
-                    Text('Sort by Organizations'),
-                  ],
-                ),
-              ),
             ],
             onSortSelected: (value) {
               setState(() => _sortBy = value);
@@ -226,17 +216,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                           flex: 3,
                                           child: Text(
                                             'Email Address',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ),
-                                        const Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            'Organizations',
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
@@ -390,24 +369,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                       color: Colors.grey[700],
                     ),
                     overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Organizations
-          Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                Icon(Icons.apartment_outlined, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  '${user.organizationsCount} organization${user.organizationsCount != 1 ? 's' : ''}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
                   ),
                 ),
               ],

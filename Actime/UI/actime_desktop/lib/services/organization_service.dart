@@ -35,6 +35,7 @@ class OrganizationService {
     final queryParams = <String, String>{
       'Page': page.toString(),
       'PageSize': effectivePageSize.toString(),
+      'IncludeTotalCount': 'true',
     };
 
     if (search != null && search.isNotEmpty) {
