@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
+import '../../constants/participation_constants.dart';
 import '../../components/actime_button.dart';
-import '../../components/circle_icon_container.dart';
 import '../../models/event.dart';
 
 class CheckoutBottomSheet extends StatefulWidget {
   final Event event;
-  final VoidCallback onCheckoutComplete;
 
   const CheckoutBottomSheet({
     super.key,
     required this.event,
-    required this.onCheckoutComplete,
   });
 
-  static Future<bool?> show(BuildContext context, Event event, VoidCallback onCheckoutComplete) {
-    return showModalBottomSheet<bool>(
+  /// Returns selected PaymentMethod ID on success, null if dismissed.
+  static Future<int?> show(BuildContext context, Event event) {
+    return showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CheckoutBottomSheet(
-        event: event,
-        onCheckoutComplete: onCheckoutComplete,
-      ),
+      builder: (context) => CheckoutBottomSheet(event: event),
     );
   }
 
@@ -30,15 +26,28 @@ class CheckoutBottomSheet extends StatefulWidget {
   State<CheckoutBottomSheet> createState() => _CheckoutBottomSheetState();
 }
 
+/// Internal state for the checkout sheet.
+/// _stage drives the UI: form → processing → success.
+enum _CheckoutStage { form, processing, success }
+
 class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
-  String _selectedPaymentMethod = 'paypal';
-  bool _isProcessing = false;
+  int _selectedPaymentMethod = PaymentMethod.payPal;
+  _CheckoutStage _stage = _CheckoutStage.form;
 
   Future<void> _handleCheckout() async {
-    setState(() => _isProcessing = true);
+    setState(() => _stage = _CheckoutStage.processing);
 
-    // Call the checkout complete callback
-    widget.onCheckoutComplete();
+    // Dummy delay — simulates network round-trip to payment gateway.
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    if (!mounted) return;
+    setState(() => _stage = _CheckoutStage.success);
+
+    // Brief pause so the user can see the success state.
+    await Future.delayed(const Duration(milliseconds: 1200));
+
+    if (!mounted) return;
+    Navigator.pop(context, _selectedPaymentMethod);
   }
 
   @override
@@ -55,15 +64,58 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            const SizedBox(height: AppDimensions.spacingLarge),
-            _buildPaymentMethodSection(),
-            const SizedBox(height: AppDimensions.spacingLarge),
-            _buildSummarySection(),
-            const SizedBox(height: AppDimensions.spacingLarge),
-            _buildTotalSection(),
-            const SizedBox(height: AppDimensions.spacingXLarge),
-            _buildCheckoutButton(),
+            if (_stage == _CheckoutStage.form) ...[
+              _buildHeader(),
+              const SizedBox(height: AppDimensions.spacingLarge),
+              _buildPaymentMethodSection(),
+              const SizedBox(height: AppDimensions.spacingLarge),
+              _buildSummarySection(),
+              const SizedBox(height: AppDimensions.spacingLarge),
+              _buildTotalSection(),
+              const SizedBox(height: AppDimensions.spacingXLarge),
+              ActimePrimaryButton(
+                label: 'Complete checkout',
+                onPressed: _handleCheckout,
+              ),
+            ] else if (_stage == _CheckoutStage.processing) ...[
+              const SizedBox(height: AppDimensions.spacingLarge),
+              Center(
+                child: Column(
+                  children: [
+                    const CircularProgressIndicator(color: AppColors.primary),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    const Text(
+                      'Processing payment...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingLarge),
+            ] else ...[
+              // success
+              const SizedBox(height: AppDimensions.spacingLarge),
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.green, size: 64),
+                    const SizedBox(height: AppDimensions.spacingMedium),
+                    const Text(
+                      'Payment successful!',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingLarge),
+            ],
             SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
           ],
         ),
@@ -84,7 +136,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           ),
         ),
         GestureDetector(
-          onTap: () => Navigator.pop(context, false),
+          onTap: () => Navigator.pop(context),
           child: Icon(
             Icons.close,
             color: AppColors.textMuted,
@@ -108,17 +160,23 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         ),
         const SizedBox(height: AppDimensions.spacingMedium),
         _buildPaymentOption(
-          id: 'paypal',
+          id: PaymentMethod.payPal,
           icon: Icons.paypal,
           label: 'PayPal',
           iconColor: const Color(0xFF003087),
+        ),
+        const SizedBox(height: AppDimensions.spacingSmall),
+        _buildPaymentOption(
+          id: PaymentMethod.creditCard,
+          icon: Icons.credit_card,
+          label: 'Credit Card',
         ),
       ],
     );
   }
 
   Widget _buildPaymentOption({
-    required String id,
+    required int id,
     required IconData icon,
     required String label,
     Color? iconColor,
@@ -248,14 +306,6 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCheckoutButton() {
-    return ActimePrimaryButton(
-      label: 'Complete checkout',
-      isLoading: _isProcessing,
-      onPressed: _handleCheckout,
     );
   }
 }

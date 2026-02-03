@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
-import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
 import '../../models/models.dart';
@@ -97,13 +96,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Future<void> _handleJoinEvent() async {
     if (_event == null) return;
 
-    // If event has a price, show checkout first
+    // Paid event — show checkout; user pays (dummy), then we join with method.
     if (!_event!.isFree) {
-      CheckoutBottomSheet.show(
-        context,
-        _event!,
-        () => _processJoinEvent(),
-      );
+      final paymentMethodId = await CheckoutBottomSheet.show(context, _event!);
+      if (paymentMethodId == null) return; // user dismissed
+      await _processJoinEvent(paymentMethodId: paymentMethodId);
       return;
     }
 
@@ -111,18 +108,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     await _processJoinEvent();
   }
 
-  Future<void> _processJoinEvent() async {
+  Future<void> _processJoinEvent({int? paymentMethodId}) async {
     if (_event == null) return;
 
     setState(() => _isJoining = true);
 
-    // Close checkout bottom sheet if open
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context, true);
-    }
-
     try {
-      final response = await _eventService.joinEvent(_event!.id);
+      final response = await _eventService.joinEvent(
+        _event!,
+        paymentMethodId: paymentMethodId,
+      );
 
       if (!mounted) return;
 
@@ -393,10 +388,35 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Widget _buildJoinButton() {
     final isUpcoming = _event!.status == EventStatus.upcoming;
+    final isPassed = _event!.status == EventStatus.completed ||
+        _event!.status == EventStatus.cancelled ||
+        _event!.status == EventStatus.inProgress;
 
     if (_isJoining) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    // Event has passed - show disabled button
+    if (isPassed) {
+      String label;
+      switch (_event!.status) {
+        case EventStatus.completed:
+          label = 'Završeno';
+          break;
+        case EventStatus.cancelled:
+          label = 'Otkazano';
+          break;
+        case EventStatus.inProgress:
+          label = 'U toku';
+          break;
+        default:
+          label = 'Završeno';
+      }
+      return ActimePrimaryButton(
+        label: label,
+        onPressed: null,
       );
     }
 

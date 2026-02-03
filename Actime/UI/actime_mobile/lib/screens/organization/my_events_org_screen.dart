@@ -4,6 +4,7 @@ import '../../constants/constants.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 import 'create_event_screen.dart';
 import 'edit_event_screen.dart';
 import '../../components/bottom_nav_org.dart';
@@ -321,6 +322,9 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
             icon: Icons.event,
+            imageUrl: ImageService().getFullImageUrl(event.organizationLogoUrl),
+            statusText: event.status.displayName,
+            statusColor: event.status.color,
             showFavorite: false,
             showEditButton: true,
             showDeleteButton: true,

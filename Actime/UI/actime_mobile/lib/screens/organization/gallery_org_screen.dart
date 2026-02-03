@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../constants/constants.dart';
 import '../../components/bottom_nav_org.dart';
-import '../../components/circle_icon_container.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
+import '../../services/gallery_service.dart';
 import 'organization_profile_screen.dart';
 
 class GalleryOrgScreen extends StatefulWidget {
@@ -17,10 +20,13 @@ class GalleryOrgScreen extends StatefulWidget {
 
 class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
   final _organizationService = OrganizationService();
+  final _galleryService = GalleryService();
+  final _imageService = ImageService();
 
   Organization? _organization;
-  List<String> _images = [];
+  List<GalleryImage> _images = [];
   bool _isLoading = true;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -29,47 +35,143 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
 
       if (!mounted) return;
 
-      setState(() {
-        if (orgResponse.success && orgResponse.data != null) {
-          _organization = orgResponse.data;
+      if (orgResponse.success && orgResponse.data != null) {
+        _organization = orgResponse.data;
+
+        final galleryResponse = await _galleryService.getByOrganizationId(widget.organizationId);
+        if (galleryResponse.success && galleryResponse.data != null) {
+          _images = galleryResponse.data!;
         }
-        // Mock images for now
-        _images = [];
-        _isLoading = false;
-      });
+      }
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      // Ignore errors
+    }
+
+    if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.groups;
+  Future<void> _uploadImage() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galerija'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final xFile = source == ImageSource.gallery
+        ? await _imageService.pickImageFromGallery()
+        : await _imageService.pickImageFromCamera();
+
+    if (xFile == null) return;
+
+    setState(() => _isUploading = true);
+
+    try {
+      final file = File(xFile.path);
+      final uploadResponse = await _imageService.uploadImage(
+        file,
+        ImageUploadType.gallery,
+      );
+
+      if (!mounted) return;
+
+      if (uploadResponse.success && uploadResponse.data != null) {
+        final addResponse = await _galleryService.addImage(
+          imageUrl: uploadResponse.data!,
+          organizationId: widget.organizationId,
+        );
+
+        if (!mounted) return;
+
+        if (addResponse.success && addResponse.data != null) {
+          setState(() {
+            _images.insert(0, addResponse.data!);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Slika je uspješno dodana')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(addResponse.message ?? 'Greška pri spremanju')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(uploadResponse.message ?? 'Greška pri uploadu')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
+  }
+
+  Future<void> _deleteImage(GalleryImage image) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Obriši sliku'),
+        content: const Text('Da li ste sigurni da želite obrisati ovu sliku?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Odustani'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Obriši', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final response = await _galleryService.deleteImage(image.id);
+
+    if (!mounted) return;
+
+    if (response.success) {
+      setState(() {
+        _images.removeWhere((i) => i.id == image.id);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Slika je obrisana')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.message ?? 'Greška pri brisanju')),
+      );
     }
   }
 
@@ -114,11 +216,17 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: OutlinedButton.icon(
-              onPressed: _uploadImage,
-              icon: const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
-              label: const Text(
-                'Upload new image',
-                style: TextStyle(color: AppColors.primary),
+              onPressed: _isUploading ? null : _uploadImage,
+              icon: _isUploading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+              label: Text(
+                _isUploading ? 'Uploading...' : 'Upload new image',
+                style: const TextStyle(color: AppColors.primary),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.primary),
@@ -148,13 +256,38 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
   }
 
   Widget _buildOrganizationHeader() {
+    final logoUrl = _imageService.getFullImageUrl(_organization?.logoUrl);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          CircleIconContainer.large(
-            icon: _getCategoryIcon(_organization?.categoryName),
-            iconColor: AppColors.orange,
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.orange.withValues(alpha: 0.1),
+            ),
+            child: logoUrl.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      logoUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.groups,
+                          color: AppColors.orange,
+                          size: 30,
+                        );
+                      },
+                    ),
+                  )
+                : Icon(
+                    Icons.groups,
+                    color: AppColors.orange,
+                    size: 30,
+                  ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -170,7 +303,7 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
                   ),
                 ),
                 Text(
-                  _organization?.categoryName ?? 'Klub',
+                  '${_images.length} slika',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
@@ -200,20 +333,17 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Your gallery is currently empty.',
+              'Galerija je prazna',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade600,
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Please add some photos to\nshow people around.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.red.shade300,
-              ),
+            TextButton.icon(
+              onPressed: _uploadImage,
+              icon: const Icon(Icons.add_photo_alternate),
+              label: const Text('Dodaj prvu sliku'),
             ),
           ],
         ),
@@ -229,27 +359,24 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
       ),
       itemCount: _images.length,
       itemBuilder: (context, index) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            _images[index],
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.broken_image, color: Colors.grey),
-              );
-            },
+        final image = _images[index];
+        return GestureDetector(
+          onLongPress: () => _deleteImage(image),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              _imageService.getFullImageUrl(image.imageUrl),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.broken_image, color: Colors.grey),
+                );
+              },
+            ),
           ),
         );
       },
-    );
-  }
-
-  void _uploadImage() {
-    // TODO: Implement image picker
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Upload slike ce biti implementiran')),
     );
   }
 }

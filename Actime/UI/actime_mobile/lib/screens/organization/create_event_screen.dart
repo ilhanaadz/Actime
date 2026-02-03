@@ -33,6 +33,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Organization? _organization;
   List<Location> _locations = [];
   ActivityType? _selectedActivityType;
+  EventStatus _selectedEventStatus = EventStatus.pending;
   Location? _selectedLocation;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -167,6 +168,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             : null,
         'OrganizationId': int.parse(widget.organizationId),
         'ActivityTypeId': _selectedActivityType!.id,
+        'EventStatusId': _selectedEventStatus.id,
       });
 
       if (!mounted) return;
@@ -242,6 +244,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     ),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildActivityTypeDropdown(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
+                    _buildEventStatusDropdown(),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildDateTimeRow(),
                     const SizedBox(height: AppDimensions.spacingLarge),
@@ -347,6 +351,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         setState(() {
           _selectedActivityType = value;
         });
+      },
+    );
+  }
+
+  Widget _buildEventStatusDropdown() {
+    return ActimeDropdownField<EventStatus>(
+      initialValue: _selectedEventStatus,
+      labelText: 'Status događaja',
+      items: EventStatus.values
+          .map((status) => DropdownMenuItem(
+                value: status,
+                child: Text(status.displayName),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            _selectedEventStatus = value;
+          });
+        }
       },
     );
   }

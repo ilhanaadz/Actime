@@ -136,13 +136,22 @@ class UserService {
     );
   }
 
-  /// Cancel membership (leave organization)
+  /// Cancel membership (leave organization) by enrollment ID
   Future<ApiResponse<void>> cancelMembership(String enrollmentId) async {
     if (ApiConfig.useMockApi) {
       return await _mockService.cancelMembership(enrollmentId);
     }
 
     return await _apiService.delete('${ApiConfig.membership}/$enrollmentId');
+  }
+
+  /// Cancel membership by organization ID
+  Future<ApiResponse<void>> cancelMembershipByOrganization(String organizationId) async {
+    if (ApiConfig.useMockApi) {
+      return await _mockService.cancelMembership(organizationId);
+    }
+
+    return await _apiService.delete(ApiConfig.membershipByOrganization(int.parse(organizationId)));
   }
 
   /// Get user's event history (past events)

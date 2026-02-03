@@ -20,7 +20,7 @@ class EnrollmentRequestsScreen extends StatefulWidget {
 class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
   final _organizationService = OrganizationService();
 
-  List<Enrollment> _pendingEnrollments = [];
+  List<Membership> _pendingEnrollments = [];
   bool _isLoading = true;
   String? _error;
 
@@ -59,8 +59,8 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
     }
   }
 
-  Future<void> _approveEnrollment(Enrollment enrollment) async {
-    final response = await _organizationService.approveEnrollment(enrollment.id);
+  Future<void> _approveEnrollment(Membership membership) async {
+    final response = await _organizationService.approveEnrollment(membership.id.toString());
     if (response.success) {
       _loadEnrollments();
       if (mounted) {
@@ -71,8 +71,8 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
     }
   }
 
-  Future<void> _rejectEnrollment(Enrollment enrollment) async {
-    final response = await _organizationService.rejectEnrollment(enrollment.id);
+  Future<void> _rejectEnrollment(Membership membership) async {
+    final response = await _organizationService.rejectEnrollment(membership.id.toString());
     if (response.success) {
       _loadEnrollments();
       if (mounted) {
@@ -156,15 +156,15 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
         padding: const EdgeInsets.all(16),
         itemCount: _pendingEnrollments.length,
         itemBuilder: (context, index) {
-          final enrollment = _pendingEnrollments[index];
-          return _buildEnrollmentRequestCard(enrollment);
+          final membership = _pendingEnrollments[index];
+          return _buildEnrollmentRequestCard(membership);
         },
       ),
     );
   }
 
-  Widget _buildEnrollmentRequestCard(Enrollment enrollment) {
-    final user = enrollment.user;
+  Widget _buildEnrollmentRequestCard(Membership membership) {
+    final user = membership.user;
     final dateFormat = DateFormat('dd.MM.yyyy.');
 
     return Container(
@@ -228,7 +228,7 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  dateFormat.format(enrollment.createdAt),
+                  dateFormat.format(membership.createdAt),
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade500,
@@ -243,13 +243,13 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
               _buildActionButton(
                 icon: Icons.check,
                 color: Colors.green,
-                onTap: () => _approveEnrollment(enrollment),
+                onTap: () => _approveEnrollment(membership),
               ),
               const SizedBox(height: 8),
               _buildActionButton(
                 icon: Icons.close,
                 color: Colors.red,
-                onTap: () => _rejectEnrollment(enrollment),
+                onTap: () => _rejectEnrollment(membership),
               ),
             ],
           ),

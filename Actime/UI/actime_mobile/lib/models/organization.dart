@@ -50,6 +50,7 @@ class Organization {
   final int eventsCount;
   final bool isVerified;
   final bool isMember;
+  final int? membershipStatusId;
   final OrganizationStatus status;
   final DateTime createdAt;
   final DateTime? lastModifiedAt;
@@ -73,6 +74,7 @@ class Organization {
     this.eventsCount = 0,
     this.isVerified = false,
     this.isMember = false,
+    this.membershipStatusId,
     this.status = OrganizationStatus.active,
     required this.createdAt,
     this.lastModifiedAt,
@@ -100,6 +102,7 @@ class Organization {
       eventsCount: _parseInt(json['EventsCount'] ?? json['eventsCount']) ?? 0,
       isVerified: json['IsVerified'] as bool? ?? json['isVerified'] as bool? ?? false,
       isMember: json['IsMember'] as bool? ?? json['isMember'] as bool? ?? false,
+      membershipStatusId: _parseInt(json['MembershipStatusId'] ?? json['membershipStatusId']),
       status: OrganizationStatus.fromString(json['Status'] as String? ?? json['status'] as String?),
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
@@ -139,6 +142,7 @@ class Organization {
       'EventsCount': eventsCount,
       'IsVerified': isVerified,
       'IsMember': isMember,
+      'MembershipStatusId': membershipStatusId,
       'Logo': logoUrl,
       'Status': status.name,
       'CreatedAt': createdAt.toIso8601String(),
@@ -163,6 +167,7 @@ class Organization {
     int? eventsCount,
     bool? isVerified,
     bool? isMember,
+    int? membershipStatusId,
     OrganizationStatus? status,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
@@ -184,6 +189,7 @@ class Organization {
       eventsCount: eventsCount ?? this.eventsCount,
       isVerified: isVerified ?? this.isVerified,
       isMember: isMember ?? this.isMember,
+      membershipStatusId: membershipStatusId ?? this.membershipStatusId,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,

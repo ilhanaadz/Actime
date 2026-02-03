@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 
 class EditUserProfileScreen extends StatefulWidget {
   const EditUserProfileScreen({super.key});
@@ -12,6 +15,7 @@ class EditUserProfileScreen extends StatefulWidget {
 
 class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   final _userService = UserService();
+  final _imageService = ImageService();
   final _formKey = GlobalKey<FormState>();
 
   final _firstNameController = TextEditingController();
@@ -21,6 +25,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   User? _user;
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isUploadingImage = false;
 
   @override
   void initState() {
@@ -99,6 +104,82 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
     }
   }
 
+  Future<void> _changeProfileImage() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galerija'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final xFile = source == ImageSource.gallery
+        ? await _imageService.pickImageFromGallery()
+        : await _imageService.pickImageFromCamera();
+
+    if (xFile == null) return;
+
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final file = File(xFile.path);
+      final uploadResponse = await _imageService.uploadImage(
+        file,
+        ImageUploadType.profile,
+      );
+
+      if (!mounted) return;
+
+      if (uploadResponse.success && uploadResponse.data != null) {
+        final updateResponse = await _userService.updateProfile({
+          'ProfileImageUrl': uploadResponse.data,
+        });
+
+        if (!mounted) return;
+
+        if (updateResponse.success) {
+          setState(() {
+            _user = _user?.copyWith(profileImageUrl: uploadResponse.data);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Slika je uspješno promijenjena')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(updateResponse.message ?? 'Greška pri spremanju')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(uploadResponse.message ?? 'Greška pri uploadu')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,22 +219,28 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                             radius: 50,
                             backgroundColor: AppColors.borderLight,
                             backgroundImage: _user?.avatar != null
-                                ? NetworkImage(_user!.avatar!)
+                                ? NetworkImage(_imageService.getFullImageUrl(_user!.avatar))
                                 : null,
                             child: _user?.avatar == null
                                 ? Icon(Icons.person, size: 50, color: AppColors.textMuted)
                                 : null,
                           ),
+                          if (_isUploadingImage)
+                            const Positioned.fill(
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.black38,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
                           Positioned(
                             bottom: 0,
                             right: 0,
                             child: GestureDetector(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Promjena slike će biti implementirana')),
-                                );
-                              },
+                              onTap: _isUploadingImage ? null : _changeProfileImage,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: const BoxDecoration(

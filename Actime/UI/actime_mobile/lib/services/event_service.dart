@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import '../constants/participation_constants.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'auth_service.dart';
 import 'mock_api_service.dart';
+import 'token_service.dart';
 
 /// Participant model for event participants
 class Participant {
@@ -75,6 +80,7 @@ class EventService {
 
   final ApiService _apiService = ApiService();
   final MockApiService _mockService = MockApiService();
+  final AuthService _authService = AuthService();
 
   /// Get events (paginated)
   /// Backend uses TextSearchObject for filtering
@@ -166,14 +172,36 @@ class EventService {
   }
 
   /// Join event (participate)
-  Future<ApiResponse<void>> joinEvent(String eventId) async {
+  /// Sets appropriate status values based on whether event is free or paid.
+  /// [paymentMethodId] is provided after successful (dummy) checkout for paid events.
+  Future<ApiResponse<void>> joinEvent(Event event, {int? paymentMethodId}) async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.success(null, message: 'Uspješno ste se prijavili na događaj');
     }
 
+    final userId = _authService.currentUserId;
+    if (userId == null) {
+      return ApiResponse.error('Morate biti prijavljeni');
+    }
+
+    final body = <String, dynamic>{
+      'EventId': int.tryParse(event.id) ?? 0,
+      'UserId': userId,
+    };
+
+    if (event.isFree) {
+      // Free event - no payment involved, leave PaymentStatusId/PaymentMethodId null
+      body['AttendanceStatusId'] = AttendanceStatus.going;
+    } else {
+      // Paid event - checkout already completed, mark as paid with selected method
+      body['AttendanceStatusId'] = AttendanceStatus.going;
+      body['PaymentStatusId'] = PaymentStatus.paid;
+      body['PaymentMethodId'] = paymentMethodId ?? PaymentMethod.other;
+    }
+
     final response = await _apiService.post<Map<String, dynamic>>(
       ApiConfig.participation,
-      body: {'EventId': eventId},
+      body: body,
       fromJson: (json) => json,
     );
 
@@ -189,7 +217,19 @@ class EventService {
       return ApiResponse.success(null, message: 'Uspješno ste se odjavili sa događaja');
     }
 
-    return await _apiService.delete('${ApiConfig.participation}/event/$eventId');
+    final userId = _authService.currentUserId;
+    if (userId == null) {
+      return ApiResponse.error('Morate biti prijavljeni');
+    }
+
+    final response = await _apiService.delete(
+      '${ApiConfig.participation}/event/$eventId/user/$userId',
+    );
+
+    if (response.success) {
+      return ApiResponse.success(null, message: 'Uspješno ste se odjavili sa događaja');
+    }
+    return ApiResponse.error(response.message ?? 'Greška pri odjavi');
   }
 
   /// Get organization events
@@ -251,5 +291,47 @@ class EventService {
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Participant.fromJson),
     );
+  }
+
+  /// Get recommended events for user
+  /// Uses RecommendationController endpoint
+  Future<ApiResponse<List<Event>>> getRecommendedEvents({int top = 5}) async {
+    if (ApiConfig.useMockApi) {
+      final eventsResponse = await _mockService.getEvents(page: 1, perPage: top);
+      if (eventsResponse.success && eventsResponse.data != null) {
+        return ApiResponse.success(eventsResponse.data!.items);
+      }
+      return ApiResponse.success([]);
+    }
+
+    final userId = _authService.currentUserId;
+    if (userId == null) {
+      return ApiResponse.error('Morate biti prijavljeni');
+    }
+
+    try {
+      final tokenService = TokenService();
+      final token = await tokenService.getAccessToken();
+      final uri = Uri.parse('${ApiConfig.fullUrl}${ApiConfig.recommendedEvents(userId, top: top)}');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(ApiConfig.connectionTimeout);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final List<dynamic> data = jsonDecode(response.body);
+        final events = data.map((e) => Event.fromJson(e as Map<String, dynamic>)).toList();
+        return ApiResponse.success(events, statusCode: response.statusCode);
+      }
+
+      return ApiResponse.error('Greška pri dohvatanju preporuka', statusCode: response.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Došlo je do greške: $e');
+    }
   }
 }

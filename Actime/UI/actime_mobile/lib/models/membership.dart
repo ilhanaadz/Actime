@@ -1,3 +1,6 @@
+import 'user.dart';
+import 'organization.dart';
+
 /// Membership model
 /// Maps to backend Membership entity
 class Membership {
@@ -9,6 +12,8 @@ class Membership {
   final DateTime? endDate;
   final DateTime createdAt;
   final DateTime? lastModifiedAt;
+  final User? user;
+  final Organization? organization;
 
   Membership({
     required this.id,
@@ -19,6 +24,8 @@ class Membership {
     this.endDate,
     required this.createdAt,
     this.lastModifiedAt,
+    this.user,
+    this.organization,
   });
 
   factory Membership.fromJson(Map<String, dynamic> json) {
@@ -31,6 +38,16 @@ class Membership {
       endDate: _parseDateTime(json['EndDate'] ?? json['endDate']),
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
+      user: json['User'] != null
+          ? User.fromJson(json['User'] as Map<String, dynamic>)
+          : json['user'] != null
+              ? User.fromJson(json['user'] as Map<String, dynamic>)
+              : null,
+      organization: json['Organization'] != null
+          ? Organization.fromJson(json['Organization'] as Map<String, dynamic>)
+          : json['organization'] != null
+              ? Organization.fromJson(json['organization'] as Map<String, dynamic>)
+              : null,
     );
   }
 
@@ -58,6 +75,8 @@ class Membership {
       'EndDate': endDate?.toIso8601String(),
       'CreatedAt': createdAt.toIso8601String(),
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
+      'User': user?.toJson(),
+      'Organization': organization?.toJson(),
     };
   }
 

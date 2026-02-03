@@ -24,8 +24,8 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
   int _selectedTab = 0; // 0 = Participations, 1 = Enrollments
   int _selectedTimeFilter = 0; // 0 = Events, 1 = Months, 2 = Years
   List<EventParticipation> _participations = [];
-  List<Enrollment> _approvedEnrollments = [];
-  List<Enrollment> _pendingEnrollments = [];
+  List<Membership> _approvedEnrollments = [];
+  List<Membership> _pendingEnrollments = [];
   int _totalParticipations = 0;
   bool _isLoading = true;
   String? _error;
@@ -532,11 +532,11 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
     );
   }
 
-  Widget _buildEnrollmentCard(Enrollment enrollment) {
-    final user = enrollment.user;
+  Widget _buildEnrollmentCard(Membership membership) {
+    final user = membership.user;
     final dateFormat = DateFormat('dd.MM.yyyy.');
     // Calculate months since enrollment
-    final enrolledDate = enrollment.reviewedAt ?? enrollment.createdAt;
+    final enrolledDate = membership.startDate ?? membership.createdAt;
     final monthsSinceEnrollment = DateTime.now().difference(enrolledDate).inDays ~/ 30;
 
     return Container(

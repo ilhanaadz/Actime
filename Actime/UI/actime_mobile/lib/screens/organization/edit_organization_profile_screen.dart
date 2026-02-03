@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../constants/constants.dart';
 import '../../components/searchable_dropdown.dart';
 import '../../components/add_address_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 
 class EditOrganizationProfileScreen extends StatefulWidget {
   final String organizationId;
@@ -21,6 +24,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
   final _organizationService = OrganizationService();
   final _categoryService = CategoryService();
   final _addressService = AddressService();
+  final _imageService = ImageService();
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -36,6 +40,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isAddressesLoading = true;
+  bool _isUploadingImage = false;
   String? _error;
 
   @override
@@ -126,6 +131,82 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
         _addresses.add(newAddress);
         _selectedAddress = newAddress;
       });
+    }
+  }
+
+  Future<void> _changeLogo() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galerija'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final xFile = source == ImageSource.gallery
+        ? await _imageService.pickImageFromGallery()
+        : await _imageService.pickImageFromCamera();
+
+    if (xFile == null) return;
+
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final file = File(xFile.path);
+      final uploadResponse = await _imageService.uploadImage(
+        file,
+        ImageUploadType.organization,
+      );
+
+      if (!mounted) return;
+
+      if (uploadResponse.success && uploadResponse.data != null) {
+        final updateResponse = await _organizationService.updateMyOrganization({
+          'LogoUrl': uploadResponse.data,
+        });
+
+        if (!mounted) return;
+
+        if (updateResponse.success) {
+          setState(() {
+            _organization = _organization?.copyWith(logoUrl: uploadResponse.data);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Logo je uspješno promijenjen')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(updateResponse.message ?? 'Greška pri spremanju')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(uploadResponse.message ?? 'Greška pri uploadu')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+      }
     }
   }
 
@@ -341,7 +422,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
                     child: _organization?.logo != null
                         ? ClipOval(
                             child: Image.network(
-                              _organization!.logo!,
+                              _imageService.getFullImageUrl(_organization!.logo),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Icon(
@@ -358,16 +439,26 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
                             color: Colors.grey[400],
                           ),
                   ),
+                  if (_isUploadingImage)
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(
+                        color: Colors.black38,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: GestureDetector(
-                      onTap: () {
-                        // TODO: Implement image picker
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Promjena slike ce biti implementirana')),
-                        );
-                      },
+                      onTap: _isUploadingImage ? null : _changeLogo,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(

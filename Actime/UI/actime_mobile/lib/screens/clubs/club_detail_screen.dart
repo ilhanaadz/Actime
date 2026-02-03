@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
+import '../../constants/participation_constants.dart';
 import '../../components/circle_icon_container.dart';
 import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
@@ -25,8 +27,11 @@ class ClubDetailScreen extends StatefulWidget {
 class _ClubDetailScreenState extends State<ClubDetailScreen> {
   final _organizationService = OrganizationService();
   final _userService = UserService();
+  final _reviewService = ReviewService();
 
   Organization? _organization;
+  List<Review> _reviews = [];
+  double _averageRating = 0.0;
   bool _isLoading = true;
   bool _isCancelling = false;
   String? _error;
@@ -35,6 +40,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   void initState() {
     super.initState();
     _loadOrganization();
+    _loadReviews();
   }
 
   Future<void> _loadOrganization() async {
@@ -70,22 +76,50 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     }
   }
 
+  Future<void> _loadReviews() async {
+    final orgId = int.tryParse(widget.organizationId);
+    if (orgId == null) return;
+
+    try {
+      final reviewsFuture = _reviewService.getReviewsByOrganization(orgId);
+      final avgFuture = _reviewService.getOrganizationAverageRating(orgId);
+
+      final reviewsResponse = await reviewsFuture;
+      final avgResponse = await avgFuture;
+
+      if (!mounted) return;
+
+      setState(() {
+        if (reviewsResponse.success && reviewsResponse.data != null) {
+          _reviews = reviewsResponse.data!;
+        }
+        if (avgResponse.success && avgResponse.data != null) {
+          _averageRating = avgResponse.data!;
+        }
+      });
+    } catch (_) {
+      // Reviews are non-critical — fail silently
+    }
+  }
+
   Future<void> _handleCancelMembership() async {
     if (_organization == null) return;
+
+    final isPending = _organization!.membershipStatusId == MembershipStatus.pending;
 
     setState(() => _isCancelling = true);
 
     try {
-      // Note: This requires the enrollment ID, which we'd need from the API
-      // For now, we'll use the organization ID as a placeholder
-      final response = await _userService.cancelMembership(_organization!.id);
+      final response = await _userService.cancelMembershipByOrganization(_organization!.id);
 
       if (!mounted) return;
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Članstvo je uspješno otkazano.'),
+          SnackBar(
+            content: Text(isPending
+              ? 'Prijava je uspješno otkazana.'
+              : 'Članstvo je uspješno otkazano.'),
             backgroundColor: Colors.green,
           ),
         );
@@ -94,7 +128,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message ?? 'Greška pri otkazivanju članstva'),
+            content: Text(response.message ?? (isPending
+              ? 'Greška pri otkazivanju prijave'
+              : 'Greška pri otkazivanju članstva')),
             backgroundColor: Colors.red,
           ),
         );
@@ -231,6 +267,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             ),
             const SizedBox(height: AppDimensions.spacingLarge),
             _buildAboutSection(),
+            const SizedBox(height: AppDimensions.spacingLarge),
+            _buildReviewsSection(),
             const SizedBox(height: AppDimensions.spacingXLarge),
             _buildMembershipButton(),
           ],
@@ -333,6 +371,132 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     );
   }
 
+  Widget _buildReviewsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recenzije',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (widget.isLoggedIn)
+              ActimeTextButton(
+                label: 'Napišite recenziju',
+                onPressed: _showLeaveReviewSheet,
+              ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.spacingMedium),
+        if (_reviews.isNotEmpty) ...[
+          _buildAverageRating(),
+          const SizedBox(height: AppDimensions.spacingMedium),
+          ...(_reviews.take(5).map((review) => _buildReviewCard(review))),
+        ] else
+          Text(
+            'Još nema recenzija za ovaj klub.',
+            style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAverageRating() {
+    return Row(
+      children: [
+        Text(
+          _averageRating.toStringAsFixed(1),
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingSmall),
+        Row(
+          children: List.generate(5, (i) => Icon(
+            i < _averageRating.round() ? Icons.star : Icons.star_outline,
+            color: AppColors.orange,
+            size: 18,
+          )),
+        ),
+        const SizedBox(width: AppDimensions.spacingSmall),
+        Text(
+          '(${_reviews.length} recenzija)',
+          style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewCard(Review review) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppDimensions.spacingMedium),
+      padding: const EdgeInsets.all(AppDimensions.spacingMedium),
+      decoration: BoxDecoration(
+        color: AppColors.inputBackground,
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: List.generate(5, (i) => Icon(
+                  i < review.rating ? Icons.star : Icons.star_outline,
+                  color: AppColors.orange,
+                  size: 16,
+                )),
+              ),
+              Text(
+                DateFormat('dd.MM.yyyy.').format(review.createdAt),
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+          if (review.comment != null && review.comment!.isNotEmpty) ...[
+            const SizedBox(height: AppDimensions.spacingXSmall),
+            Text(
+              review.comment!,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showLeaveReviewSheet() async {
+    if (_organization == null) return;
+    final orgId = int.tryParse(_organization!.id);
+    if (orgId == null) return;
+
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => _LeaveReviewSheet(organizationId: orgId),
+    );
+
+    if (submitted == true) {
+      _loadReviews();
+    }
+  }
+
   Widget _buildMembershipButton() {
     if (_isCancelling) {
       return const Center(
@@ -353,15 +517,34 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       );
     }
 
-    // Already a member - show cancel button
-    if (_organization!.isMember) {
-      return ActimeOutlinedButton(
-        label: 'Otkaži članstvo',
-        onPressed: _handleCancelMembership,
-      );
+    final membershipStatus = _organization!.membershipStatusId;
+
+    // Check membership status
+    if (membershipStatus != null) {
+      switch (membershipStatus) {
+        case MembershipStatus.pending:
+          // Application sent, waiting for approval
+          return ActimeOutlinedButton(
+            label: 'Otkaži prijavu',
+            onPressed: _handleCancelMembership,
+          );
+        case MembershipStatus.active:
+          // Active member - can cancel membership
+          return ActimeOutlinedButton(
+            label: 'Otkaži članstvo',
+            onPressed: _handleCancelMembership,
+          );
+        case MembershipStatus.rejected:
+        case MembershipStatus.cancelled:
+        case MembershipStatus.expired:
+          // Can apply again
+          break;
+        default:
+          break;
+      }
     }
 
-    // Not a member - show join button
+    // No membership or can apply again - show join button
     return ActimePrimaryButton(
       label: 'Prijava za članstvo',
       onPressed: () {
@@ -375,6 +558,148 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
           ),
         ).then((_) => _loadOrganization());
       },
+    );
+  }
+}
+
+/// Bottom sheet for submitting a new review.
+/// Returns `true` via Navigator.pop when submission succeeds.
+class _LeaveReviewSheet extends StatefulWidget {
+  final int organizationId;
+
+  const _LeaveReviewSheet({required this.organizationId});
+
+  @override
+  State<_LeaveReviewSheet> createState() => __LeaveReviewSheetState();
+}
+
+class __LeaveReviewSheetState extends State<_LeaveReviewSheet> {
+  final _reviewService = ReviewService();
+  final _authService = AuthService();
+  final _commentController = TextEditingController();
+
+  int _selectedRating = 0;
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_selectedRating == 0) return;
+
+    final userId = _authService.currentUserId;
+    if (userId == null) return;
+
+    setState(() => _isSubmitting = true);
+
+    final response = await _reviewService.createReview(
+      userId: userId,
+      organizationId: widget.organizationId,
+      rating: _selectedRating,
+      comment: _commentController.text.trim().isEmpty
+          ? null
+          : _commentController.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isSubmitting = false);
+
+    if (response.success) {
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context, true);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Recenzija je uspješno dodana!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.message ?? 'Greška pri dodavanju recenzije'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppDimensions.spacingLarge,
+        right: AppDimensions.spacingLarge,
+        top: AppDimensions.spacingLarge,
+        bottom: AppDimensions.spacingLarge + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacingLarge),
+          const Text(
+            'Napišite recenziju',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacingXSmall),
+          Text(
+            'Ocijenite ovaj klub od 1 do 5 zvezda',
+            style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppDimensions.spacingDefault),
+          // Star selector
+          Row(
+            children: List.generate(5, (i) => GestureDetector(
+              onTap: () => setState(() => _selectedRating = i + 1),
+              child: Icon(
+                (i + 1) <= _selectedRating ? Icons.star : Icons.star_outline,
+                color: AppColors.orange,
+                size: 36,
+              ),
+            )),
+          ),
+          const SizedBox(height: AppDimensions.spacingDefault),
+          // Comment field
+          TextField(
+            controller: _commentController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Dodajte komentarz (opcionalno)',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              ),
+              contentPadding: const EdgeInsets.all(AppDimensions.spacingMedium),
+            ),
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: AppDimensions.spacingDefault),
+          // Submit
+          ActimePrimaryButton(
+            label: 'Podijeliti recenziju',
+            onPressed: _selectedRating > 0 && !_isSubmitting ? _submit : null,
+            isLoading: _isSubmitting,
+          ),
+        ],
+      ),
     );
   }
 }

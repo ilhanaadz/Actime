@@ -6,6 +6,7 @@ import '../../components/bottom_nav_user.dart';
 import 'user_profile_screen.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 import 'favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../clubs/club_detail_screen.dart';
@@ -51,8 +52,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return;
       }
 
-      // Load both memberships and event history
+      // Load memberships, upcoming events, and event history
       final membershipResponse = await _userService.getUserMemberships();
+      final upcomingResponse = await _userService.getUserEvents();
       final historyResponse = await _userService.getUserEventHistory();
 
       if (!mounted) return;
@@ -61,9 +63,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (membershipResponse.success && membershipResponse.data != null) {
           _memberships = membershipResponse.data!.data;
         }
-        if (historyResponse.success && historyResponse.data != null) {
-          _events = historyResponse.data!.data;
+
+        // Combine upcoming and past events
+        final List<Event> allEvents = [];
+        if (upcomingResponse.success && upcomingResponse.data != null) {
+          allEvents.addAll(upcomingResponse.data!.data);
         }
+        if (historyResponse.success && historyResponse.data != null) {
+          // Add history events that are not already in upcoming
+          for (final event in historyResponse.data!.data) {
+            if (!allEvents.any((e) => e.id == event.id)) {
+              allEvents.add(event);
+            }
+          }
+        }
+        // Sort by start date (newest first)
+        allEvents.sort((a, b) => b.startDate.compareTo(a.startDate));
+        _events = allEvents;
+
         _isLoading = false;
       });
     } catch (e) {
@@ -218,8 +235,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _canCancelEvent(Event event) {
     final now = DateTime.now();
     final hasNotPassed = event.startDate.isAfter(now);
-    final isNotPaid = event.isFree;
-    return hasNotPassed && isNotPaid;
+    return hasNotPassed;
   }
 
   @override
@@ -510,6 +526,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  Widget _buildOrgLogo(Event event) {
+    final logoUrl = ImageService().getFullImageUrl(event.organizationLogoUrl);
+    if (logoUrl.isNotEmpty) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey.shade200,
+        ),
+        child: ClipOval(
+          child: Image.network(
+            logoUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(Icons.event, color: Colors.grey.shade400, size: 20);
+            },
+          ),
+        ),
+      );
+    }
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.orange.withValues(alpha: 0.1),
+      ),
+      child: const Icon(Icons.event, color: Colors.orange, size: 20),
+    );
+  }
+
   Widget _buildEventCard(Event event) {
     return GestureDetector(
       onTap: () {
@@ -530,6 +578,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         child: Row(
           children: [
+            // Organization logo
+            _buildOrgLogo(event),
+            const SizedBox(width: 12),
             // Event info
             Expanded(
               child: Column(
@@ -544,12 +595,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    event.activityTypeName ?? 'Dogadjaj',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        event.activityTypeName ?? 'Dogadjaj',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: event.status.color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: event.status.color, width: 1),
+                        ),
+                        child: Text(
+                          event.status.displayName,
+                          style: TextStyle(color: event.status.color, fontSize: 10, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

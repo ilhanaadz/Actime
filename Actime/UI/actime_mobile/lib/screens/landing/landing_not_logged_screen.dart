@@ -4,6 +4,7 @@ import '../../components/bottom_nav.dart';
 import '../../models/models.dart';
 import '../../services/organization_service.dart';
 import '../../services/event_service.dart';
+import '../../services/image_service.dart';
 import '../auth/sign_in_screen.dart';
 import '../events/events_list_screen.dart';
 import '../events/event_detail_screen.dart';
@@ -306,6 +307,7 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
 
   Widget _buildEventCard(Event event) {
     final icon = Icons.event;
+    final logoUrl = ImageService().getFullImageUrl(event.organizationLogoUrl);
 
     return GestureDetector(
       onTap: () => _navigateToEventDetail(event),
@@ -326,23 +328,52 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
                 color: Colors.orange.shade50,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.orange, size: 24),
+              child: logoUrl.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        logoUrl,
+                        fit: BoxFit.cover,
+                        width: 50,
+                        height: 50,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(icon, color: Colors.orange, size: 24);
+                        },
+                      ),
+                    )
+                  : Icon(icon, color: Colors.orange, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D7C8C),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      event.formattedPrice,
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0D7C8C),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          event.formattedPrice,
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: event.status.color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: event.status.color, width: 1),
+                        ),
+                        child: Text(
+                          event.status.displayName,
+                          style: TextStyle(color: event.status.color, fontSize: 10, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Row(

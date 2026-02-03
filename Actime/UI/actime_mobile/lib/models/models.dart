@@ -19,3 +19,4 @@ export 'review.dart';
 export 'notification.dart';
 export 'enrollment.dart';
 export 'event_participation.dart';
+export 'gallery_image.dart';

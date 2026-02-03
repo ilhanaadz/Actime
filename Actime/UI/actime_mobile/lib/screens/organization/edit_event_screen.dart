@@ -32,6 +32,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
   Event? _event;
   List<Location> _locations = [];
   ActivityType? _selectedActivityType;
+  EventStatus? _selectedEventStatus;
   Location? _selectedLocation;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -120,6 +121,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
 
     _selectedActivityType = ActivityType.fromId(_event!.activityTypeId);
+    _selectedEventStatus = _event!.status;
   }
 
   @override
@@ -176,6 +178,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
             : null,
         if (_selectedActivityType != null) 'ActivityTypeId': _selectedActivityType!.id,
         if (_selectedLocation != null) 'LocationId': _selectedLocation!.id,
+        if (_selectedEventStatus != null) 'EventStatusId': _selectedEventStatus!.id,
       });
 
       if (!mounted) return;
@@ -295,6 +298,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
                     const SizedBox(height: AppDimensions.spacingLarge),
                     _buildActivityTypeDropdown(),
                     const SizedBox(height: AppDimensions.spacingLarge),
+                    _buildEventStatusDropdown(),
+                    const SizedBox(height: AppDimensions.spacingLarge),
                     _buildDateTimeRow(),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     SearchableDropdown<Location>(
@@ -381,6 +386,31 @@ class _EditEventScreenState extends State<EditEventScreen> {
           _selectedActivityType = value;
         });
       },
+    );
+  }
+
+  Widget _buildEventStatusDropdown() {
+    final currentStatus = _selectedEventStatus ?? EventStatus.pending;
+    final availableStatuses = currentStatus.availableForSelection;
+
+    return ActimeDropdownField<EventStatus>(
+      initialValue: _selectedEventStatus,
+      labelText: 'Status događaja',
+      items: availableStatuses
+          .map((status) => DropdownMenuItem(
+                value: status,
+                child: Text(status.displayName),
+              ))
+          .toList(),
+      onChanged: currentStatus.isTerminal
+          ? null
+          : (value) {
+              if (value != null) {
+                setState(() {
+                  _selectedEventStatus = value;
+                });
+              }
+            },
     );
   }
 

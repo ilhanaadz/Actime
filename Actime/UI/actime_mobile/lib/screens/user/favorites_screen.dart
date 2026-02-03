@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
+import '../../components/event_card.dart';
 import 'user_profile_screen.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 import '../clubs/club_detail_screen.dart';
 import '../events/event_detail_screen.dart';
 import '../landing/landing_logged_screen.dart';
@@ -322,8 +325,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Icon(icon, color: Colors.orange, size: 24);
   }
 
+  String _formatDate(DateTime date) {
+    return DateFormat('dd.MM.yyyy').format(date);
+  }
+
   Widget _buildEventCard(Event event) {
-    return GestureDetector(
+    return EventCard(
+      title: event.name,
+      price: event.formattedPrice,
+      date: _formatDate(event.startDate),
+      location: event.location ?? 'Nije određeno',
+      participants: event.participantsCount.toString(),
+      icon: Icons.event,
+      imageUrl: ImageService().getFullImageUrl(event.organizationLogoUrl),
+      statusText: event.status.displayName,
+      statusColor: event.status.color,
+      isFavorite: true,
       onTap: () {
         Navigator.push(
           context,
@@ -332,48 +349,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ).then((_) => _loadFavorites());
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Row(
-          children: [
-            // Event info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    event.activityTypeName ?? 'Dogadjaj',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Favorite button
-            IconButton(
-              icon: const Icon(Icons.favorite, color: AppColors.primary),
-              onPressed: () => _toggleEventFavorite(event),
-            ),
-          ],
-        ),
-      ),
+      onFavoriteTap: () => _toggleEventFavorite(event),
     );
   }
 }

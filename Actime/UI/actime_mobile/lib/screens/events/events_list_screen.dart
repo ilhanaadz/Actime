@@ -9,6 +9,7 @@ import '../../components/actime_text_field.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 import '../user/favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
@@ -269,6 +270,9 @@ class _EventsListScreenState extends State<EventsListScreen> {
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
             icon: Icons.event,
+            imageUrl: ImageService().getFullImageUrl(event.organizationLogoUrl),
+            statusText: event.status.displayName,
+            statusColor: event.status.color,
             isFavorite: _favoriteEventIds.contains(event.id),
             onTap: () => _navigateToDetail(context, event),
             onFavoriteTap: () => _toggleFavorite(event),

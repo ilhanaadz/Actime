@@ -18,7 +18,7 @@ class EnrollmentApplicationsScreen extends StatefulWidget {
 class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScreen> {
   final _organizationService = OrganizationService();
 
-  List<Enrollment> _enrollments = [];
+  List<Membership> _memberships = [];
   Organization? _organization;
   bool _isLoading = true;
   String? _error;
@@ -37,7 +37,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
 
     try {
       final orgResponse = await _organizationService.getOrganizationById(widget.organizationId);
-      final enrollmentsResponse = await _organizationService.getOrganizationEnrollments(
+      final membershipsResponse = await _organizationService.getOrganizationEnrollments(
         widget.organizationId,
         status: EnrollmentStatus.pending,
       );
@@ -48,14 +48,14 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
         _organization = orgResponse.data;
       }
 
-      if (enrollmentsResponse.success && enrollmentsResponse.data != null) {
+      if (membershipsResponse.success && membershipsResponse.data != null) {
         setState(() {
-          _enrollments = enrollmentsResponse.data!.data;
+          _memberships = membershipsResponse.data!.data;
           _isLoading = false;
         });
       } else {
         setState(() {
-          _error = enrollmentsResponse.message ?? 'Greška pri učitavanju prijava';
+          _error = membershipsResponse.message ?? 'Greška pri učitavanju prijava';
           _isLoading = false;
         });
       }
@@ -68,16 +68,16 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
     }
   }
 
-  Future<void> _approveEnrollment(Enrollment enrollment) async {
+  Future<void> _approveEnrollment(Membership membership) async {
     try {
-      final response = await _organizationService.approveEnrollment(enrollment.id);
+      final response = await _organizationService.approveEnrollment(membership.id.toString());
 
       if (!mounted) return;
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${enrollment.user?.name ?? 'Korisnik'} je prihvaćen'),
+            content: Text('${membership.user?.name ?? 'Korisnik'} je prihvaćen'),
             backgroundColor: Colors.green,
           ),
         );
@@ -100,16 +100,16 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
     }
   }
 
-  Future<void> _rejectEnrollment(Enrollment enrollment) async {
+  Future<void> _rejectEnrollment(Membership membership) async {
     try {
-      final response = await _organizationService.rejectEnrollment(enrollment.id);
+      final response = await _organizationService.rejectEnrollment(membership.id.toString());
 
       if (!mounted) return;
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${enrollment.user?.name ?? 'Korisnik'} je odbijen'),
+            content: Text('${membership.user?.name ?? 'Korisnik'} je odbijen'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -218,7 +218,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${_enrollments.length} na čekanju',
+              '${_memberships.length} na čekanju',
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -260,7 +260,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
       );
     }
 
-    if (_enrollments.isEmpty) {
+    if (_memberships.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -281,17 +281,17 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
       color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _enrollments.length,
+        itemCount: _memberships.length,
         itemBuilder: (context, index) {
-          final enrollment = _enrollments[index];
-          return _buildApplicationCard(enrollment);
+          final membership = _memberships[index];
+          return _buildApplicationCard(membership);
         },
       ),
     );
   }
 
-  Widget _buildApplicationCard(Enrollment enrollment) {
-    final user = enrollment.user;
+  Widget _buildApplicationCard(Membership membership) {
+    final user = membership.user;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -331,26 +331,11 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
                 ),
               ),
               Text(
-                _getTimeAgo(enrollment.createdAt),
+                _getTimeAgo(membership.createdAt),
                 style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
             ],
           ),
-
-          if (enrollment.message != null && enrollment.message!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                enrollment.message!,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-              ),
-            ),
-          ],
 
           const SizedBox(height: 12),
 
@@ -358,7 +343,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _showRejectDialog(enrollment),
+                  onPressed: () => _showRejectDialog(membership),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.red.shade300),
                     shape: RoundedRectangleBorder(
@@ -374,7 +359,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => _showAcceptDialog(enrollment),
+                  onPressed: () => _showAcceptDialog(membership),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
@@ -395,14 +380,14 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
     );
   }
 
-  void _showAcceptDialog(Enrollment enrollment) {
+  void _showAcceptDialog(Membership membership) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Prihvati prijavu'),
-          content: Text('Jeste li sigurni da želite prihvatiti prijavu korisnika ${enrollment.user?.name ?? ''}?'),
+          content: Text('Jeste li sigurni da želite prihvatiti prijavu korisnika ${membership.user?.name ?? ''}?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -411,7 +396,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _approveEnrollment(enrollment);
+                _approveEnrollment(membership);
               },
               child: const Text('Prihvati', style: TextStyle(color: AppColors.primary)),
             ),
@@ -421,14 +406,14 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
     );
   }
 
-  void _showRejectDialog(Enrollment enrollment) {
+  void _showRejectDialog(Membership membership) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Odbij prijavu'),
-          content: Text('Jeste li sigurni da želite odbiti prijavu korisnika ${enrollment.user?.name ?? ''}?'),
+          content: Text('Jeste li sigurni da želite odbiti prijavu korisnika ${membership.user?.name ?? ''}?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -437,7 +422,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _rejectEnrollment(enrollment);
+                _rejectEnrollment(membership);
               },
               child: const Text('Odbij', style: TextStyle(color: Colors.red)),
             ),

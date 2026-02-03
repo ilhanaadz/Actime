@@ -1,52 +1,119 @@
-/// Event status enum
+import 'package:flutter/material.dart';
+
+/// Event status enum matching backend EventStatus
+/// Used for tracking event lifecycle status with state machine transitions
 enum EventStatus {
-  draft,
-  upcoming,
-  ongoing,
-  completed,
-  cancelled;
+  pending(1, 'Na čekanju'),
+  upcoming(2, 'Nadolazeći'),
+  inProgress(3, 'U toku'),
+  completed(4, 'Završen'),
+  cancelled(5, 'Otkazan'),
+  postponed(6, 'Odgođen'),
+  rescheduled(7, 'Premješten');
 
-  static EventStatus fromString(String? value) {
-    if (value == null) return EventStatus.upcoming; // Default to upcoming instead of draft
+  final int id;
+  final String displayName;
 
-    switch (value.toLowerCase()) {
-      case 'upcoming':
-      case '1': // Common numeric mapping
-        return EventStatus.upcoming;
-      case 'ongoing':
-      case 'active':
-      case 'inprogress':
-      case '2':
-        return EventStatus.ongoing;
-      case 'completed':
-      case 'finished':
-      case 'done':
-      case '3':
-        return EventStatus.completed;
-      case 'cancelled':
-      case 'canceled':
-      case '4':
-        return EventStatus.cancelled;
-      case 'draft':
-      case '0':
-        return EventStatus.draft;
-      default:
-        return EventStatus.upcoming; // Default to upcoming for unknown statuses
+  const EventStatus(this.id, this.displayName);
+
+  /// Get EventStatus from ID
+  static EventStatus? fromId(int? id) {
+    if (id == null) return null;
+    try {
+      return EventStatus.values.firstWhere((status) => status.id == id);
+    } catch (_) {
+      return null;
     }
   }
 
-  String get displayName {
+  static EventStatus fromString(String? value) {
+    if (value == null) return EventStatus.pending;
+
+    switch (value.toLowerCase()) {
+      case 'pending':
+      case '1':
+        return EventStatus.pending;
+      case 'upcoming':
+      case '2':
+        return EventStatus.upcoming;
+      case 'inprogress':
+      case 'in_progress':
+      case 'active':
+      case '3':
+        return EventStatus.inProgress;
+      case 'completed':
+      case 'finished':
+      case 'done':
+      case '4':
+        return EventStatus.completed;
+      case 'cancelled':
+      case 'canceled':
+      case '5':
+        return EventStatus.cancelled;
+      case 'postponed':
+      case '6':
+        return EventStatus.postponed;
+      case 'rescheduled':
+      case '7':
+        return EventStatus.rescheduled;
+      default:
+        return EventStatus.pending;
+    }
+  }
+
+  /// Get all event statuses as a list for dropdowns
+  static List<EventStatus> get all => EventStatus.values;
+
+  /// State machine: Get valid transitions from current status
+  List<EventStatus> get validTransitions {
     switch (this) {
-      case EventStatus.draft:
-        return 'Nacrt';
+      case EventStatus.pending:
+        return [EventStatus.upcoming, EventStatus.cancelled];
       case EventStatus.upcoming:
-        return 'Nadolazeći';
-      case EventStatus.ongoing:
-        return 'U toku';
+        return [EventStatus.inProgress, EventStatus.postponed, EventStatus.rescheduled, EventStatus.cancelled];
+      case EventStatus.inProgress:
+        return [EventStatus.completed, EventStatus.postponed, EventStatus.cancelled];
       case EventStatus.completed:
-        return 'Završen';
+        return []; // Terminal state
       case EventStatus.cancelled:
-        return 'Otkazan';
+        return []; // Terminal state
+      case EventStatus.postponed:
+        return [EventStatus.upcoming, EventStatus.rescheduled, EventStatus.cancelled];
+      case EventStatus.rescheduled:
+        return [EventStatus.upcoming, EventStatus.inProgress, EventStatus.cancelled];
+    }
+  }
+
+  /// Check if transition to target status is valid
+  bool canTransitionTo(EventStatus target) {
+    return validTransitions.contains(target);
+  }
+
+  /// Get available statuses for dropdown (current + valid transitions)
+  List<EventStatus> get availableForSelection {
+    return [this, ...validTransitions];
+  }
+
+  /// Check if this is a terminal (final) state
+  bool get isTerminal => validTransitions.isEmpty;
+
+  /// Get color for status badge
+  Color get color {
+    switch (this) {
+      case EventStatus.pending:
+        return Colors.orange;
+      case EventStatus.upcoming:
+        return const Color(0xFF0D7C8C); // Primary teal
+      case EventStatus.inProgress:
+        return Colors.blue;
+      case EventStatus.completed:
+        return Colors.green;
+      case EventStatus.cancelled:
+        return Colors.red;
+      case EventStatus.postponed:
+        return Colors.amber;
+      case EventStatus.rescheduled:
+        return Colors.purple;
     }
   }
 }
@@ -67,6 +134,7 @@ class Event {
   final int participantsCount;
   final String organizationId;
   final String? organizationName;
+  final String? organizationLogoUrl;
   final int? activityTypeId;
   final String? activityTypeName;
   final EventStatus status;
@@ -95,9 +163,10 @@ class Event {
     this.participantsCount = 0,
     required this.organizationId,
     this.organizationName,
+    this.organizationLogoUrl,
     this.activityTypeId,
     this.activityTypeName,
-    this.status = EventStatus.upcoming,
+    this.status = EventStatus.pending,
     this.isFeatured = false,
     bool? isFree,
     this.isEnrolled = false,
@@ -138,6 +207,7 @@ class Event {
       participantsCount: _parseInt(json['ParticipantsCount'] ?? json['participantsCount']) ?? 0,
       organizationId: (json['OrganizationId'] ?? json['organizationId'])?.toString() ?? '0',
       organizationName: json['OrganizationName'] as String? ?? json['organizationName'] as String?,
+      organizationLogoUrl: json['OrganizationLogoUrl'] as String? ?? json['organizationLogoUrl'] as String?,
       activityTypeId: _parseInt(json['ActivityTypeId'] ?? json['activityTypeId']),
       activityTypeName: json['ActivityTypeName'] as String? ?? json['activityTypeName'] as String?,
       status: EventStatus.fromString(
@@ -193,6 +263,7 @@ class Event {
       'ParticipantsCount': participantsCount,
       'OrganizationId': organizationId,
       'OrganizationName': organizationName,
+      'OrganizationLogoUrl': organizationLogoUrl,
       'ActivityTypeId': activityTypeId,
       'ActivityTypeName': activityTypeName,
       'Status': status.name,
@@ -221,6 +292,7 @@ class Event {
     int? participantsCount,
     String? organizationId,
     String? organizationName,
+    String? organizationLogoUrl,
     int? activityTypeId,
     String? activityTypeName,
     EventStatus? status,
@@ -247,6 +319,7 @@ class Event {
       participantsCount: participantsCount ?? this.participantsCount,
       organizationId: organizationId ?? this.organizationId,
       organizationName: organizationName ?? this.organizationName,
+      organizationLogoUrl: organizationLogoUrl ?? this.organizationLogoUrl,
       activityTypeId: activityTypeId ?? this.activityTypeId,
       activityTypeName: activityTypeName ?? this.activityTypeName,
       status: status ?? this.status,

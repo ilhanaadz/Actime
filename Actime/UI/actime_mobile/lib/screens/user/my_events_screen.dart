@@ -6,6 +6,7 @@ import '../../components/tab_button.dart';
 import '../../components/app_bar_component.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/image_service.dart';
 import '../../components/bottom_nav_user.dart';
 import '../landing/landing_logged_screen.dart';
 import '../events/event_detail_screen.dart';
@@ -197,6 +198,9 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
             location: event.location ?? 'Nije određeno',
             participants: event.participantsCount.toString(),
             icon: Icons.event,
+            imageUrl: ImageService().getFullImageUrl(event.organizationLogoUrl),
+            statusText: event.status.displayName,
+            statusColor: event.status.color,
             showFavorite: false,
             onTap: () {
               Navigator.push(

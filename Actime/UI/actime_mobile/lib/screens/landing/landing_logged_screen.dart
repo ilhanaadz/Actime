@@ -5,6 +5,7 @@ import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../services/organization_service.dart';
 import '../../services/event_service.dart';
+import '../../services/image_service.dart';
 import '../user/favorites_screen.dart';
 import '../user/user_profile_screen.dart';
 import '../clubs/clubs_list_screen.dart';
@@ -35,14 +36,14 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
   Future<void> _loadData() async {
     try {
       final clubsResponse = await _organizationService.getOrganizations(perPage: 2);
-      final eventsResponse = await _eventService.getEvents(perPage: 2);
+      final recommendedResponse = await _eventService.getRecommendedEvents(top: 2);
       if (mounted) {
         setState(() {
           if (clubsResponse.success && clubsResponse.data != null) {
             _clubs = clubsResponse.data!.data;
           }
-          if (eventsResponse.success && eventsResponse.data != null) {
-            _events = eventsResponse.data!.data;
+          if (recommendedResponse.success && recommendedResponse.data != null) {
+            _events = recommendedResponse.data!;
           }
           _isLoading = false;
         });
@@ -320,6 +321,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
 
   Widget _buildEventCard(Event event) {
     final icon = Icons.event;
+    final logoUrl = ImageService().getFullImageUrl(event.organizationLogoUrl);
 
     return GestureDetector(
       onTap: () => _navigateToEventDetail(event),
@@ -340,7 +342,19 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                 color: Colors.orange.shade50,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.orange, size: 24),
+              child: logoUrl.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        logoUrl,
+                        fit: BoxFit.cover,
+                        width: 50,
+                        height: 50,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(icon, color: Colors.orange, size: 24);
+                        },
+                      ),
+                    )
+                  : Icon(icon, color: Colors.orange, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -358,6 +372,19 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                         child: Text(
                           event.formattedPrice,
                           style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: event.status.color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: event.status.color, width: 1),
+                        ),
+                        child: Text(
+                          event.status.displayName,
+                          style: TextStyle(color: event.status.color, fontSize: 10, fontWeight: FontWeight.w500),
                         ),
                       ),
                       const Spacer(),

@@ -24,8 +24,8 @@ class Review {
       id: _parseInt(json['Id'] ?? json['id']) ?? 0,
       userId: _parseInt(json['UserId'] ?? json['userId']) ?? 0,
       organizationId: _parseInt(json['OrganizationId'] ?? json['organizationId']) ?? 0,
-      rating: _parseInt(json['Rating'] ?? json['rating']) ?? 0,
-      comment: json['Comment'] as String? ?? json['comment'] as String?,
+      rating: _parseInt(json['Score'] ?? json['score'] ?? json['Rating'] ?? json['rating']) ?? 0,
+      comment: json['Text'] as String? ?? json['text'] as String? ?? json['Comment'] as String? ?? json['comment'] as String?,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
     );

@@ -47,13 +47,29 @@ class Enrollment {
               ? Organization.fromJson(json['organization'] as Map<String, dynamic>)
               : null,
       message: json['Message'] as String? ?? json['message'] as String?,
-      status: EnrollmentStatus.fromString(json['Status'] as String? ?? json['status'] as String? ?? 'pending'),
-      createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
+      status: _parseStatus(json),
+      createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt'] ?? json['StartDate'] ?? json['startDate']) ?? DateTime.now(),
       updatedAt: _parseDateTime(json['UpdatedAt'] ?? json['updatedAt']),
       reviewedAt: _parseDateTime(json['ReviewedAt'] ?? json['reviewedAt']),
       reviewedBy: json['ReviewedBy'] as String? ?? json['reviewedBy'] as String?,
       rejectionReason: json['RejectionReason'] as String? ?? json['rejectionReason'] as String?,
     );
+  }
+
+  static EnrollmentStatus _parseStatus(Map<String, dynamic> json) {
+    // First try to get status as string
+    final statusString = json['Status'] as String? ?? json['status'] as String?;
+    if (statusString != null) {
+      return EnrollmentStatus.fromString(statusString);
+    }
+
+    // Otherwise try to parse MembershipStatusId as integer
+    final statusId = json['MembershipStatusId'] ?? json['membershipStatusId'];
+    if (statusId != null) {
+      return EnrollmentStatus.fromStatusId(statusId is int ? statusId : int.tryParse(statusId.toString()) ?? 1);
+    }
+
+    return EnrollmentStatus.pending;
   }
 
   static DateTime? _parseDateTime(dynamic value) {
@@ -126,6 +142,23 @@ enum EnrollmentStatus {
       (status) => status.value == value,
       orElse: () => EnrollmentStatus.pending,
     );
+  }
+
+  /// Convert MembershipStatusId (int) to EnrollmentStatus
+  /// Backend status IDs: 1=pending, 2=active/approved, 3=suspended, 4=cancelled, 5=expired, 6=rejected
+  static EnrollmentStatus fromStatusId(int statusId) {
+    switch (statusId) {
+      case 1:
+        return EnrollmentStatus.pending;
+      case 2:
+        return EnrollmentStatus.approved;
+      case 4:
+        return EnrollmentStatus.cancelled;
+      case 6:
+        return EnrollmentStatus.rejected;
+      default:
+        return EnrollmentStatus.pending;
+    }
   }
 
   String get displayName {

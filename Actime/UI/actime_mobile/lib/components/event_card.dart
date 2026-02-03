@@ -11,6 +11,9 @@ class EventCard extends StatelessWidget {
   final String participants;
   final IconData icon;
   final Color? iconColor;
+  final String? imageUrl;
+  final String? statusText;
+  final Color? statusColor;
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onEditTap;
@@ -29,6 +32,9 @@ class EventCard extends StatelessWidget {
     required this.participants,
     required this.icon,
     this.iconColor,
+    this.imageUrl,
+    this.statusText,
+    this.statusColor,
     this.onTap,
     this.onFavoriteTap,
     this.onEditTap,
@@ -59,17 +65,47 @@ class EventCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleIconContainer(
-                      icon: icon,
-                      iconColor: effectiveIconColor,
-                      backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
-                    ),
+                    if (imageUrl != null && imageUrl!.isNotEmpty)
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: effectiveIconColor.withValues(alpha: 0.1),
+                        ),
+                        child: ClipOval(
+                          child: Image.network(
+                            imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(icon, color: effectiveIconColor, size: 24);
+                            },
+                          ),
+                        ),
+                      )
+                    else
+                      CircleIconContainer(
+                        icon: icon,
+                        iconColor: effectiveIconColor,
+                        backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
+                      ),
                     const SizedBox(width: AppDimensions.spacingDefault),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          PriceBadge(price: price),
+                          Row(
+                            children: [
+                              PriceBadge(price: price),
+                              if (statusText != null) ...[
+                                const SizedBox(width: AppDimensions.spacingSmall),
+                                StatusBadge(
+                                  status: statusText!,
+                                  color: statusColor,
+                                ),
+                              ],
+                            ],
+                          ),
                           const SizedBox(height: AppDimensions.spacingSmall),
                           Row(
                             children: [
@@ -189,6 +225,41 @@ class PriceBadge extends StatelessWidget {
         style: TextStyle(
           color: textColor ?? AppColors.white,
           fontSize: 10,
+        ),
+      ),
+    );
+  }
+}
+
+class StatusBadge extends StatelessWidget {
+  final String status;
+  final Color? color;
+
+  const StatusBadge({
+    super.key,
+    required this.status,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final badgeColor = color ?? AppColors.orange;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingSmall,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: badgeColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
+        border: Border.all(color: badgeColor, width: 1),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: badgeColor,
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
