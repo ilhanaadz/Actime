@@ -16,6 +16,12 @@ class Event {
   final DateTime createdAt;
   final DateTime? lastModifiedAt;
 
+  // Additional properties from API responses
+  final String? image;
+  final String? organizationName;
+  final String? location;
+  final int? participantsCount;
+
   Event({
     required this.id,
     required this.organizationId,
@@ -31,6 +37,10 @@ class Event {
     required this.activityTypeId,
     required this.createdAt,
     this.lastModifiedAt,
+    this.image,
+    this.organizationName,
+    this.location,
+    this.participantsCount,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -49,6 +59,10 @@ class Event {
       activityTypeId: _parseInt(json['ActivityTypeId'] ?? json['activityTypeId']) ?? 0,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
+      image: json['Image'] as String? ?? json['image'] as String?,
+      organizationName: json['OrganizationName'] as String? ?? json['organizationName'] as String?,
+      location: json['Location'] as String? ?? json['location'] as String?,
+      participantsCount: _parseInt(json['ParticipantsCount'] ?? json['participantsCount']),
     );
   }
 
@@ -90,6 +104,10 @@ class Event {
       'ActivityTypeId': activityTypeId,
       'CreatedAt': createdAt.toIso8601String(),
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
+      'Image': image,
+      'OrganizationName': organizationName,
+      'Location': location,
+      'ParticipantsCount': participantsCount,
     };
   }
 
@@ -108,6 +126,10 @@ class Event {
     int? activityTypeId,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
+    String? image,
+    String? organizationName,
+    String? location,
+    int? participantsCount,
   }) {
     return Event(
       id: id ?? this.id,
@@ -124,6 +146,10 @@ class Event {
       activityTypeId: activityTypeId ?? this.activityTypeId,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
+      image: image ?? this.image,
+      organizationName: organizationName ?? this.organizationName,
+      location: location ?? this.location,
+      participantsCount: participantsCount ?? this.participantsCount,
     );
   }
 
@@ -133,6 +159,46 @@ class Event {
     return '${price.toStringAsFixed(2)} BAM';
   }
 
+  /// Alias for title (used in admin screens)
+  String get name => title;
+
+  /// Alias for start (used in admin screens)
+  DateTime get startDate => start;
+
+  /// Get status enum based on eventStatusId
+  EventStatus get status {
+    // Map eventStatusId to EventStatus enum
+    switch (eventStatusId) {
+      case 1:
+        return EventStatus.pending;
+      case 2:
+        return EventStatus.active;
+      case 3:
+        return EventStatus.closed;
+      case 4:
+        return EventStatus.cancelled;
+      default:
+        return EventStatus.pending;
+    }
+  }
+
+  /// Get status string based on eventStatusId
+  String get statusString {
+    // Map eventStatusId to status strings
+    switch (eventStatusId) {
+      case 1:
+        return 'pending';
+      case 2:
+        return 'active';
+      case 3:
+        return 'closed';
+      case 4:
+        return 'cancelled';
+      default:
+        return 'unknown';
+    }
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -140,4 +206,12 @@ class Event {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+/// Event status enum
+enum EventStatus {
+  pending,
+  active,
+  closed,
+  cancelled,
 }

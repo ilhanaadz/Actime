@@ -205,17 +205,14 @@ class MockApiService {
       return ApiResponse(
         success: true,
         data: AuthResponse(
+          userId: 0,
+          email: email,
+          firstName: 'Admin',
+          lastName: 'User',
           accessToken: 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
           refreshToken: 'mock_refresh_token',
           expiresAt: DateTime.now().add(const Duration(days: 7)),
-          user: User(
-            id: 0,
-            username: 'admin',
-            email: email,
-            firstName: 'Admin',
-            lastName: 'User',
-            createdAt: DateTime.now(),
-          ),
+          roles: ['Admin'],
         ),
         statusCode: 200,
       );

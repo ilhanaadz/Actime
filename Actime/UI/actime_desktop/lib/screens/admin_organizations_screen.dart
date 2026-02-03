@@ -76,7 +76,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
     }
   }
 
-  Future<void> _loadOrganizationDetails(String id) async {
+  Future<void> _loadOrganizationDetails(int id) async {
     setState(() => _isLoading = true);
 
     try {
@@ -462,7 +462,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                         const SizedBox(height: 24),
                         _buildAboutSection(org),
                         const SizedBox(height: 24),
-                        if (org.gallery.isNotEmpty) ...[
+                        if (org.gallery != null && org.gallery!.isNotEmpty) ...[
                           _buildGallerySection(org),
                           const SizedBox(height: 24),
                         ],
@@ -615,6 +615,13 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   }
 
   Widget _buildGallerySection(Organization org) {
+    if (org.gallery == null || org.gallery!.isEmpty) {
+      return _buildSection(
+        'Gallery',
+        const Text('No gallery images available'),
+      );
+    }
+
     return _buildSection(
       'Gallery',
       GridView.builder(
@@ -625,7 +632,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
-        itemCount: org.gallery.length,
+        itemCount: org.gallery!.length,
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
@@ -635,7 +642,7 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                org.gallery[index],
+                org.gallery![index],
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) =>
                     Icon(Icons.image, color: Colors.grey[400], size: 40),

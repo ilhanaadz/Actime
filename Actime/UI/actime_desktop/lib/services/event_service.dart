@@ -14,29 +14,52 @@ class EventService {
   Future<ApiResponse<PaginatedResponse<Event>>> getEvents({
     int page = 1,
     int pageSize = 10,
+    int? perPage,
     String? search,
     String? sortBy,
     String? sortOrder,
     int? eventStatusId,
+    String? status,
     int? organizationId,
     int? activityTypeId,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
+    // Use perPage if provided, otherwise use pageSize
+    final effectivePageSize = perPage ?? pageSize;
+
+    // Convert status string to eventStatusId if provided
+    int? effectiveStatusId = eventStatusId;
+    if (status != null && effectiveStatusId == null) {
+      switch (status.toLowerCase()) {
+        case 'pending':
+          effectiveStatusId = 1;
+          break;
+        case 'active':
+          effectiveStatusId = 2;
+          break;
+        case 'closed':
+          effectiveStatusId = 3;
+          break;
+        case 'cancelled':
+          effectiveStatusId = 4;
+          break;
+      }
+    }
     if (ApiConfig.useMockApi) {
       return await _mockService.getEvents(
         page: page,
-        pageSize: pageSize,
+        pageSize: effectivePageSize,
         search: search,
         sortBy: sortBy,
-        eventStatusId: eventStatusId,
+        eventStatusId: effectiveStatusId,
         startDate: startDate,
       );
     }
 
     final queryParams = <String, String>{
       'Page': page.toString(),
-      'PageSize': pageSize.toString(),
+      'PageSize': effectivePageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {
@@ -48,8 +71,8 @@ class EventService {
     if (sortOrder != null) {
       queryParams['SortOrder'] = sortOrder;
     }
-    if (eventStatusId != null) {
-      queryParams['EventStatusId'] = eventStatusId.toString();
+    if (effectiveStatusId != null) {
+      queryParams['EventStatusId'] = effectiveStatusId.toString();
     }
     if (organizationId != null) {
       queryParams['OrganizationId'] = organizationId.toString();

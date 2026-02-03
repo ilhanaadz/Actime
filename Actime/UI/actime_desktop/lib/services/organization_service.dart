@@ -14,15 +14,19 @@ class OrganizationService {
   Future<ApiResponse<PaginatedResponse<Organization>>> getOrganizations({
     int page = 1,
     int pageSize = 10,
+    int? perPage,
     String? search,
     String? sortBy,
     String? sortOrder,
     int? categoryId,
   }) async {
+    // Use perPage if provided, otherwise use pageSize
+    final effectivePageSize = perPage ?? pageSize;
+
     if (ApiConfig.useMockApi) {
       return await _mockService.getOrganizations(
         page: page,
-        pageSize: pageSize,
+        pageSize: effectivePageSize,
         search: search,
         sortBy: sortBy,
       );
@@ -30,7 +34,7 @@ class OrganizationService {
 
     final queryParams = <String, String>{
       'Page': page.toString(),
-      'PageSize': pageSize.toString(),
+      'PageSize': effectivePageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {

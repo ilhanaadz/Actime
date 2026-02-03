@@ -12,6 +12,7 @@ class User {
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime? lastModifiedAt;
+  final int? organizationsCount;
 
   User({
     required this.id,
@@ -25,6 +26,7 @@ class User {
     this.isDeleted = false,
     required this.createdAt,
     this.lastModifiedAt,
+    this.organizationsCount,
   });
 
   /// Get full name
@@ -40,6 +42,12 @@ class User {
   /// Get display name (prefer full name, fallback to username)
   String get displayName => fullName.isNotEmpty ? fullName : username;
 
+  /// Alias for displayName (used in admin screens)
+  String get name => displayName;
+
+  /// Alias for profileImageUrl (used in admin screens)
+  String? get avatar => profileImageUrl;
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: _parseInt(json['Id'] ?? json['id']) ?? 0,
@@ -53,6 +61,7 @@ class User {
       isDeleted: json['IsDeleted'] as bool? ?? json['isDeleted'] as bool? ?? false,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
+      organizationsCount: _parseInt(json['OrganizationsCount'] ?? json['organizationsCount']),
     );
   }
 
@@ -83,6 +92,7 @@ class User {
       'IsDeleted': isDeleted,
       'CreatedAt': createdAt.toIso8601String(),
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
+      'OrganizationsCount': organizationsCount,
     };
   }
 
@@ -98,6 +108,7 @@ class User {
     bool? isDeleted,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
+    int? organizationsCount,
   }) {
     return User(
       id: id ?? this.id,
@@ -111,6 +122,7 @@ class User {
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
+      organizationsCount: organizationsCount ?? this.organizationsCount,
     );
   }
 

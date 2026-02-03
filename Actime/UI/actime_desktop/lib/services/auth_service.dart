@@ -37,8 +37,8 @@ class AuthService {
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.login,
       body: {
-        'email': email,
-        'password': password,
+        'Email': email,
+        'Password': password,
       },
       requiresAuth: false,
       fromJson: (json) => AuthResponse.fromJson(json),
@@ -87,7 +87,7 @@ class AuthService {
 
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.refreshToken,
-      body: {'refresh_token': refreshToken},
+      body: {'RefreshToken': refreshToken},
       requiresAuth: false,
       fromJson: (json) => AuthResponse.fromJson(json),
     );

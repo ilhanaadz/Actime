@@ -1,4 +1,5 @@
 import 'organization.dart';
+import 'user.dart';
 
 /// Authentication response from backend
 /// Maps to backend AuthResponse
@@ -45,6 +46,16 @@ class AuthResponse {
 
   /// Check if user is organization
   bool get isOrganization => hasRole('Organization');
+
+  /// Get User object from AuthResponse
+  User get user => User(
+        id: userId,
+        username: email.split('@')[0], // Use email prefix as username
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        createdAt: DateTime.now(),
+      );
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(

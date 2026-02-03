@@ -4,11 +4,13 @@ class Category {
   final int id;
   final String name;
   final String? description;
+  final int? organizationsCount;
 
   Category({
     required this.id,
     required this.name,
     this.description,
+    this.organizationsCount,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -16,6 +18,7 @@ class Category {
       id: _parseInt(json['Id'] ?? json['id']) ?? 0,
       name: json['Name'] as String? ?? json['name'] as String? ?? '',
       description: json['Description'] as String? ?? json['description'] as String?,
+      organizationsCount: _parseInt(json['OrganizationsCount'] ?? json['organizationsCount']),
     );
   }
 
@@ -31,6 +34,7 @@ class Category {
       'Id': id,
       'Name': name,
       'Description': description,
+      'OrganizationsCount': organizationsCount,
     };
   }
 
@@ -38,11 +42,13 @@ class Category {
     int? id,
     String? name,
     String? description,
+    int? organizationsCount,
   }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      organizationsCount: organizationsCount ?? this.organizationsCount,
     );
   }
 

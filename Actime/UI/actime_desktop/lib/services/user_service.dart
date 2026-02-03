@@ -14,14 +14,18 @@ class UserService {
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,
     int pageSize = 10,
+    int? perPage,
     String? search,
     String? sortBy,
     String? sortOrder,
   }) async {
+    // Use perPage if provided, otherwise use pageSize
+    final effectivePageSize = perPage ?? pageSize;
+
     if (ApiConfig.useMockApi) {
       return await _mockService.getUsers(
         page: page,
-        pageSize: pageSize,
+        pageSize: effectivePageSize,
         search: search,
         sortBy: sortBy,
       );
@@ -29,7 +33,7 @@ class UserService {
 
     final queryParams = <String, String>{
       'Page': page.toString(),
-      'PageSize': pageSize.toString(),
+      'PageSize': effectivePageSize.toString(),
     };
 
     if (search != null && search.isNotEmpty) {

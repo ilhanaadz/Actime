@@ -452,9 +452,13 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
         bgColor = Colors.grey;
         label = 'Closed';
         break;
-      case EventStatus.upcoming:
+      case EventStatus.pending:
         bgColor = const Color(0xFF0D7C8C);
         label = 'Upcoming';
+        break;
+      case EventStatus.cancelled:
+        bgColor = Colors.red;
+        label = 'Cancelled';
         break;
     }
 

@@ -13,6 +13,13 @@ class Organization {
   final DateTime createdAt;
   final DateTime? lastModifiedAt;
 
+  // Additional properties from API responses
+  final String? address;
+  final String? website;
+  final List<String>? gallery;
+  final int? eventsCount;
+  final int? membersCount;
+
   Organization({
     required this.id,
     required this.name,
@@ -25,7 +32,18 @@ class Organization {
     required this.addressId,
     required this.createdAt,
     this.lastModifiedAt,
+    this.address,
+    this.website,
+    this.gallery,
+    this.eventsCount,
+    this.membersCount,
   });
+
+  /// Alias for phoneNumber (used in admin screens)
+  String? get phone => phoneNumber;
+
+  /// Alias for logoUrl (used in admin screens)
+  String? get logo => logoUrl;
 
   factory Organization.fromJson(Map<String, dynamic> json) {
     return Organization(
@@ -40,7 +58,20 @@ class Organization {
       addressId: _parseInt(json['AddressId'] ?? json['addressId']) ?? 0,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
+      address: json['Address'] as String? ?? json['address'] as String?,
+      website: json['Website'] as String? ?? json['website'] as String?,
+      gallery: _parseStringList(json['Gallery'] ?? json['gallery']),
+      eventsCount: _parseInt(json['EventsCount'] ?? json['eventsCount']),
+      membersCount: _parseInt(json['MembersCount'] ?? json['membersCount']),
     );
+  }
+
+  static List<String>? _parseStringList(dynamic value) {
+    if (value == null) return null;
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    return null;
   }
 
   static int? _parseInt(dynamic value) {
@@ -70,6 +101,11 @@ class Organization {
       'AddressId': addressId,
       'CreatedAt': createdAt.toIso8601String(),
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
+      'Address': address,
+      'Website': website,
+      'Gallery': gallery,
+      'EventsCount': eventsCount,
+      'MembersCount': membersCount,
     };
   }
 
@@ -85,6 +121,11 @@ class Organization {
     int? addressId,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
+    String? address,
+    String? website,
+    List<String>? gallery,
+    int? eventsCount,
+    int? membersCount,
   }) {
     return Organization(
       id: id ?? this.id,
@@ -98,6 +139,11 @@ class Organization {
       addressId: addressId ?? this.addressId,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
+      address: address ?? this.address,
+      website: website ?? this.website,
+      gallery: gallery ?? this.gallery,
+      eventsCount: eventsCount ?? this.eventsCount,
+      membersCount: membersCount ?? this.membersCount,
     );
   }
 
