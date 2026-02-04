@@ -29,12 +29,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   final _userService = UserService();
   final _reviewService = ReviewService();
   final _authService = AuthService();
+  final _favoriteService = FavoriteService();
 
   Organization? _organization;
   List<Review> _reviews = [];
   double _averageRating = 0.0;
   bool _isLoading = true;
   bool _isCancelling = false;
+  bool _isFavorite = false;
   String? _error;
 
   @override
@@ -42,6 +44,27 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     super.initState();
     _loadOrganization();
     _loadReviews();
+    _loadFavoriteStatus();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    if (!widget.isLoggedIn) return;
+    final isFavorite = await _favoriteService.isClubFavorite(widget.organizationId);
+    if (mounted) {
+      setState(() {
+        _isFavorite = isFavorite;
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (!widget.isLoggedIn || _organization == null) return;
+    final isFavorite = await _favoriteService.toggleClubFavorite(_organization!);
+    if (mounted) {
+      setState(() {
+        _isFavorite = isFavorite;
+      });
+    }
   }
 
   Future<void> _loadOrganization() async {
@@ -341,10 +364,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             ],
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.favorite_border, color: AppColors.primary),
-          onPressed: () {},
-        ),
+        if (widget.isLoggedIn)
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? AppColors.red : AppColors.primary,
+            ),
+            onPressed: _toggleFavorite,
+          ),
       ],
     );
   }

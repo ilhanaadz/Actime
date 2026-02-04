@@ -70,6 +70,13 @@ class OrganizationService {
       return await _mockService.updateOrganization('1', data);
     }
 
+    if (data.containsKey('LogoUrl')) {
+      final path = data['LogoUrl'] as String?;
+      if (path != null && !path.startsWith(RegExp(r'https?:\/\/'))) {
+        data['LogoUrl'] = '${ApiConfig.baseUrl}$path';
+      }
+    }
+
     return await _apiService.put<Organization>(
       ApiConfig.organizationMy(),
       body: data,

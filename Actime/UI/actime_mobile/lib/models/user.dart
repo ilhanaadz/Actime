@@ -34,7 +34,6 @@ class User {
   final String id;
   final String name;
   final String email;
-  final String? phone;
   final String? bio;
   final String? profileImageUrl;
   final String? address;
@@ -55,7 +54,6 @@ class User {
     required this.id,
     required this.name,
     required this.email,
-    this.phone,
     this.bio,
     this.profileImageUrl,
     this.address,
@@ -118,8 +116,6 @@ class User {
       id: id,
       name: name,
       email: json['Email'] as String? ?? json['email'] as String? ?? '',
-      phone: json['PhoneNumber'] as String? ?? json['phoneNumber'] as String? ??
-             json['Phone'] as String? ?? json['phone'] as String?,
       bio: json['Bio'] as String? ?? json['bio'] as String?,
       profileImageUrl: json['ProfileImageUrl'] as String? ?? json['profileImageUrl'] as String? ??
                        json['Avatar'] as String? ?? json['avatar'] as String?,
@@ -159,8 +155,6 @@ class User {
       'LastName': lastName ?? (name.split(' ').length > 1 ? name.split(' ').skip(1).join(' ') : null),
       'Username': username ?? email,
       'Email': email,
-      'PhoneNumber': phone,
-      'Phone': phone,
       'Bio': bio,
       'ProfileImageUrl': profileImageUrl,
       'Avatar': profileImageUrl,
@@ -198,7 +192,6 @@ class User {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      phone: phone ?? this.phone,
       bio: bio ?? this.bio,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       address: address ?? this.address,

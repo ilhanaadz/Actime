@@ -26,15 +26,28 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   String? _error;
 
   String get _organizationId {
+    // Debug: Log what's happening
+    print('=== ORG PROFILE DEBUG ===');
+    print('isOrganization: ${_authService.isOrganization}');
+    print('currentAuth.organization: ${_authService.currentAuth?.organization}');
+    print('currentAuth.organization.id: ${_authService.currentAuth?.organization?.id}');
+    print('widget.organizationId: ${widget.organizationId}');
+
     // Priority 1: If logged in as organization, use organization.id from auth
     if (_authService.isOrganization && _authService.currentAuth?.organization?.id != null) {
+      print('Using auth organization ID: ${_authService.currentAuth!.organization!.id}');
+      print('=========================');
       return _authService.currentAuth!.organization!.id;
     }
     // Priority 2: Use organizationId parameter if provided (for viewing other organizations)
     if (widget.organizationId != null) {
+      print('Using widget organizationId: ${widget.organizationId}');
+      print('=========================');
       return widget.organizationId!;
     }
     // Fallback - should not reach here in normal flow
+    print('WARNING: Using fallback ID 1!');
+    print('=========================');
     return '1';
   }
 

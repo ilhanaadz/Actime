@@ -51,6 +51,15 @@ class _SignInScreenState extends State<SignInScreen> {
       if (response.success && response.data != null) {
         final authResponse = response.data!;
         final user = authResponse.user;
+
+        // Debug: Log organization data
+        print('=== LOGIN DEBUG ===');
+        print('User role: ${user.role}');
+        print('Is organization: ${authResponse.isOrganization}');
+        print('Organization: ${authResponse.organization}');
+        print('Organization ID: ${authResponse.organization?.id}');
+        print('===================');
+
         // Route based on user role
         if (user.role == UserRole.organization) {
           // Check if organization setup is required

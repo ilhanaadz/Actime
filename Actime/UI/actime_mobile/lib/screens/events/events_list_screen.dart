@@ -171,10 +171,14 @@ class _EventsListScreenState extends State<EventsListScreen> {
   void _showStatusFilter() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
         padding: const EdgeInsets.all(AppDimensions.spacingDefault),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -188,14 +192,23 @@ class _EventsListScreenState extends State<EventsListScreen> {
               ),
             ),
             const SizedBox(height: AppDimensions.spacingDefault),
-            _buildStatusOption('Svi događaji', null),
-            _buildStatusOption(EventStatus.pending.displayName, EventStatus.pending),
-            _buildStatusOption(EventStatus.upcoming.displayName, EventStatus.upcoming),
-            _buildStatusOption(EventStatus.inProgress.displayName, EventStatus.inProgress),
-            _buildStatusOption(EventStatus.completed.displayName, EventStatus.completed),
-            _buildStatusOption(EventStatus.cancelled.displayName, EventStatus.cancelled),
-            _buildStatusOption(EventStatus.postponed.displayName, EventStatus.postponed),
-            _buildStatusOption(EventStatus.rescheduled.displayName, EventStatus.rescheduled),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildStatusOption('Svi događaji', null),
+                    _buildStatusOption(EventStatus.pending.displayName, EventStatus.pending),
+                    _buildStatusOption(EventStatus.upcoming.displayName, EventStatus.upcoming),
+                    _buildStatusOption(EventStatus.inProgress.displayName, EventStatus.inProgress),
+                    _buildStatusOption(EventStatus.completed.displayName, EventStatus.completed),
+                    _buildStatusOption(EventStatus.cancelled.displayName, EventStatus.cancelled),
+                    _buildStatusOption(EventStatus.postponed.displayName, EventStatus.postponed),
+                    _buildStatusOption(EventStatus.rescheduled.displayName, EventStatus.rescheduled),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

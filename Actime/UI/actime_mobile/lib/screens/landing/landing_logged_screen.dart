@@ -6,6 +6,7 @@ import '../../models/models.dart';
 import '../../services/organization_service.dart';
 import '../../services/event_service.dart';
 import '../../services/image_service.dart';
+import '../../services/favorite_service.dart';
 import '../user/favorites_screen.dart';
 import '../user/user_profile_screen.dart';
 import '../clubs/clubs_list_screen.dart';
@@ -23,14 +24,55 @@ class LandingPageLogged extends StatefulWidget {
 class _LandingPageLoggedState extends State<LandingPageLogged> {
   final OrganizationService _organizationService = OrganizationService();
   final EventService _eventService = EventService();
+  final FavoriteService _favoriteService = FavoriteService();
   List<Organization> _clubs = [];
   List<Event> _events = [];
+  Set<String> _favoriteClubIds = {};
+  Set<String> _favoriteEventIds = {};
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final favoriteClubs = await _favoriteService.getFavoriteClubs();
+    final favoriteEvents = await _favoriteService.getFavoriteEvents();
+    if (mounted) {
+      setState(() {
+        _favoriteClubIds = favoriteClubs.map((c) => c.id).toSet();
+        _favoriteEventIds = favoriteEvents.map((e) => e.id).toSet();
+      });
+    }
+  }
+
+  Future<void> _toggleClubFavorite(Organization club) async {
+    final isFavorite = await _favoriteService.toggleClubFavorite(club);
+    if (mounted) {
+      setState(() {
+        if (isFavorite) {
+          _favoriteClubIds.add(club.id);
+        } else {
+          _favoriteClubIds.remove(club.id);
+        }
+      });
+    }
+  }
+
+  Future<void> _toggleEventFavorite(Event event) async {
+    final isFavorite = await _favoriteService.toggleEventFavorite(event);
+    if (mounted) {
+      setState(() {
+        if (isFavorite) {
+          _favoriteEventIds.add(event.id);
+        } else {
+          _favoriteEventIds.remove(event.id);
+        }
+      });
+    }
   }
 
   Future<void> _loadData() async {
@@ -257,6 +299,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
   Widget _buildClubCard(Organization club) {
     final icon = _getCategoryIcon(club.categoryName);
     final iconColor = _getCategoryColor(club.categoryName);
+    final isFavorite = _favoriteClubIds.contains(club.id);
 
     return GestureDetector(
       onTap: () => _navigateToClubDetail(club),
@@ -270,6 +313,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
         child: Column(
           children: [
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 Container(
                   width: 60,
@@ -281,9 +325,30 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                   child: Icon(icon, color: iconColor, size: 30),
                 ),
                 Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
+                  top: -4,
+                  right: -4,
+                  child: GestureDetector(
+                    onTap: () => _toggleClubFavorite(club),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        size: 16,
+                        color: isFavorite ? AppColors.red : Colors.grey.shade400,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -322,6 +387,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
   Widget _buildEventCard(Event event) {
     final icon = Icons.event;
     final logoUrl = ImageService().getFullImageUrl(event.organizationLogoUrl);
+    final isFavorite = _favoriteEventIds.contains(event.id);
 
     return GestureDetector(
       onTap: () => _navigateToEventDetail(event),
@@ -388,7 +454,14 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.favorite_border, size: 20, color: AppColors.primary),
+                      GestureDetector(
+                        onTap: () => _toggleEventFavorite(event),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          size: 20,
+                          color: isFavorite ? AppColors.red : AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),

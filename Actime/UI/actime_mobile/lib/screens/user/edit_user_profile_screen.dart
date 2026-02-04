@@ -20,7 +20,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _phoneController = TextEditingController();
 
   User? _user;
   bool _isLoading = true;
@@ -37,7 +36,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
@@ -53,7 +51,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
         _user = response.data;
         _firstNameController.text = _user?.firstName ?? '';
         _lastNameController.text = _user?.lastName ?? '';
-        _phoneController.text = _user?.phone ?? '';
         setState(() => _isLoading = false);
       } else {
         setState(() => _isLoading = false);
@@ -77,7 +74,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
       final response = await _userService.updateProfile({
         if (firstName.isNotEmpty) 'FirstName': firstName,
         if (lastName.isNotEmpty) 'LastName': lastName,
-        if (_phoneController.text.isNotEmpty) 'PhoneNumber': _phoneController.text,
       });
 
       if (!mounted) return;
@@ -301,22 +297,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Phone
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Telefon',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
 
                     // Save Button
                     Center(

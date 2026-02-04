@@ -24,7 +24,6 @@ class MockApiService {
       id: '1',
       name: 'Amar Hadžić',
       email: 'amar.hadzic@email.com',
-      phone: '+387 61 123 456',
       bio: 'Ljubitelj sporta i outdoor aktivnosti',
       role: UserRole.user,
       organizationsCount: 3,
@@ -35,7 +34,6 @@ class MockApiService {
       id: '2',
       name: 'Emina Kovačević',
       email: 'emina.kovacevic@email.com',
-      phone: '+387 62 234 567',
       bio: 'Organizatorica kulturnih događaja',
       role: UserRole.organization,
       organizationsCount: 2,
@@ -46,7 +44,6 @@ class MockApiService {
       id: '3',
       name: 'Mirza Begović',
       email: 'mirza.begovic@email.com',
-      phone: '+387 63 345 678',
       role: UserRole.user,
       organizationsCount: 5,
       eventsCount: 8,
@@ -56,7 +53,6 @@ class MockApiService {
       id: '4',
       name: 'Lejla Mujić',
       email: 'lejla.mujic@email.com',
-      phone: '+387 61 456 789',
       role: UserRole.user,
       organizationsCount: 2,
       eventsCount: 15,
@@ -66,7 +62,6 @@ class MockApiService {
       id: '5',
       name: 'Dino Huseinović',
       email: 'dino.huseinovic@email.com',
-      phone: '+387 62 567 890',
       role: UserRole.organization,
       organizationsCount: 1,
       eventsCount: 30,
@@ -85,7 +80,6 @@ class MockApiService {
       id: '7',
       name: 'Kenan Mehmedović',
       email: 'kenan.mehmedovic@email.com',
-      phone: '+387 63 678 901',
       role: UserRole.user,
       organizationsCount: 2,
       eventsCount: 10,
@@ -125,7 +119,6 @@ class MockApiService {
       id: '2',
       name: 'Planinarsko društvo Bjelašnica',
       description: 'Organiziramo izlete, pohode i planinarenja na prekrasne bosanske planine.',
-      phone: '+387 33 234 567',
       email: 'pd.bjel@email.com',
       address: 'Maršala Tita 50, Sarajevo',
       categoryId: '1',
@@ -790,7 +783,6 @@ class MockApiService {
 
     final updatedUser = _mockUsers[index].copyWith(
       name: data['Name'] as String? ?? data['name'] as String? ?? _mockUsers[index].name,
-      phone: data['Phone'] as String? ?? data['phone'] as String? ?? _mockUsers[index].phone,
       bio: data['Bio'] as String? ?? data['bio'] as String? ?? _mockUsers[index].bio,
       address: data['Address'] as String? ?? data['address'] as String? ?? _mockUsers[index].address,
       lastModifiedAt: DateTime.now(),
@@ -1203,7 +1195,7 @@ class MockApiService {
   }
 
   /// Get event participants
-  Future<ApiResponse<PaginatedResponse<Participant>>> getEventParticipants(
+  Future<ApiResponse<PaginatedResponse<User>>> getEventParticipants(
     String eventId, {
     int page = 1,
     int perPage = 10,
@@ -1211,16 +1203,16 @@ class MockApiService {
     await _simulateDelay();
 
     final participants = _mockUsers.take(5).map((user) {
-      return Participant(
-        id: 'p_${user.id}',
-        userId: user.id,
-        eventId: eventId,
-        userName: user.name,
-        userEmail: user.email,
-        userPhone: user.phone,
-        userAvatar: user.profileImageUrl,
-        joinedAt: DateTime.now().subtract(Duration(days: _random.nextInt(7))),
-        isPaid: _random.nextBool(),
+      return User(
+        createdAt: user.createdAt,
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        id: user.id,
+        email: user.email,
+        bio: user.bio,
+        address: user.address,
+        profileImageUrl: user.profileImageUrl,
       );
     }).toList();
 

@@ -17,10 +17,12 @@ class EditOrganizationProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<EditOrganizationProfileScreen> createState() => _EditOrganizationProfileScreenState();
+  State<EditOrganizationProfileScreen> createState() =>
+      _EditOrganizationProfileScreenState();
 }
 
-class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileScreen> {
+class _EditOrganizationProfileScreenState
+    extends State<EditOrganizationProfileScreen> {
   final _organizationService = OrganizationService();
   final _categoryService = CategoryService();
   final _addressService = AddressService();
@@ -183,26 +185,32 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
 
         if (updateResponse.success) {
           setState(() {
-            _organization = _organization?.copyWith(logoUrl: uploadResponse.data);
+            _organization = _organization?.copyWith(
+              logoUrl: uploadResponse.data,
+            );
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Logo je uspješno promijenjen')),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(updateResponse.message ?? 'Greška pri spremanju')),
+            SnackBar(
+              content: Text(updateResponse.message ?? 'Greška pri spremanju'),
+            ),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(uploadResponse.message ?? 'Greška pri uploadu')),
+          SnackBar(
+            content: Text(uploadResponse.message ?? 'Greška pri uploadu'),
+          ),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Došlo je do greške')));
     } finally {
       if (mounted) {
         setState(() => _isUploadingImage = false);
@@ -227,7 +235,9 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
         'PhoneNumber': _phoneController.text,
         'Email': _emailController.text,
         'Description': _aboutController.text,
-        if (_selectedCategoryId != null) 'CategoryId': int.tryParse(_selectedCategoryId!) ?? _selectedCategoryId,
+        if (_selectedCategoryId != null)
+          'CategoryId':
+              int.tryParse(_selectedCategoryId!) ?? _selectedCategoryId,
         if (_selectedAddress != null) 'AddressId': _selectedAddress!.id,
       });
 
@@ -245,9 +255,9 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Doslo je do greske')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Doslo je do greske')));
     } finally {
       if (mounted) {
         setState(() {
@@ -261,15 +271,10 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Confirmation',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -309,10 +314,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Confirm',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -327,18 +329,12 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
         children: [
           Text(
             '$label: ',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
           ),
           Expanded(
             child: Text(
               value.length > 30 ? '${value.substring(0, 30)}...' : value,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
             ),
           ),
         ],
@@ -422,7 +418,9 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
                     child: _organization?.logo != null
                         ? ClipOval(
                             child: Image.network(
-                              _imageService.getFullImageUrl(_organization!.logo),
+                              _imageService.getFullImageUrl(
+                                _organization!.logo,
+                              ),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Icon(
@@ -535,6 +533,17 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty)
+                  return null; // ako nije obavezno
+
+                final phoneRegex = RegExp(r'^\+?[0-9\s\-]{8,15}$');
+                if (!phoneRegex.hasMatch(value)) {
+                  return 'Unesite validan broj telefona';
+                }
+
+                return null;
+              },
               decoration: InputDecoration(
                 labelText: 'Phone',
                 enabledBorder: UnderlineInputBorder(
@@ -554,10 +563,12 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
               selectedValue: _selectedAddress,
               items: _addresses,
               itemLabel: (address) => address.street,
-              itemSubtitle: (address) => address.city?.name ?? address.cityName ?? '',
+              itemSubtitle: (address) =>
+                  address.city?.name ?? address.cityName ?? '',
               isLoading: _isAddressesLoading,
               isOutlined: false,
-              onChanged: (address) => setState(() => _selectedAddress = address),
+              onChanged: (address) =>
+                  setState(() => _selectedAddress = address),
               onAddNew: _showAddAddressModal,
               addNewLabel: 'Dodaj novu adresu',
             ),
@@ -566,6 +577,7 @@ class _EditOrganizationProfileScreenState extends State<EditOrganizationProfileS
             // E-mail
             TextFormField(
               controller: _emailController,
+              enabled: false,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value != null && value.isNotEmpty) {

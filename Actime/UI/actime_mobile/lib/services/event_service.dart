@@ -34,7 +34,6 @@ class Participant {
     id: userId,
     name: userName ?? '',
     email: userEmail ?? '',
-    phone: userPhone,
     profileImageUrl: userAvatar,
     createdAt: joinedAt,
   );
@@ -288,38 +287,30 @@ class EventService {
         if (sortBy != null) 'SortBy': sortBy,
         'SortDescending': sortDescending.toString(),
         if (status != null) 'EventStatusId': status.id.toString(),
-        if (startDate != null) 'FilterDate': startDate.toIso8601String(),
-        if (endDate != null) 'FilterDate': endDate.toIso8601String(),
+        if (startDate != null) 'FromDate': startDate.toIso8601String(),
+        if (endDate != null) 'ToDate': endDate.toIso8601String(),
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
     );
   }
 
   /// Get event participants
-  Future<ApiResponse<PaginatedResponse<Participant>>> getEventParticipants(
-    String eventId, {
-    int page = 1,
-    int perPage = 10,
-  }) async {
-    if (ApiConfig.useMockApi) {
-      // Return mock participants
-      return ApiResponse.success(PaginatedResponse<Participant>(
-        items: [],
-        totalCount: 0,
-        page: page,
-        pageSize: perPage,
-      ));
-    }
-
-    return await _apiService.get<PaginatedResponse<Participant>>(
-      '${ApiConfig.participation}/event/$eventId',
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, Participant.fromJson),
-    );
+ Future<ApiResponse<List<User>>> getEventParticipants(String eventId) async {
+  if (ApiConfig.useMockApi) {
+    return ApiResponse.success(<User>[]);
   }
+
+  return await _apiService.get<List<User>>(
+    '${ApiConfig.participation}/participants/$eventId',
+    fromJson: (json) {
+      final list = json as List<dynamic>;
+
+      return list
+          .map((e) => User.fromJson(e as Map<String, dynamic>))
+          .toList();
+    },
+  );
+}
 
   /// Get recommended events for user
   /// Uses RecommendationController endpoint

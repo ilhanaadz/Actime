@@ -22,7 +22,7 @@ class _EventParticipantsDetailScreenState
     extends State<EventParticipantsDetailScreen> {
   final _eventService = EventService();
 
-  List<Participant> _participants = [];
+  List<User> _participants = [];
   bool _isLoading = true;
   String? _error;
 
@@ -45,7 +45,7 @@ class _EventParticipantsDetailScreenState
 
       setState(() {
         if (response.success && response.data != null) {
-          _participants = response.data!.data;
+          _participants = response.data!;
         }
         _isLoading = false;
       });
@@ -138,8 +138,8 @@ class _EventParticipantsDetailScreenState
     );
   }
 
-  Widget _buildParticipantCard(Participant participant) {
-    final user = participant.user;
+  Widget _buildParticipantCard(User participant) {
+    final user = participant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -155,7 +155,7 @@ class _EventParticipantsDetailScreenState
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             radius: 20,
             child: Text(
-              user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : '?',
+              user.name.isNotEmpty == true ? user.name[0].toUpperCase() : '?',
               style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -168,7 +168,7 @@ class _EventParticipantsDetailScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'Unknown',
+                  user.name.isNotEmpty == true ? user.name : 'Unknown',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -183,7 +183,7 @@ class _EventParticipantsDetailScreenState
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    user?.email ?? '',
+                    user.email.isNotEmpty == true ? user.email : '',
                     style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.primary,

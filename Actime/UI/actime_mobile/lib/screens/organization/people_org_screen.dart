@@ -23,7 +23,6 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
   final _pdfReportService = PdfReportService();
 
   int _selectedTab = 0; // 0 = Participations, 1 = Enrollments
-  int _selectedTimeFilter = 0; // 0 = Events, 1 = Months, 2 = Years
   List<EventParticipation> _participations = [];
   List<Membership> _approvedEnrollments = [];
   List<Membership> _pendingEnrollments = [];
@@ -555,7 +554,6 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
     final dateFormat = DateFormat('dd.MM.yyyy.');
     // Calculate months since enrollment
     final enrolledDate = membership.startDate ?? membership.createdAt;
-    final monthsSinceEnrollment = DateTime.now().difference(enrolledDate).inDays ~/ 30;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -574,16 +572,6 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.primary,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              monthsSinceEnrollment.toString(),
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
               ),
             ),
           ),

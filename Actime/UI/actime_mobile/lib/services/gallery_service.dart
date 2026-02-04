@@ -31,26 +31,19 @@ class GalleryService {
     );
   }
 
-  Future<ApiResponse<List<GalleryImage>>> getByOrganizationId(String organizationId) async {
-    final response = await _apiService.get<Map<String, dynamic>>(
+  Future<ApiResponse<List<GalleryImage>>> getByOrganizationId(
+    String organizationId,
+  ) async {
+    final response = await _apiService.get<List<GalleryImage>>(
       '/Gallery/organization/$organizationId',
-      fromJson: (json) => json,
-    );
-
-    if (response.success && response.data != null) {
-      final items = response.data!['items'] as List? ?? response.data as List?;
-      if (items != null) {
-        final images = items
+      fromJson: (json) {
+        return (json as List)
             .map((item) => GalleryImage.fromJson(item as Map<String, dynamic>))
             .toList();
-        return ApiResponse.success(images, statusCode: response.statusCode);
-      }
-    }
-
-    return ApiResponse.error(
-      response.message ?? 'Greška pri učitavanju galerije',
-      statusCode: response.statusCode,
+      },
     );
+
+    return ApiResponse.success(response.data!, statusCode: response.statusCode);
   }
 
   Future<ApiResponse<GalleryImage>> addImage({
@@ -65,7 +58,8 @@ class GalleryService {
         'ImageUrl': imageUrl,
         if (caption != null) 'Caption': caption,
         if (userId != null) 'UserId': int.tryParse(userId),
-        if (organizationId != null) 'OrganizationId': int.tryParse(organizationId),
+        if (organizationId != null)
+          'OrganizationId': int.tryParse(organizationId),
       },
       fromJson: (json) => GalleryImage.fromJson(json),
     );

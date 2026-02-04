@@ -157,13 +157,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
                       icon: Icons.email_outlined,
                       text: _user?.email ?? '',
                     ),
-                    if (_user?.phone != null && _user!.phone!.isNotEmpty) ...[
-                      const SizedBox(height: AppDimensions.spacingDefault),
-                      ProfileInfoRow(
-                        icon: Icons.phone_outlined,
-                        text: _user!.phone!,
-                      ),
-                    ],
                     if (_user?.bio != null && _user!.bio!.isNotEmpty) ...[
                       const SizedBox(height: AppDimensions.spacingDefault),
                       ProfileInfoRow(

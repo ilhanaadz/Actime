@@ -44,14 +44,16 @@ class _GalleryOrgScreenState extends State<GalleryOrgScreen> {
 
       if (orgResponse.success && orgResponse.data != null) {
         _organization = orgResponse.data;
-
+       
         final galleryResponse = await _galleryService.getByOrganizationId(widget.organizationId);
+      
         if (galleryResponse.success && galleryResponse.data != null) {
           _images = galleryResponse.data!;
         }
+      } else {
       }
     } catch (e) {
-      // Ignore errors
+      print('Gallery error: $e');
     }
 
     if (mounted) {
