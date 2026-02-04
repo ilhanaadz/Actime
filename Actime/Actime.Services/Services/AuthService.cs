@@ -388,6 +388,7 @@ namespace Actime.Services.Services
                 AccessToken = string.Empty,
                 RefreshToken = string.Empty,
                 ExpiresAt = DateTime.MinValue,
+                ProfileImageUrl = user.ProfileImageUrl,
                 Roles = roles.ToList(),
                 RequiresOrganizationSetup = roles.Contains("Organization") && organizationDto == null,
                 Organization = organizationDto

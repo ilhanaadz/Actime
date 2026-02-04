@@ -19,5 +19,6 @@ namespace Actime.Model.Responses
         public List<string> Roles { get; set; } = new();
         public bool RequiresOrganizationSetup { get; set; }
         public Organization? Organization { get; set; }
+        public string? ProfileImageUrl { get; set; }
     }
 }

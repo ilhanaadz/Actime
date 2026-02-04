@@ -35,9 +35,6 @@ namespace Actime.Services.Services
             if (request.LastName != null)
                 user.LastName = request.LastName;
 
-            if (request.PhoneNumber != null)
-                user.PhoneNumber = request.PhoneNumber;
-
             if (request.ProfileImageUrl != null)
                 user.ProfileImageUrl = request.ProfileImageUrl;
 

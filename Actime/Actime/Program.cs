@@ -1,4 +1,5 @@
 using Actime;
+using Actime.Hubs;
 using Actime.Model.Settings;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
@@ -150,6 +151,17 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddSignalR();
 
+// CORS for SignalR (Flutter app)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
@@ -190,6 +202,8 @@ app.UseSwaggerUI();
 
 app.UseStaticFiles();
 
+app.UseCors("SignalRPolicy");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -197,5 +211,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
