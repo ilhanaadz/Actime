@@ -10,9 +10,6 @@ namespace Actime.Model.Requests
         [StringLength(100)]
         public string? LastName { get; set; }
 
-        [Phone]
-        public string? PhoneNumber { get; set; }
-
         [Url]
         public string? ProfileImageUrl { get; set; }
     }

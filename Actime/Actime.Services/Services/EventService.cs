@@ -121,8 +121,7 @@ namespace Actime.Services.Services
 
             if (!string.IsNullOrWhiteSpace(search.Text))
             {
-                query = query.Where(e => e.Title.Contains(search.Text) ||
-                                        (e.Description != null && e.Description.Contains(search.Text)));
+                query = query.Where(e => e.Title.Contains(search.Text));
             }
 
             // Filter by specific status
@@ -137,9 +136,14 @@ namespace Actime.Services.Services
                 query = query.Where(e => e.EventStatusId != (int)Model.Constants.EventStatus.Pending);
             }
 
-            if (search.FilterDate != null)
+            if (search.FromDate != null)
             {
-                query = query.Where(e => e.Start == search.FilterDate);
+                query = query.Where(e => e.Start >= search.FromDate);
+            }
+
+            if (search.ToDate != null)
+            {
+                query = query.Where(e => e.End <= search.ToDate);
             }
 
             return query;

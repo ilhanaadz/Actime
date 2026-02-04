@@ -15,7 +15,9 @@ namespace Actime.Services.Interfaces
         Task<List<Participation>> GetUserParticipationsAsync(int userId);
         
         Task<List<Event>> GetUserParticipatedEventsAsync(int userId);
-        
+
+        Task<List<User>> GetEventParticipantsAsync(int eventId);
+
         Task<bool> CancelParticipationAsync(int eventId, int userId);
     }
 }

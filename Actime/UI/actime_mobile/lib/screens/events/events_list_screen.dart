@@ -36,6 +36,9 @@ class _EventsListScreenState extends State<EventsListScreen> {
   String? _error;
   int _currentPage = 1;
   int _totalPages = 1;
+  EventStatus? _selectedStatus;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
@@ -106,15 +109,31 @@ class _EventsListScreenState extends State<EventsListScreen> {
         page: _currentPage,
         perPage: 10,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
-        status: EventStatus.upcoming,
+        status: _selectedStatus,
         sortBy: 'Start',
       );
 
       if (!mounted) return;
 
       if (response.success && response.data != null) {
+        var events = response.data!.data;
+
+        // Apply date range filter client-side if needed
+        if (_startDate != null) {
+          events = events.where((e) =>
+            e.startDate.isAfter(_startDate!) ||
+            e.startDate.isAtSameMomentAs(_startDate!)
+          ).toList();
+        }
+        if (_endDate != null) {
+          events = events.where((e) =>
+            e.startDate.isBefore(_endDate!) ||
+            e.startDate.isAtSameMomentAs(_endDate!)
+          ).toList();
+        }
+
         setState(() {
-          _events = response.data!.data;
+          _events = events;
           _totalPages = response.data!.lastPage;
           _isLoading = false;
         });
@@ -135,6 +154,108 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
   String _formatDate(DateTime date) {
     return DateFormat('dd.MM.yyyy.').format(date);
+  }
+
+  String _getDateRangeText() {
+    final dateFormat = DateFormat('dd.MM.yyyy.');
+    if (_startDate != null && _endDate != null) {
+      return '${dateFormat.format(_startDate!)} - ${dateFormat.format(_endDate!)}';
+    } else if (_startDate != null) {
+      return 'Od ${dateFormat.format(_startDate!)}';
+    } else if (_endDate != null) {
+      return 'Do ${dateFormat.format(_endDate!)}';
+    }
+    return '';
+  }
+
+  void _showStatusFilter() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Filtriraj po statusu',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            _buildStatusOption('Svi događaji', null),
+            _buildStatusOption(EventStatus.pending.displayName, EventStatus.pending),
+            _buildStatusOption(EventStatus.upcoming.displayName, EventStatus.upcoming),
+            _buildStatusOption(EventStatus.inProgress.displayName, EventStatus.inProgress),
+            _buildStatusOption(EventStatus.completed.displayName, EventStatus.completed),
+            _buildStatusOption(EventStatus.cancelled.displayName, EventStatus.cancelled),
+            _buildStatusOption(EventStatus.postponed.displayName, EventStatus.postponed),
+            _buildStatusOption(EventStatus.rescheduled.displayName, EventStatus.rescheduled),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusOption(String label, EventStatus? status) {
+    final isSelected = _selectedStatus == status;
+    return ListTile(
+      title: Text(label),
+      leading: status != null
+          ? Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: status.color,
+                shape: BoxShape.circle,
+              ),
+            )
+          : null,
+      trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
+      onTap: () {
+        setState(() {
+          _selectedStatus = status;
+        });
+        _loadEvents();
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future<void> _showDateRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: (_startDate != null && _endDate != null)
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
+      _loadEvents();
+    }
   }
 
   @override
@@ -179,23 +300,70 @@ class _EventsListScreenState extends State<EventsListScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(AppDimensions.spacingDefault),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: ActimeSearchField(
-                    hintText: 'Pretraži događaje...',
-                    controller: _searchController,
+                Row(
+                  children: [
+                    Expanded(
+                      child: ActimeSearchField(
+                        hintText: 'Pretraži događaje...',
+                        controller: _searchController,
+                      ),
+                    ),
+                    const SizedBox(width: AppDimensions.spacingMedium),
+                    IconButton(
+                      icon: const Icon(Icons.tune, color: AppColors.primary),
+                      onPressed: _showStatusFilter,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.calendar_today,
+                        color: (_startDate != null || _endDate != null)
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      ),
+                      onPressed: _showDateRangePicker,
+                    ),
+                  ],
+                ),
+                if (_startDate != null || _endDate != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppDimensions.spacingSmall),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.spacingSmall,
+                        vertical: AppDimensions.spacingSmall,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _getDateRangeText(),
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 16, color: AppColors.primary),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              setState(() {
+                                _startDate = null;
+                                _endDate = null;
+                              });
+                              _loadEvents();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppDimensions.spacingMedium),
-                IconButton(
-                  icon: const Icon(Icons.tune, color: AppColors.primary),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.calendar_today, color: AppColors.primary),
-                  onPressed: () {},
-                ),
               ],
             ),
           ),

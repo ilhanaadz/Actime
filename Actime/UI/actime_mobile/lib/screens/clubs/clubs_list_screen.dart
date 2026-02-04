@@ -3,6 +3,7 @@ import '../../constants/constants.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
 import '../../components/bottom_nav.dart';
+import '../../components/actime_text_field.dart';
 import '../user/user_profile_screen.dart';
 import '../../components/event_card.dart';
 import '../../models/models.dart';
@@ -25,11 +26,15 @@ class ClubsListScreen extends StatefulWidget {
 class _ClubsListScreenState extends State<ClubsListScreen> {
   final _organizationService = OrganizationService();
   final _favoriteService = FavoriteService();
+  final _searchController = TextEditingController();
 
   List<Organization> _organizations = [];
   Set<String> _favoriteClubIds = {};
   bool _isLoading = true;
   String? _error;
+  bool _showSearchField = false;
+  String _sortBy = 'Name';
+  bool _sortDescending = false;
 
   @override
   void initState() {
@@ -38,6 +43,23 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     if (widget.isLoggedIn) {
       _loadFavorites();
     }
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Debounce search
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _loadOrganizations();
+      }
+    });
   }
 
   Future<void> _loadFavorites() async {
@@ -80,7 +102,9 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
       final response = await _organizationService.getOrganizations(
         page: 1,
         perPage: 20,
-        sortBy: 'Name',
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
+        sortBy: _sortBy,
+        sortDescending: _sortDescending,
       );
 
       if (!mounted) return;
@@ -149,8 +173,6 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
         showFavorite: widget.isLoggedIn,
-        showSearch: true,
-        showFilter: true,
         onLogoTap: () {
           Navigator.pushReplacement(
             context,
@@ -183,10 +205,103 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
           }
         },
       ),
-      body: _buildContent(),
+      body: Column(
+        children: [
+          _buildSearchFilterRow(),
+          Expanded(
+            child: _buildContent(),
+          ),
+        ],
+      ),
       bottomNavigationBar: widget.isLoggedIn
           ? const BottomNavUser(currentIndex: 1)
           : const BottomNav(currentIndex: 1),
+    );
+  }
+
+  Widget _buildSearchFilterRow() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+          child: Row(
+            children: [
+              Expanded(
+                child: _showSearchField
+                    ? ActimeSearchField(
+                        controller: _searchController,
+                        hintText: 'Pretraži klubove...',
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              if (!_showSearchField) const Spacer(),
+              IconButton(
+                icon: Icon(
+                  _showSearchField ? Icons.close : Icons.search,
+                  color: _showSearchField ? AppColors.primary : AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _showSearchField = !_showSearchField;
+                    if (!_showSearchField) {
+                      _searchController.clear();
+                    }
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.sort, color: AppColors.textSecondary),
+                onPressed: _showSortOptions,
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+      ],
+    );
+  }
+
+  void _showSortOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Sortiraj po',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            _buildSortOption('Naziv (A-Z)', 'Name', false),
+            _buildSortOption('Naziv (Z-A)', 'Name', true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortOption(String label, String sortBy, bool descending) {
+    final isSelected = _sortBy == sortBy && _sortDescending == descending;
+    return ListTile(
+      title: Text(label),
+      trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
+      onTap: () {
+        setState(() {
+          _sortBy = sortBy;
+          _sortDescending = descending;
+        });
+        _loadOrganizations();
+        Navigator.pop(context);
+      },
     );
   }
 

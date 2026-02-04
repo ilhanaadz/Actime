@@ -112,7 +112,7 @@ class EventService {
         'IncludeTotalCount': includeTotalCount.toString(),
         if (effectiveSearch != null && effectiveSearch.isNotEmpty) 'Text': effectiveSearch,
         if (sortBy != null) 'SortBy': sortBy,
-        if (status != null) 'Status': status.name,
+        if (status != null) 'EventStatusId': status.id.toString(),
         'SortDescending': sortDescending.toString(),
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
@@ -234,14 +234,39 @@ class EventService {
     String organizationId, {
     int page = 1,
     int perPage = 10,
+    String? search,
+    String? sortBy,
+    bool sortDescending = false,
+    EventStatus? status,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (ApiConfig.useMockApi) {
       // Filter mock events by organization ID
-      final allEventsResponse = await _mockService.getEvents(page: page, perPage: perPage);
+      final allEventsResponse = await _mockService.getEvents(
+        page: page,
+        perPage: perPage,
+        search: search,
+        sortBy: sortBy,
+      );
       if (allEventsResponse.success && allEventsResponse.data != null) {
-        final filteredItems = allEventsResponse.data!.items
+        var filteredItems = allEventsResponse.data!.items
             .where((e) => e.organizationId == organizationId)
             .toList();
+
+        // Apply status filter if provided
+        if (status != null) {
+          filteredItems = filteredItems.where((e) => e.status == status).toList();
+        }
+
+        // Apply date range filter if provided
+        if (startDate != null) {
+          filteredItems = filteredItems.where((e) => e.startDate.isAfter(startDate) || e.startDate.isAtSameMomentAs(startDate)).toList();
+        }
+        if (endDate != null) {
+          filteredItems = filteredItems.where((e) => e.startDate.isBefore(endDate) || e.startDate.isAtSameMomentAs(endDate)).toList();
+        }
+
         return ApiResponse.success(PaginatedResponse<Event>(
           items: filteredItems,
           totalCount: filteredItems.length,
@@ -259,6 +284,12 @@ class EventService {
         'PageSize': perPage.toString(),
         'OrganizationId': organizationId,
         'IncludeTotalCount': 'true',
+        if (search != null && search.isNotEmpty) 'Text': search,
+        if (sortBy != null) 'SortBy': sortBy,
+        'SortDescending': sortDescending.toString(),
+        if (status != null) 'EventStatusId': status.id.toString(),
+        if (startDate != null) 'FilterDate': startDate.toIso8601String(),
+        if (endDate != null) 'FilterDate': endDate.toIso8601String(),
       },
       fromJson: (json) => PaginatedResponse.fromJson(json, Event.fromJson),
     );

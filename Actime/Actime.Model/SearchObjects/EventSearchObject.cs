@@ -17,6 +17,8 @@ namespace Actime.Model.SearchObjects
         /// </summary>
         public int? CurrentUserId { get; set; }
 
-        public DateTime? FilterDate { get; set; }
+        public DateTime? FromDate { get; set; }
+        
+        public DateTime? ToDate { get; set; }
     }
 }

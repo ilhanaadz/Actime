@@ -26,7 +26,18 @@ namespace Actime.Services.Services
             if (!canBeDeleted)
                 return false;
 
-            _context.Set<TEntity>().Remove(entity);
+            if (entity is SoftDeleteEntity softDeletable)
+            {
+                softDeletable.IsDeleted = true;
+                softDeletable.DeletedAt = DateTime.UtcNow;
+
+                _context.Set<TEntity>().Update(entity);
+            }
+            else
+            {
+                _context.Set<TEntity>().Remove(entity);
+            }
+
             await _context.SaveChangesAsync();
             await OnDeleted(entity);
 

@@ -16,7 +16,7 @@ namespace Actime.Model.Requests
         [StringLength(500), Url]
         public string? LogoUrl { get; set; }
 
-        [Phone(ErrorMessage = "Invalid phone number")]
+        [RegularExpression(@"^\+?[0-9\s\-]{8,15}$", ErrorMessage = "Invalid phone number format")]
         public string? PhoneNumber { get; set; }
     }
 }

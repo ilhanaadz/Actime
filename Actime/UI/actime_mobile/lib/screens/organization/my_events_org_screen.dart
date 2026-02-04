@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constants.dart';
 import '../../components/event_card.dart';
+import '../../components/actime_text_field.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../../services/image_service.dart';
@@ -22,15 +23,38 @@ class MyEventsOrgScreen extends StatefulWidget {
 
 class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
   final _eventService = EventService();
+  final _searchController = TextEditingController();
 
   List<Event> _events = [];
   bool _isLoading = true;
   String? _error;
+  bool _showSearchField = false;
+  String _sortBy = 'Start';
+  bool _sortDescending = true;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Debounce search
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _loadData();
+      }
+    });
   }
 
   Future<void> _loadData() async {
@@ -42,6 +66,11 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
     try {
       final eventsResponse = await _eventService.getOrganizationEvents(
         widget.organizationId,
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
+        sortBy: _sortBy,
+        sortDescending: _sortDescending,
+        startDate: _startDate,
+        endDate: _endDate,
       );
 
       if (!mounted) return;
@@ -232,35 +261,185 @@ class _MyEventsOrgScreenState extends State<MyEventsOrgScreen> {
   }
 
   Widget _buildSearchFilterRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingDefault,
-        vertical: AppDimensions.spacingSmall,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingDefault,
+            vertical: AppDimensions.spacingSmall,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  _showSearchField ? Icons.close : Icons.search,
+                  color: _showSearchField ? AppColors.primary : AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _showSearchField = !_showSearchField;
+                    if (!_showSearchField) {
+                      _searchController.clear();
+                    }
+                  });
+                },
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.sort, color: AppColors.textSecondary),
+                onPressed: _showSortOptions,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.calendar_today_outlined,
+                  color: (_startDate != null || _endDate != null) ? AppColors.primary : AppColors.textSecondary,
+                ),
+                onPressed: _showDateRangePicker,
+              ),
+            ],
+          ),
+        ),
+        if (_showSearchField)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingDefault,
+              vertical: AppDimensions.spacingSmall,
+            ),
+            child: ActimeSearchField(
+              controller: _searchController,
+              hintText: 'Pretraži događaje...',
+            ),
+          ),
+        if (_startDate != null || _endDate != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingDefault,
+              vertical: AppDimensions.spacingSmall,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingSmall,
+                vertical: AppDimensions.spacingSmall,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getDateRangeText(),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16, color: AppColors.primary),
+                    onPressed: () {
+                      setState(() {
+                        _startDate = null;
+                        _endDate = null;
+                      });
+                      _loadData();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _getDateRangeText() {
+    final dateFormat = DateFormat('dd.MM.yyyy.');
+    if (_startDate != null && _endDate != null) {
+      return '${dateFormat.format(_startDate!)} - ${dateFormat.format(_endDate!)}';
+    } else if (_startDate != null) {
+      return 'Od ${dateFormat.format(_startDate!)}';
+    } else if (_endDate != null) {
+      return 'Do ${dateFormat.format(_endDate!)}';
+    }
+    return '';
+  }
+
+  void _showSortOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.textSecondary),
-            onPressed: () {
-              // TODO: Implement search
-            },
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.sort, color: AppColors.textSecondary),
-            onPressed: () {
-              // TODO: Implement sort
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary),
-            onPressed: () {
-              // TODO: Implement calendar filter
-            },
-          ),
-        ],
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppDimensions.spacingDefault),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Sortiraj po',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingDefault),
+            _buildSortOption('Datum (najnoviji)', 'Start', true),
+            _buildSortOption('Datum (najstariji)', 'Start', false),
+            _buildSortOption('Naziv (A-Z)', 'Title', false),
+            _buildSortOption('Naziv (Z-A)', 'Title', true),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildSortOption(String label, String sortBy, bool descending) {
+    final isSelected = _sortBy == sortBy && _sortDescending == descending;
+    return ListTile(
+      title: Text(label),
+      trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
+      onTap: () {
+        setState(() {
+          _sortBy = sortBy;
+          _sortDescending = descending;
+        });
+        _loadData();
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future<void> _showDateRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: (_startDate != null && _endDate != null)
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
+      _loadData();
+    }
   }
 
   Widget _buildContent() {
