@@ -9,6 +9,7 @@ import '../../services/services.dart';
 import '../../services/image_service.dart';
 import 'favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../clubs/club_detail_screen.dart';
 import '../events/event_detail_screen.dart';
 
@@ -241,6 +242,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
+        onNotificationTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
           );
         },
         onFavoriteTap: () {

@@ -18,7 +18,8 @@ class UserProfileScreen extends StatefulWidget {
   State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindingObserver {
+class _UserProfileScreenState extends State<UserProfileScreen>
+    with WidgetsBindingObserver {
   final _authService = AuthService();
   final _userService = UserService();
 
@@ -127,7 +128,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EditUserProfileScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const EditUserProfileScreen(),
+                ),
               ).then((_) => _loadUserProfile());
             },
           ),
@@ -142,7 +145,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
                 padding: const EdgeInsets.all(AppDimensions.spacingLarge),
                 child: Column(
                   children: [
-                    _buildProfilePicture(),
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: AppColors.borderLight,
+                          backgroundImage: _user?.avatar != null
+                              ? NetworkImage(_user!.avatar!)
+                              : null,
+                          child: _user?.avatar == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: AppColors.textMuted,
+                                )
+                              : null,
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: AppDimensions.spacingLarge),
                     Text(
                       _user?.name ?? 'Korisnik',
@@ -164,11 +184,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
                         text: _user!.bio!,
                       ),
                     ],
-                    // const SizedBox(height: AppDimensions.spacingDefault),
-                    // ProfileInfoRow(
-                    //   icon: Icons.event,
-                    //   text: '${_user?.eventsCount ?? 0} događaja',
-                    // ),
                     const SizedBox(height: AppDimensions.spacingXLarge),
                     _buildMyClubsSection(),
                     const SizedBox(height: AppDimensions.spacingXLarge),
@@ -198,33 +213,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildProfilePicture() {
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: AppColors.borderLight,
-          backgroundImage: _user?.avatar != null ? NetworkImage(_user!.avatar!) : null,
-          child: _user?.avatar == null
-              ? Icon(Icons.person, size: 50, color: AppColors.textMuted)
-              : null,
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.camera_alt, size: 16, color: AppColors.white),
-          ),
-        ),
-      ],
     );
   }
 
@@ -258,20 +246,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
             ..._memberships.map((membership) {
               final org = membership.organization;
               return Padding(
-                padding: const EdgeInsets.only(bottom: AppDimensions.spacingMedium),
+                padding: const EdgeInsets.only(
+                  bottom: AppDimensions.spacingMedium,
+                ),
                 child: ClubItemSmall(
                   name: org?.name ?? 'Nepoznat klub',
                   sport: org?.categoryName ?? 'Klub',
-                  icon: _getCategoryIcon(org?.categoryName),
-                  iconColor: _getCategoryColor(org?.categoryName),
+                  imageUrl: org?.logoUrl,
                   onTap: org != null
                       ? () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ClubDetailScreen(
-                                organizationId: org.id,
-                              ),
+                              builder: (context) =>
+                                  ClubDetailScreen(organizationId: org.id),
                             ),
                           );
                         }
@@ -282,44 +270,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with WidgetsBindi
         ],
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.groups;
-    }
-  }
-
-  Color _getCategoryColor(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return AppColors.red;
-      case 'kultura':
-        return Colors.purple;
-      case 'edukacija':
-        return Colors.blue;
-      case 'zdravlje':
-        return AppColors.red;
-      case 'muzika':
-        return AppColors.orange;
-      case 'tehnologija':
-        return Colors.grey;
-      default:
-        return AppColors.primary;
-    }
   }
 
   Future<void> _showLogoutDialog(BuildContext context) async {

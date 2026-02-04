@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/info_row.dart';
 import '../../components/circle_icon_container.dart';
+import '../../components/notification_badge.dart';
+import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import 'edit_organization_profile_screen.dart';
 import '../../components/bottom_nav_org.dart';
 import '../auth/sign_in_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../user/change_password_screen.dart';
 
 class OrganizationProfileScreen extends StatefulWidget {
   final String? organizationId;
@@ -14,40 +19,32 @@ class OrganizationProfileScreen extends StatefulWidget {
   const OrganizationProfileScreen({super.key, this.organizationId});
 
   @override
-  State<OrganizationProfileScreen> createState() => _OrganizationProfileScreenState();
+  State<OrganizationProfileScreen> createState() =>
+      _OrganizationProfileScreenState();
 }
 
 class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   final _organizationService = OrganizationService();
   final _authService = AuthService();
+  final _signalRService = SignalRService();
 
   Organization? _organization;
   bool _isLoading = true;
   String? _error;
 
-  String get _organizationId {
-    // Debug: Log what's happening
-    print('=== ORG PROFILE DEBUG ===');
-    print('isOrganization: ${_authService.isOrganization}');
-    print('currentAuth.organization: ${_authService.currentAuth?.organization}');
-    print('currentAuth.organization.id: ${_authService.currentAuth?.organization?.id}');
-    print('widget.organizationId: ${widget.organizationId}');
+  StreamSubscription<SignalRNotification>? _notificationSubscription;
 
+  String get _organizationId {
     // Priority 1: If logged in as organization, use organization.id from auth
-    if (_authService.isOrganization && _authService.currentAuth?.organization?.id != null) {
-      print('Using auth organization ID: ${_authService.currentAuth!.organization!.id}');
-      print('=========================');
+    if (_authService.isOrganization &&
+        _authService.currentAuth?.organization?.id != null) {
       return _authService.currentAuth!.organization!.id;
     }
     // Priority 2: Use organizationId parameter if provided (for viewing other organizations)
     if (widget.organizationId != null) {
-      print('Using widget organizationId: ${widget.organizationId}');
-      print('=========================');
       return widget.organizationId!;
     }
     // Fallback - should not reach here in normal flow
-    print('WARNING: Using fallback ID 1!');
-    print('=========================');
     return '1';
   }
 
@@ -55,6 +52,53 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   void initState() {
     super.initState();
     _loadOrganization();
+    _setupNotificationListener();
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupNotificationListener() {
+    _notificationSubscription = _signalRService.notificationStream.listen((notification) {
+      if (mounted) {
+        _showNotificationSnackbar(notification);
+      }
+    });
+  }
+
+  void _showNotificationSnackbar(SignalRNotification notification) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(notification.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(notification.message, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Pogledaj',
+          textColor: Colors.white,
+          onPressed: () => _navigateToNotifications(),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToNotifications() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+    );
   }
 
   Future<void> _loadOrganization() async {
@@ -64,7 +108,9 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
     });
 
     try {
-      final response = await _organizationService.getOrganizationById(_organizationId);
+      final response = await _organizationService.getOrganizationById(
+        _organizationId,
+      );
 
       if (!mounted) return;
 
@@ -92,15 +138,10 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Odjava',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         content: const Text(
           'Da li ste sigurni da se želite odjaviti?',
@@ -116,10 +157,7 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Ne',
-              style: TextStyle(color: Colors.black87),
-            ),
+            child: const Text('Ne', style: TextStyle(color: Colors.black87)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -130,10 +168,7 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Da',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Da', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -189,6 +224,13 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
         ),
         leadingWidth: 100,
         actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: NotificationBadge(
+              onTap: _navigateToNotifications,
+              iconColor: AppColors.primary,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.primary),
             onPressed: _showLogoutDialog,
@@ -234,11 +276,19 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: CircleIconContainer(
-              icon: _getCategoryIcon(_organization?.categoryName),
-              iconColor: AppColors.orange,
-              size: 120,
-              iconSize: 60,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: AppColors.borderLight,
+                  backgroundImage: _organization?.logoUrl != null
+                      ? NetworkImage(_organization!.logoUrl!)
+                      : null,
+                  child: _organization?.logoUrl == null
+                      ? Icon(Icons.groups, size: 50, color: AppColors.textMuted)
+                      : null,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppDimensions.spacingLarge),
@@ -263,25 +313,31 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
             value: _organization?.categoryName ?? '-',
           ),
           const SizedBox(height: AppDimensions.spacingDefault),
-          ProfileField(
-            label: 'Phone',
-            value: _organization?.phone ?? '-',
-          ),
+          ProfileField(label: 'Phone', value: _organization?.phone ?? '-'),
           const SizedBox(height: AppDimensions.spacingDefault),
-          ProfileField(
-            label: 'Address',
-            value: _organization?.address ?? '-',
-          ),
+          ProfileField(label: 'Address', value: _organization?.address ?? '-'),
           const SizedBox(height: AppDimensions.spacingDefault),
-          ProfileField(
-            label: 'E-mail',
-            value: _organization?.email ?? '-',
-          ),
+          ProfileField(label: 'E-mail', value: _organization?.email ?? '-'),
           const SizedBox(height: AppDimensions.spacingDefault),
           ProfileField(
             label: 'About us',
             value: _organization?.description ?? '-',
             isMultiline: true,
+          ),
+          const SizedBox(height: AppDimensions.spacingXLarge),
+          ActimeOutlinedButton(
+            label: 'Promijeni lozinku',
+            icon: Icons.lock_outline,
+            borderColor: AppColors.primary,
+            textColor: AppColors.primary,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChangePasswordScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),

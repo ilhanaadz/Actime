@@ -11,6 +11,7 @@ import '../../services/image_service.dart';
 import '../clubs/club_detail_screen.dart';
 import '../events/event_detail_screen.dart';
 import '../landing/landing_logged_screen.dart';
+import '../notifications/notifications_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -77,6 +78,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
+        onNotificationTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
           );
         },
         onFavoriteTap: () {},
@@ -250,17 +257,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 color: Colors.orange.shade50,
                 shape: BoxShape.circle,
               ),
-              child: club.logo != null
+              child: club.logoUrl != null
                   ? ClipOval(
                       child: Image.network(
-                        club.logo!,
+                        club.logoUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          return _buildClubIcon(club.categoryName);
+                          return Icon(_getCategoryIcon(club.categoryName),
+                              color: _getCategoryColor(club.categoryName),
+                              size: 30);
                         },
                       ),
                     )
-                  : _buildClubIcon(club.categoryName),
+                  : Icon(_getCategoryIcon(club.categoryName),
+                      color: _getCategoryColor(club.categoryName),
+                      size: 30),
             ),
             const SizedBox(width: 16),
             // Club info
@@ -297,33 +308,57 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       ),
     );
   }
-
-  Widget _buildClubIcon(String? categoryName) {
-    IconData icon;
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        icon = Icons.sports_soccer;
-        break;
-      case 'kultura':
-        icon = Icons.palette;
-        break;
-      case 'edukacija':
-        icon = Icons.school;
-        break;
-      case 'zdravlje':
-        icon = Icons.favorite;
-        break;
-      case 'muzika':
-        icon = Icons.music_note;
-        break;
-      case 'tehnologija':
-        icon = Icons.computer;
-        break;
+  
+  IconData _getCategoryIcon(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'football':
+      case 'fudbal':
+        return Icons.sports_soccer;
+      case 'basketball':
+      case 'košarka':
+        return Icons.sports_basketball;
+      case 'volleyball':
+      case 'odbojka':
+        return Icons.sports_volleyball;
+      case 'tennis':
+      case 'tenis':
+        return Icons.sports_tennis;
+      case 'hiking':
+      case 'planinarenje':
+        return Icons.hiking;
+      case 'swimming':
+      case 'plivanje':
+        return Icons.pool;
       default:
-        icon = Icons.groups;
+        return Icons.sports;
     }
-    return Icon(icon, color: Colors.orange, size: 24);
   }
+
+  Color _getCategoryColor(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'football':
+      case 'fudbal':
+        return Colors.green;
+      case 'basketball':
+      case 'košarka':
+        return Colors.orange;
+      case 'volleyball':
+      case 'odbojka':
+        return Colors.blue;
+      case 'tennis':
+      case 'tenis':
+        return Colors.yellow.shade700;
+      case 'hiking':
+      case 'planinarenje':
+        return Colors.brown;
+      case 'swimming':
+      case 'plivanje':
+        return Colors.cyan;
+      default:
+        return Colors.teal;
+    }
+  }
+
 
   String _formatDate(DateTime date) {
     return DateFormat('dd.MM.yyyy').format(date);

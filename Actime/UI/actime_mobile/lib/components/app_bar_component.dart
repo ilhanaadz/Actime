@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
+import 'notification_badge.dart';
 
 class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showFavorite;
   final bool showSearch;
   final bool showFilter;
+  final bool showNotifications;
   final VoidCallback? onProfileTap;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onFilterTap;
   final VoidCallback? onLogoTap;
+  final VoidCallback? onNotificationTap;
 
   const ActimeAppBar({
     super.key,
     this.showFavorite = false,
     this.showSearch = false,
     this.showFilter = false,
+    this.showNotifications = true,
     this.onProfileTap,
     this.onFavoriteTap,
     this.onSearchTap,
     this.onFilterTap,
     this.onLogoTap,
+    this.onNotificationTap,
   });
 
   @override
@@ -49,6 +54,14 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.tune, color: Color(0xFF0D7C8C)),
             onPressed: onFilterTap ?? () {},
+          ),
+        if (showNotifications)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: NotificationBadge(
+              onTap: onNotificationTap,
+              iconColor: const Color(0xFF0D7C8C),
+            ),
           ),
         if (showFavorite)
           IconButton(

@@ -12,6 +12,7 @@ import '../user/favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import '../auth/sign_in_screen.dart';
+import '../notifications/notifications_screen.dart';
 import 'club_detail_screen.dart';
 
 class ClubsListScreen extends StatefulWidget {
@@ -129,50 +130,13 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.groups;
-    }
-  }
-
-  Color _getCategoryColor(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return AppColors.red;
-      case 'kultura':
-        return Colors.purple;
-      case 'edukacija':
-        return Colors.blue;
-      case 'zdravlje':
-        return AppColors.red;
-      case 'muzika':
-        return AppColors.orange;
-      case 'tehnologija':
-        return Colors.grey;
-      default:
-        return AppColors.primary;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
         showFavorite: widget.isLoggedIn,
+        showNotifications: widget.isLoggedIn,
         onLogoTap: () {
           Navigator.pushReplacement(
             context,
@@ -183,6 +147,14 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
             ),
           );
         },
+        onNotificationTap: widget.isLoggedIn
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                );
+              }
+            : null,
         onFavoriteTap: widget.isLoggedIn
             ? () {
                 Navigator.push(
@@ -363,14 +335,13 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
           return ClubCard(
             name: org.name,
             sport: org.categoryName ?? 'Klub',
-            email: org.email ?? '',
+            email: org.email,
             phone: org.phone ?? '',
             members: org.membersCount.toString(),
-            icon: _getCategoryIcon(org.categoryName),
-            iconColor: _getCategoryColor(org.categoryName),
             isFavorite: _favoriteClubIds.contains(org.id),
             onTap: () => _navigateToDetail(context, org),
             onFavoriteTap: () => _toggleFavorite(org),
+            imageUrl: org.logoUrl,
           );
         },
       ),

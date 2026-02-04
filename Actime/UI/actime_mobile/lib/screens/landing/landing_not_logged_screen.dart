@@ -1,3 +1,4 @@
+import 'package:actime_mobile/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav.dart';
@@ -134,6 +135,7 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: ActimeAppBar(
+        showNotifications: false,
         onProfileTap: () {
           Navigator.push(
             context,
@@ -250,9 +252,6 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
   }
 
   Widget _buildClubCard(Organization club) {
-    final icon = _getCategoryIcon(club.categoryName);
-    final iconColor = _getCategoryColor(club.categoryName);
-
     return GestureDetector(
       onTap: () => _navigateToClubDetail(club),
       child: Container(
@@ -264,14 +263,19 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
         ),
         child: Column(
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 30),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: AppColors.borderLight,
+                  backgroundImage: club.logoUrl != null
+                      ? NetworkImage(club.logoUrl!)
+                      : null,
+                  child: club.logoUrl == null
+                      ? Icon(_getCategoryIcon(club.categoryName), size: 25, color: _getCategoryColor(club.categoryName))
+                      : null,
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Text(
@@ -279,7 +283,7 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0D7C8C),
+                color: AppColors.primary,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,

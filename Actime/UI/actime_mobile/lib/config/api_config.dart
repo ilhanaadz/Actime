@@ -13,6 +13,9 @@ class ApiConfig {
   // For physical device use your computer's IP: http://192.168.x.x:8080
   static const String baseUrl = 'http://10.0.2.2:5171';
 
+  // SignalR Hub URL for real-time notifications
+  static const String signalRHubUrl = '$baseUrl/notificationHub';
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 60);
   static const Duration receiveTimeout = Duration(seconds: 60);

@@ -14,6 +14,7 @@ import '../user/favorites_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import '../auth/sign_in_screen.dart';
+import '../notifications/notifications_screen.dart';
 import 'event_detail_screen.dart';
 
 class EventsListScreen extends StatefulWidget {
@@ -277,6 +278,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
       backgroundColor: AppColors.white,
       appBar: ActimeAppBar(
         showFavorite: widget.isLoggedIn,
+        showNotifications: widget.isLoggedIn,
         onLogoTap: () {
           Navigator.pushReplacement(
             context,
@@ -287,6 +289,14 @@ class _EventsListScreenState extends State<EventsListScreen> {
             ),
           );
         },
+        onNotificationTap: widget.isLoggedIn
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                );
+              }
+            : null,
         onFavoriteTap: widget.isLoggedIn
             ? () {
                 Navigator.push(

@@ -284,7 +284,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             if (_event!.maxParticipants != null) ...[
               const SizedBox(height: AppDimensions.spacingMedium),
               InfoRow(
-                icon: Icons.group,
+                icon: Icons.groups,
                 text: '${_event!.participantsCount}/${_event!.maxParticipants} učesnika',
               ),
             ],

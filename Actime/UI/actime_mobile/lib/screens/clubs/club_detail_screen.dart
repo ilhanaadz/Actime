@@ -49,7 +49,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
 
   Future<void> _loadFavoriteStatus() async {
     if (!widget.isLoggedIn) return;
-    final isFavorite = await _favoriteService.isClubFavorite(widget.organizationId);
+    final isFavorite = await _favoriteService.isClubFavorite(
+      widget.organizationId,
+    );
     if (mounted) {
       setState(() {
         _isFavorite = isFavorite;
@@ -59,7 +61,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
 
   Future<void> _toggleFavorite() async {
     if (!widget.isLoggedIn || _organization == null) return;
-    final isFavorite = await _favoriteService.toggleClubFavorite(_organization!);
+    final isFavorite = await _favoriteService.toggleClubFavorite(
+      _organization!,
+    );
     if (mounted) {
       setState(() {
         _isFavorite = isFavorite;
@@ -129,21 +133,26 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   Future<void> _handleCancelMembership() async {
     if (_organization == null) return;
 
-    final isPending = _organization!.membershipStatusId == MembershipStatus.pending;
+    final isPending =
+        _organization!.membershipStatusId == MembershipStatus.pending;
 
     setState(() => _isCancelling = true);
 
     try {
-      final response = await _userService.cancelMembershipByOrganization(_organization!.id);
+      final response = await _userService.cancelMembershipByOrganization(
+        _organization!.id,
+      );
 
       if (!mounted) return;
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isPending
-              ? 'Prijava je uspješno otkazana.'
-              : 'Članstvo je uspješno otkazano.'),
+            content: Text(
+              isPending
+                  ? 'Prijava je uspješno otkazana.'
+                  : 'Članstvo je uspješno otkazano.',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -154,9 +163,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message ?? (isPending
-              ? 'Greška pri otkazivanju prijave'
-              : 'Greška pri otkazivanju članstva')),
+            content: Text(
+              response.message ??
+                  (isPending
+                      ? 'Greška pri otkazivanju prijave'
+                      : 'Greška pri otkazivanju članstva'),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,44 +185,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       if (mounted) {
         setState(() => _isCancelling = false);
       }
-    }
-  }
-
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.groups;
-    }
-  }
-
-  Color _getCategoryColor(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return AppColors.red;
-      case 'kultura':
-        return Colors.purple;
-      case 'edukacija':
-        return Colors.blue;
-      case 'zdravlje':
-        return AppColors.red;
-      case 'muzika':
-        return AppColors.orange;
-      case 'tehnologija':
-        return Colors.grey;
-      default:
-        return AppColors.primary;
     }
   }
 
@@ -260,9 +234,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     }
 
     if (_organization == null) {
-      return const Center(
-        child: Text('Klub nije pronađen'),
-      );
+      return const Center(child: Text('Klub nije pronađen'));
     }
 
     return SingleChildScrollView(
@@ -275,17 +247,26 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             const SizedBox(height: AppDimensions.spacingLarge),
             _buildTitleSection(),
             const SizedBox(height: AppDimensions.spacingLarge),
-            if (_organization!.phone != null && _organization!.phone!.isNotEmpty)
+            if (_organization!.phone != null &&
+                _organization!.phone!.isNotEmpty)
               InfoRow(icon: Icons.phone_outlined, text: _organization!.phone!),
-            if (_organization!.phone != null && _organization!.phone!.isNotEmpty)
+            if (_organization!.phone != null &&
+                _organization!.phone!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
-            if (_organization!.email != null && _organization!.email!.isNotEmpty)
+            if (_organization!.email != null &&
+                _organization!.email!.isNotEmpty)
               InfoRow(icon: Icons.email_outlined, text: _organization!.email!),
-            if (_organization!.email != null && _organization!.email!.isNotEmpty)
+            if (_organization!.email != null &&
+                _organization!.email!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
-            if (_organization!.address != null && _organization!.address!.isNotEmpty)
-              InfoRow(icon: Icons.location_on_outlined, text: _organization!.address!),
-            if (_organization!.address != null && _organization!.address!.isNotEmpty)
+            if (_organization!.address != null &&
+                _organization!.address!.isNotEmpty)
+              InfoRow(
+                icon: Icons.location_on_outlined,
+                text: _organization!.address!,
+              ),
+            if (_organization!.address != null &&
+                _organization!.address!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
             InfoRow(
               icon: Icons.event,
@@ -306,9 +287,19 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
-        CircleIconContainer.xLarge(
-          icon: _getCategoryIcon(_organization!.categoryName),
-          iconColor: _getCategoryColor(_organization!.categoryName),
+        Stack(
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: AppColors.borderLight,
+              backgroundImage: _organization?.logoUrl != null
+                  ? NetworkImage(_organization!.logoUrl!)
+                  : null,
+              child: _organization?.logoUrl == null
+                  ? Icon(Icons.groups, size: 50, color: AppColors.textMuted)
+                  : null,
+            ),
+          ],
         ),
         const SizedBox(width: AppDimensions.spacingDefault),
         if (_organization!.isVerified)
@@ -333,7 +324,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
               ),
             ),
             const SizedBox(width: AppDimensions.spacingXSmall),
-            const Icon(Icons.person_outline, size: 18, color: AppColors.textSecondary),
+            const Icon(
+              Icons.person_outline,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
           ],
         ),
       ],
@@ -359,7 +354,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
               const SizedBox(height: AppDimensions.spacingXSmall),
               Text(
                 _organization!.categoryName ?? 'Klub',
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -450,11 +448,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
         ),
         const SizedBox(width: AppDimensions.spacingSmall),
         Row(
-          children: List.generate(5, (i) => Icon(
-            i < _averageRating.round() ? Icons.star : Icons.star_outline,
-            color: AppColors.orange,
-            size: 18,
-          )),
+          children: List.generate(
+            5,
+            (i) => Icon(
+              i < _averageRating.round() ? Icons.star : Icons.star_outline,
+              color: AppColors.orange,
+              size: 18,
+            ),
+          ),
         ),
         const SizedBox(width: AppDimensions.spacingSmall),
         Text(
@@ -480,11 +481,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: List.generate(5, (i) => Icon(
-                  i < review.rating ? Icons.star : Icons.star_outline,
-                  color: AppColors.orange,
-                  size: 16,
-                )),
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < review.rating ? Icons.star : Icons.star_outline,
+                    color: AppColors.orange,
+                    size: 16,
+                  ),
+                ),
               ),
               Text(
                 DateFormat('dd.MM.yyyy.').format(review.createdAt),
@@ -668,7 +672,9 @@ class __LeaveReviewSheetState extends State<_LeaveReviewSheet> {
         left: AppDimensions.spacingLarge,
         right: AppDimensions.spacingLarge,
         top: AppDimensions.spacingLarge,
-        bottom: AppDimensions.spacingLarge + MediaQuery.of(context).viewInsets.bottom,
+        bottom:
+            AppDimensions.spacingLarge +
+            MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,14 +708,17 @@ class __LeaveReviewSheetState extends State<_LeaveReviewSheet> {
           const SizedBox(height: AppDimensions.spacingDefault),
           // Star selector
           Row(
-            children: List.generate(5, (i) => GestureDetector(
-              onTap: () => setState(() => _selectedRating = i + 1),
-              child: Icon(
-                (i + 1) <= _selectedRating ? Icons.star : Icons.star_outline,
-                color: AppColors.orange,
-                size: 36,
+            children: List.generate(
+              5,
+              (i) => GestureDetector(
+                onTap: () => setState(() => _selectedRating = i + 1),
+                child: Icon(
+                  (i + 1) <= _selectedRating ? Icons.star : Icons.star_outline,
+                  color: AppColors.orange,
+                  size: 36,
+                ),
               ),
-            )),
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingDefault),
           // Comment field
@@ -719,7 +728,9 @@ class __LeaveReviewSheetState extends State<_LeaveReviewSheet> {
             decoration: InputDecoration(
               hintText: 'Dodajte komentarz (opcionalno)',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.borderRadiusLarge,
+                ),
               ),
               contentPadding: const EdgeInsets.all(AppDimensions.spacingMedium),
             ),

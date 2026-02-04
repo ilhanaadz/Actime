@@ -2,6 +2,7 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'mock_api_service.dart';
+import 'signalr_service.dart';
 import 'token_service.dart';
 
 /// Authentication service
@@ -14,6 +15,7 @@ class AuthService {
   final ApiService _apiService = ApiService();
   final MockApiService _mockService = MockApiService();
   final TokenService _tokenService = TokenService();
+  final SignalRService _signalRService = SignalRService();
 
   AuthResponse? _currentAuth;
 
@@ -59,6 +61,9 @@ class AuthService {
         refreshToken: response.data!.refreshToken,
         expiry: response.data!.expiresAt,
       );
+
+      // Connect to SignalR for real-time notifications
+      await _signalRService.connect(response.data!.userId);
     }
 
     return response;
@@ -92,6 +97,9 @@ class AuthService {
 
   /// Logout
   Future<void> logout() async {
+    // Disconnect from SignalR
+    await _signalRService.disconnect();
+
     if (!ApiConfig.useMockApi) {
       // Call backend logout endpoint
       await _apiService.post<Map<String, dynamic>>(
@@ -139,6 +147,9 @@ class AuthService {
 
     if (response.success && response.data != null) {
       _currentAuth = response.data;
+
+      // Connect to SignalR for real-time notifications
+      await _signalRService.connect(response.data!.userId);
     }
 
     return response;

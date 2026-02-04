@@ -236,8 +236,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   children: [
                     _buildOrganizationInfo(),
                     const SizedBox(height: AppDimensions.spacingXLarge),
-                    _buildCoverImageSection(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
                     ActimeTextField(
                       controller: _eventNameController,
                       labelText: 'Naziv događaja',
@@ -289,10 +287,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Widget _buildOrganizationInfo() {
     return Row(
       children: [
-        CircleIconContainer(
-          icon: Icons.groups,
-          iconColor: AppColors.orange,
-        ),
+         CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.borderLight,
+              backgroundImage: _organization?.logoUrl != null
+                  ? NetworkImage(_organization!.logoUrl!)
+                  : null,
+              child: _organization?.logoUrl == null
+                  ? Icon(Icons.groups, size: 20, color: AppColors.textMuted)
+                  : null,
+            ),
         const SizedBox(width: AppDimensions.spacingMedium),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,28 +316,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildCoverImageSection() {
-    return Container(
-      width: double.infinity,
-      height: 150,
-      decoration: BoxDecoration(
-        color: AppColors.border,
-        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.textHint),
-          const SizedBox(height: AppDimensions.spacingSmall),
-          Text(
-            'Dodaj sliku događaja',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-          ),
-        ],
-      ),
     );
   }
 

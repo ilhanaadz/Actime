@@ -58,7 +58,9 @@ class EventCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.spacingDefault),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.borderRadiusLarge,
+              ),
               border: Border.all(color: AppColors.border),
             ),
             child: Column(
@@ -78,7 +80,11 @@ class EventCard extends StatelessWidget {
                             imageUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return Icon(icon, color: effectiveIconColor, size: 24);
+                              return Icon(
+                                icon,
+                                color: effectiveIconColor,
+                                size: 24,
+                              );
                             },
                           ),
                         ),
@@ -87,7 +93,9 @@ class EventCard extends StatelessWidget {
                       CircleIconContainer(
                         icon: icon,
                         iconColor: effectiveIconColor,
-                        backgroundColor: effectiveIconColor.withValues(alpha: 0.1),
+                        backgroundColor: effectiveIconColor.withValues(
+                          alpha: 0.1,
+                        ),
                       ),
                     const SizedBox(width: AppDimensions.spacingDefault),
                     Expanded(
@@ -98,7 +106,9 @@ class EventCard extends StatelessWidget {
                             children: [
                               PriceBadge(price: price),
                               if (statusText != null) ...[
-                                const SizedBox(width: AppDimensions.spacingSmall),
+                                const SizedBox(
+                                  width: AppDimensions.spacingSmall,
+                                ),
                                 StatusBadge(
                                   status: statusText!,
                                   color: statusColor,
@@ -109,11 +119,20 @@ class EventCard extends StatelessWidget {
                           const SizedBox(height: AppDimensions.spacingSmall),
                           Row(
                             children: [
-                              const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: AppDimensions.spacingXSmall),
+                              const Icon(
+                                Icons.person_outline,
+                                size: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(
+                                width: AppDimensions.spacingXSmall,
+                              ),
                               Text(
                                 participants,
-                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -135,17 +154,37 @@ class EventCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            Text(
+                              date,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                             const SizedBox(width: AppDimensions.spacingXSmall),
-                            const Icon(Icons.calendar_today, size: 12, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ],
                         ),
                         const SizedBox(height: AppDimensions.spacingXSmall),
                         Row(
                           children: [
-                            Text(location, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                            Text(
+                              location,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                             const SizedBox(width: AppDimensions.spacingXSmall),
-                            const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.location_on_outlined,
+                              size: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ],
                         ),
                       ],
@@ -222,10 +261,7 @@ class PriceBadge extends StatelessWidget {
       ),
       child: Text(
         price,
-        style: TextStyle(
-          color: textColor ?? AppColors.white,
-          fontSize: 10,
-        ),
+        style: TextStyle(color: textColor ?? AppColors.white, fontSize: 10),
       ),
     );
   }
@@ -235,11 +271,7 @@ class StatusBadge extends StatelessWidget {
   final String status;
   final Color? color;
 
-  const StatusBadge({
-    super.key,
-    required this.status,
-    this.color,
-  });
+  const StatusBadge({super.key, required this.status, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -272,11 +304,10 @@ class ClubCard extends StatelessWidget {
   final String email;
   final String phone;
   final String members;
-  final IconData icon;
-  final Color iconColor;
   final bool isFavorite;
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteTap;
+  final String? imageUrl;
 
   const ClubCard({
     super.key,
@@ -285,11 +316,10 @@ class ClubCard extends StatelessWidget {
     required this.email,
     required this.phone,
     required this.members,
-    required this.icon,
-    required this.iconColor,
     this.isFavorite = false,
     this.onTap,
     this.onFavoriteTap,
+    this.imageUrl,
   });
 
   @override
@@ -302,24 +332,29 @@ class ClubCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.spacingDefault),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.borderRadiusLarge,
+              ),
               border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
                 Stack(
                   children: [
-                    CircleIconContainer(
-                      icon: icon,
-                      iconColor: iconColor,
-                      backgroundColor: iconColor.withValues(alpha: 0.1),
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundColor: AppColors.borderLight,
+                      backgroundImage: imageUrl != null
+                          ? NetworkImage(imageUrl!)
+                          : null,
+                      child: imageUrl == null
+                          ? Icon(
+                              _getCategoryIcon(sport),
+                              size: 25,
+                              color: _getCategoryColor(sport),
+                            )
+                          : null,
                     ),
-                    if (isFavorite)
-                      const Positioned(
-                        top: 0,
-                        right: 0,
-                        child: FavoriteBadge(),
-                      ),
                   ],
                 ),
                 const SizedBox(width: AppDimensions.spacingDefault),
@@ -338,16 +373,25 @@ class ClubCard extends StatelessWidget {
                       const SizedBox(height: AppDimensions.spacingXSmall),
                       Text(
                         sport,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: AppDimensions.spacingSmall),
                       Text(
                         email,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       Text(
                         phone,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -363,7 +407,11 @@ class ClubCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppDimensions.spacingXSmall),
-                    const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ],
                 ),
               ],
@@ -388,20 +436,68 @@ class ClubCard extends StatelessWidget {
   }
 }
 
+  IconData _getCategoryIcon(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'football':
+      case 'fudbal':
+        return Icons.sports_soccer;
+      case 'basketball':
+      case 'košarka':
+        return Icons.sports_basketball;
+      case 'volleyball':
+      case 'odbojka':
+        return Icons.sports_volleyball;
+      case 'tennis':
+      case 'tenis':
+        return Icons.sports_tennis;
+      case 'hiking':
+      case 'planinarenje':
+        return Icons.hiking;
+      case 'swimming':
+      case 'plivanje':
+        return Icons.pool;
+      default:
+        return Icons.sports;
+    }
+  }
+
+  Color _getCategoryColor(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'football':
+      case 'fudbal':
+        return Colors.green;
+      case 'basketball':
+      case 'košarka':
+        return Colors.orange;
+      case 'volleyball':
+      case 'odbojka':
+        return Colors.blue;
+      case 'tennis':
+      case 'tenis':
+        return Colors.yellow.shade700;
+      case 'hiking':
+      case 'planinarenje':
+        return Colors.brown;
+      case 'swimming':
+      case 'plivanje':
+        return Colors.cyan;
+      default:
+        return Colors.teal;
+    }
+  }
+
 class ClubItemSmall extends StatelessWidget {
   final String name;
   final String sport;
-  final IconData icon;
-  final Color iconColor;
   final VoidCallback? onTap;
+  final String? imageUrl;
 
   const ClubItemSmall({
     super.key,
     required this.name,
     required this.sport,
-    required this.icon,
-    required this.iconColor,
     this.onTap,
+    this.imageUrl,
   });
 
   @override
@@ -417,10 +513,19 @@ class ClubItemSmall extends StatelessWidget {
         ),
         child: Row(
           children: [
-            CircleIconContainer.small(
-              icon: icon,
-              iconColor: iconColor,
-              backgroundColor: iconColor.withValues(alpha: 0.1),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: AppColors.borderLight,
+                  backgroundImage: imageUrl != null
+                      ? NetworkImage(imageUrl!)
+                      : null,
+                  child: imageUrl == null
+                      ? Icon(_getCategoryIcon(sport), size: 25, color: _getCategoryColor(sport))
+                      : null,
+                ),
+              ],
             ),
             const SizedBox(width: AppDimensions.spacingMedium),
             Expanded(
@@ -437,12 +542,19 @@ class ClubItemSmall extends StatelessWidget {
                   ),
                   Text(
                     sport,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: AppColors.textSecondary,
+            ),
           ],
         ),
       ),

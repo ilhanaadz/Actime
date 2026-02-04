@@ -15,6 +15,7 @@ class AuthResponse {
   final List<String> roles;
   final bool requiresOrganizationSetup;
   final Organization? organization;
+  final String? profileImageUrl;
 
   AuthResponse({
     required this.id,
@@ -28,6 +29,7 @@ class AuthResponse {
     required this.roles,
     this.requiresOrganizationSetup = false,
     this.organization,
+    this.profileImageUrl,
   });
 
   /// Get full name
@@ -67,6 +69,7 @@ class AuthResponse {
       createdAt: DateTime.now(),
       firstName: firstName,
       lastName: lastName,
+      profileImageUrl: profileImageUrl,
     );
   }
 
@@ -93,6 +96,7 @@ class AuthResponse {
           : json['organization'] != null
               ? Organization.fromJson(json['organization'] as Map<String, dynamic>)
               : null,
+      profileImageUrl: json['ProfileImageUrl'] as String? ?? json['profileImageUrl'] as String?,
     );
   }
 
@@ -125,6 +129,7 @@ class AuthResponse {
       'Roles': roles,
       'RequiresOrganizationSetup': requiresOrganizationSetup,
       'Organization': organization?.toJson(),
+      'ProfileImageUrl': profileImageUrl,
     };
   }
 }

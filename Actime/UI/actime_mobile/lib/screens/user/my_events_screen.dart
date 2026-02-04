@@ -9,6 +9,7 @@ import '../../services/services.dart';
 import '../../services/image_service.dart';
 import '../../components/bottom_nav_user.dart';
 import '../landing/landing_logged_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../events/event_detail_screen.dart';
 import 'user_profile_screen.dart';
 import 'favorites_screen.dart';
@@ -94,6 +95,12 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+          );
+        },
+        onNotificationTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
           );
         },
         onFavoriteTap: () {
