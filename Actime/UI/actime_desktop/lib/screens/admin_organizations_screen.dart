@@ -3,6 +3,7 @@ import '../components/admin_layout.dart';
 import '../components/pagination_widget.dart';
 import '../components/search_sort_header.dart';
 import '../components/delete_confirmation_dialog.dart';
+import '../config/api_config.dart';
 import '../services/services.dart';
 import '../models/models.dart';
 
@@ -16,8 +17,10 @@ class AdminOrganizationsScreen extends StatefulWidget {
 class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   final _searchController = TextEditingController();
   final _organizationService = OrganizationService();
+  final _galleryService = GalleryService();
 
   Organization? _selectedOrg;
+  List<GalleryImage> _galleryImages = [];
   int _currentPage = 1;
   int _totalPages = 1;
   String _sortBy = 'name';
@@ -78,7 +81,10 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   }
 
   Future<void> _loadOrganizationDetails(int id) async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _galleryImages = [];
+    });
 
     try {
       final response = await _organizationService.getOrganizationById(id);
@@ -88,8 +94,9 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
       if (response.success && response.data != null) {
         setState(() {
           _selectedOrg = response.data;
-          _isLoading = false;
         });
+        // Load gallery images separately
+        _loadGalleryImages(id);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -107,6 +114,28 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _loadGalleryImages(int organizationId) async {
+    try {
+      final response = await _galleryService.getByOrganizationId(organizationId);
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _galleryImages = response.data!;
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } catch (_) {
+      // Gallery is non-critical - fail silently
+      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -446,8 +475,8 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                         const SizedBox(height: 24),
                         _buildAboutSection(org),
                         const SizedBox(height: 24),
-                        if (org.gallery != null && org.gallery!.isNotEmpty) ...[
-                          _buildGallerySection(org),
+                        if (_galleryImages.isNotEmpty) ...[
+                          _buildGallerySection(),
                           const SizedBox(height: 24),
                         ],
                         _buildDeleteButton(org),
@@ -598,16 +627,9 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
     );
   }
 
-  Widget _buildGallerySection(Organization org) {
-    if (org.gallery == null || org.gallery!.isEmpty) {
-      return _buildSection(
-        'Gallery',
-        const Text('No gallery images available'),
-      );
-    }
-
+  Widget _buildGallerySection() {
     return _buildSection(
-      'Gallery',
+      'Gallery (${_galleryImages.length})',
       GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -616,24 +638,71 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
-        itemCount: org.gallery!.length,
+        itemCount: _galleryImages.length,
         itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                org.gallery![index],
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    Icon(Icons.image, color: Colors.grey[400], size: 40),
+          final image = _galleryImages[index];
+          final imageUrl = _getFullImageUrl(image.imageUrl);
+          return GestureDetector(
+            onTap: () => _showImageDialog(imageUrl),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      Icon(Icons.image, color: Colors.grey[400], size: 40),
+                ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  String _getFullImageUrl(String? relativeUrl) {
+    if (relativeUrl == null || relativeUrl.isEmpty) return '';
+    if (relativeUrl.startsWith('http')) return relativeUrl;
+    return '${ApiConfig.baseUrl}$relativeUrl';
+  }
+
+  void _showImageDialog(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    padding: const EdgeInsets.all(32),
+                    color: Colors.white,
+                    child: const Icon(Icons.broken_image, size: 64),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

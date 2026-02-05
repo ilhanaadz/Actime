@@ -7,6 +7,8 @@ import '../../components/info_row.dart';
 import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../services/gallery_service.dart';
+import '../../services/image_service.dart';
 import '../auth/sign_in_screen.dart';
 import 'enrollment_application_screen.dart';
 
@@ -30,9 +32,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   final _reviewService = ReviewService();
   final _authService = AuthService();
   final _favoriteService = FavoriteService();
+  final _galleryService = GalleryService();
+  final _imageService = ImageService();
 
   Organization? _organization;
   List<Review> _reviews = [];
+  List<GalleryImage> _galleryImages = [];
   double _averageRating = 0.0;
   bool _isLoading = true;
   bool _isCancelling = false;
@@ -45,6 +50,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     _loadOrganization();
     _loadReviews();
     _loadFavoriteStatus();
+    _loadGallery();
   }
 
   Future<void> _loadFavoriteStatus() async {
@@ -127,6 +133,24 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       });
     } catch (_) {
       // Reviews are non-critical — fail silently
+    }
+  }
+
+  Future<void> _loadGallery() async {
+    try {
+      final response = await _galleryService.getByOrganizationId(
+        widget.organizationId,
+      );
+
+      if (!mounted) return;
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _galleryImages = response.data!;
+        });
+      }
+    } catch (_) {
+      // Gallery is non-critical — fail silently
     }
   }
 
@@ -274,6 +298,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             ),
             const SizedBox(height: AppDimensions.spacingLarge),
             _buildAboutSection(),
+            if (_galleryImages.isNotEmpty) ...[
+              const SizedBox(height: AppDimensions.spacingLarge),
+              _buildGallerySection(),
+            ],
             const SizedBox(height: AppDimensions.spacingLarge),
             _buildReviewsSection(),
             const SizedBox(height: AppDimensions.spacingXLarge),
@@ -396,6 +424,73 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGallerySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Galerija',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingMedium),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _galleryImages.length,
+            itemBuilder: (context, index) {
+              final image = _galleryImages[index];
+              return GestureDetector(
+                onTap: () => _showImageViewer(index),
+                child: Container(
+                  width: 120,
+                  margin: EdgeInsets.only(
+                    right: index < _galleryImages.length - 1
+                        ? AppDimensions.spacingSmall
+                        : 0,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.borderRadiusLarge,
+                    ),
+                    child: Image.network(
+                      _imageService.getFullImageUrl(image.imageUrl),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppColors.inputBackground,
+                          child: Icon(
+                            Icons.broken_image,
+                            color: AppColors.textMuted,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showImageViewer(int initialIndex) {
+    showDialog(
+      context: context,
+      builder: (context) => _ImageViewerDialog(
+        images: _galleryImages,
+        initialIndex: initialIndex,
+        imageService: _imageService,
+      ),
     );
   }
 
@@ -743,6 +838,112 @@ class __LeaveReviewSheetState extends State<_LeaveReviewSheet> {
             onPressed: _selectedRating > 0 && !_isSubmitting ? _submit : null,
             isLoading: _isSubmitting,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-screen image viewer dialog with swipe navigation
+class _ImageViewerDialog extends StatefulWidget {
+  final List<GalleryImage> images;
+  final int initialIndex;
+  final ImageService imageService;
+
+  const _ImageViewerDialog({
+    required this.images,
+    required this.initialIndex,
+    required this.imageService,
+  });
+
+  @override
+  State<_ImageViewerDialog> createState() => _ImageViewerDialogState();
+}
+
+class _ImageViewerDialogState extends State<_ImageViewerDialog> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.black,
+      insetPadding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          // Image PageView
+          PageView.builder(
+            controller: _pageController,
+            itemCount: widget.images.length,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+            },
+            itemBuilder: (context, index) {
+              final image = widget.images[index];
+              return InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: Image.network(
+                    widget.imageService.getFullImageUrl(image.imageUrl),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.broken_image,
+                        color: Colors.white54,
+                        size: 64,
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+          // Close button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          // Image counter
+          if (widget.images.length > 1)
+            Positioned(
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '${_currentIndex + 1} / ${widget.images.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

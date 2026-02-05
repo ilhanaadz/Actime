@@ -9,3 +9,4 @@ export 'membership.dart';
 export 'participation.dart';
 export 'review.dart';
 export 'notification.dart';
+export 'gallery_image.dart';
