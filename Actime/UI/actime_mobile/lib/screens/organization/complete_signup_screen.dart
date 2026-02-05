@@ -3,6 +3,8 @@ import 'organization_profile_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../utils/validators.dart';
+import '../../constants/constants.dart';
 
 class CompleteSignUpScreen extends StatefulWidget {
   const CompleteSignUpScreen({super.key});
@@ -181,11 +183,12 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
             const SizedBox(height: 24),
             
             // Phone
-            TextField(
+            TextFormField(
               controller: _phoneController,
+              keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                labelText: 'Phone',
-                hintText: 'Phone',
+                labelText: 'Telefon',
+                hintText: 'Unesite broj telefona',
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
@@ -193,16 +196,23 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF0D7C8C)),
                 ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
               ),
+              validator: Validators.phone,
             ),
             const SizedBox(height: 24),
-            
+
             // Address
-            TextField(
+            TextFormField(
               controller: _addressController,
               decoration: InputDecoration(
-                labelText: 'Address',
-                hintText: 'Address',
+                labelText: 'Adresa',
+                hintText: 'Unesite adresu',
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
@@ -210,17 +220,23 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF0D7C8C)),
                 ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Description
-            TextField(
+            TextFormField(
               controller: _descriptionController,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: 'Please describe yourself',
-                hintText: 'Please describe yourself',
+                labelText: 'Opišite svoju organizaciju',
+                hintText: 'Opišite svoju organizaciju',
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
@@ -228,7 +244,14 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF0D7C8C)),
                 ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
               ),
+              validator: Validators.maxLengthField(500, 'Opis'),
             ),
             const SizedBox(height: 48),
             

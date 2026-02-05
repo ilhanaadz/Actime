@@ -21,3 +21,4 @@ export 'favorite_service.dart';
 export 'enrollment_service.dart';
 export 'pdf_report_service.dart';
 export 'signalr_service.dart';
+export 'stripe_payment_service.dart';

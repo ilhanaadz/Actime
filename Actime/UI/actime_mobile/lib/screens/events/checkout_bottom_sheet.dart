@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide PaymentMethod;
 import '../../constants/constants.dart';
 import '../../constants/participation_constants.dart';
 import '../../components/actime_button.dart';
 import '../../models/event.dart';
+import '../../services/stripe_payment_service.dart';
 
 class CheckoutBottomSheet extends StatefulWidget {
   final Event event;
@@ -12,7 +14,7 @@ class CheckoutBottomSheet extends StatefulWidget {
     required this.event,
   });
 
-  /// Returns selected PaymentMethod ID on success, null if dismissed.
+  /// Returns PaymentMethod.creditCard on successful Stripe payment, null if dismissed.
   static Future<int?> show(BuildContext context, Event event) {
     return showModalBottomSheet<int>(
       context: context,
@@ -26,28 +28,70 @@ class CheckoutBottomSheet extends StatefulWidget {
   State<CheckoutBottomSheet> createState() => _CheckoutBottomSheetState();
 }
 
-/// Internal state for the checkout sheet.
 /// _stage drives the UI: form → processing → success.
 enum _CheckoutStage { form, processing, success }
 
 class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
-  int _selectedPaymentMethod = PaymentMethod.payPal;
   _CheckoutStage _stage = _CheckoutStage.form;
+  String? _errorMessage;
+  final _stripeService = StripePaymentService();
 
   Future<void> _handleCheckout() async {
-    setState(() => _stage = _CheckoutStage.processing);
+    setState(() {
+      _stage = _CheckoutStage.processing;
+      _errorMessage = null;
+    });
 
-    // Dummy delay — simulates network round-trip to payment gateway.
-    await Future.delayed(const Duration(milliseconds: 1500));
+    try {
+      final eventId = int.tryParse(widget.event.id) ?? 0;
 
-    if (!mounted) return;
-    setState(() => _stage = _CheckoutStage.success);
+      final response = await _stripeService.createPaymentIntent(eventId);
+      if (!response.success || response.data == null) {
+        if (!mounted) return;
+        setState(() {
+          _stage = _CheckoutStage.form;
+          _errorMessage = response.message ?? 'Greška pri pokretanju plaćanja';
+        });
+        return;
+      }
 
-    // Brief pause so the user can see the success state.
-    await Future.delayed(const Duration(milliseconds: 1200));
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: response.data!,
+          merchantDisplayName: 'Actime',
+        ),
+      );
 
-    if (!mounted) return;
-    Navigator.pop(context, _selectedPaymentMethod);
+      //    Returns null if the user dismisses without paying.
+      final result = await Stripe.instance.presentPaymentSheet();
+      if (result == null) {
+        // User dismissed — stay on form, no error shown.
+        if (!mounted) return;
+        setState(() => _stage = _CheckoutStage.form);
+        return;
+      }
+
+      // Payment confirmed by Stripe
+      if (!mounted) return;
+      setState(() => _stage = _CheckoutStage.success);
+
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (!mounted) return;
+      Navigator.pop(context, PaymentMethod.creditCard);
+    } catch (e) {
+      if (!mounted) return;
+      if (e is StripeException) {
+        setState(() {
+          _stage = _CheckoutStage.form;
+          _errorMessage = e.error.localizedMessage;
+        });
+      } else {
+        setState(() {
+          _stage = _CheckoutStage.form;
+          _errorMessage = 'Došlo je do greške. Pokušajte ponovo.';
+        });
+      }
+    }
   }
 
   @override
@@ -67,14 +111,20 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             if (_stage == _CheckoutStage.form) ...[
               _buildHeader(),
               const SizedBox(height: AppDimensions.spacingLarge),
-              _buildPaymentMethodSection(),
-              const SizedBox(height: AppDimensions.spacingLarge),
               _buildSummarySection(),
               const SizedBox(height: AppDimensions.spacingLarge),
               _buildTotalSection(),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: AppDimensions.spacingMedium),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               const SizedBox(height: AppDimensions.spacingXLarge),
               ActimePrimaryButton(
-                label: 'Complete checkout',
+                label: 'Pay ${widget.event.formattedPrice}',
                 onPressed: _handleCheckout,
               ),
             ] else if (_stage == _CheckoutStage.processing) ...[
@@ -144,98 +194,6 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPaymentMethodSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Payment method',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textMuted,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingMedium),
-        _buildPaymentOption(
-          id: PaymentMethod.payPal,
-          icon: Icons.paypal,
-          label: 'PayPal',
-          iconColor: const Color(0xFF003087),
-        ),
-        const SizedBox(height: AppDimensions.spacingSmall),
-        _buildPaymentOption(
-          id: PaymentMethod.creditCard,
-          icon: Icons.credit_card,
-          label: 'Credit Card',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentOption({
-    required int id,
-    required IconData icon,
-    required String label,
-    Color? iconColor,
-  }) {
-    final isSelected = _selectedPaymentMethod == id;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = id),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.spacingDefault,
-          vertical: AppDimensions.spacingMedium,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor ?? AppColors.primary, size: 24),
-            const SizedBox(width: AppDimensions.spacingMedium),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

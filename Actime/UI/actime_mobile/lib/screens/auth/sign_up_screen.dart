@@ -4,9 +4,12 @@ import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../services/services.dart';
 import '../../models/models.dart';
+import '../../utils/validators.dart';
+import '../../utils/form_error_handler.dart';
 import '../organization/complete_signup_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
+import 'email_confirmation_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,6 +19,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _authService = AuthService();
   bool _isOrganization = false;
   bool _isLoading = false;
+  Map<String, String> _fieldErrors = {};
 
   @override
   void dispose() {
@@ -34,28 +39,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleSignUp() async {
-    // Validate fields
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Popunite sva polja')),
-      );
-      return;
-    }
+    setState(() => _fieldErrors = {});
 
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lozinke se ne podudaraju')),
-      );
-      return;
-    }
-
-    if (_passwordController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lozinka mora imati najmanje 6 karaktera')),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -81,21 +67,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
             MaterialPageRoute(builder: (context) => const CompleteSignUpScreen()),
           );
         } else {
-          // Navigate to home for regular users
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LandingPageLogged()),
+            MaterialPageRoute(
+              builder: (context) => EmailConfirmationScreen(
+                email: _emailController.text.trim(),
+                isPasswordReset: false,
+              ),
+            ),
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? 'Greška pri registraciji')),
-        );
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri registraciji'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške. Pokušajte ponovo.')),
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: AppColors.red,
+        ),
       );
     } finally {
       if (mounted) {
@@ -130,44 +132,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildHeader('Registracija'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    children: [
-                      ActimeTextField(
-                        controller: _nameController,
-                        hintText: 'Ime i prezime',
-                      ),
-                      const SizedBox(height: AppDimensions.spacingLarge),
-                      ActimeTextField(
-                        controller: _emailController,
-                        hintText: 'Email',
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingLarge),
-                      ActimeTextField(
-                        controller: _passwordController,
-                        hintText: 'Lozinka',
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingLarge),
-                      ActimeTextField(
-                        controller: _confirmPasswordController,
-                        hintText: 'Potvrdi lozinku',
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingLarge),
-                      _buildOrganizationCheckbox(),
-                      const SizedBox(height: AppDimensions.spacingXLarge),
-                      _isLoading
-                          ? const CircularProgressIndicator(
-                              color: AppColors.primary,
-                            )
-                          : ActimePrimaryButton(
-                              label: 'Registruj se',
-                              onPressed: _handleSignUp,
-                            ),
-                      const SizedBox(height: AppDimensions.spacingDefault),
-                      _buildSignInLink(),
-                    ],
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        ActimeTextFormField(
+                          controller: _nameController,
+                          labelText: 'Ime i prezime',
+                          hintText: 'Unesite ime i prezime',
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Ime i prezime'),
+                            Validators.minLengthField(2, 'Ime i prezime'),
+                          ]),
+                          errorText: _fieldErrors['username'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        ActimeTextFormField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Unesite email adresu',
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Email'),
+                            Validators.email,
+                          ]),
+                          errorText: _fieldErrors['email'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        ActimeTextFormField(
+                          controller: _passwordController,
+                          labelText: 'Lozinka',
+                          hintText: 'Unesite lozinku (min. 6 znakova)',
+                          obscureText: true,
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Lozinka'),
+                            Validators.minLengthField(6, 'Lozinka'),
+                          ]),
+                          errorText: _fieldErrors['password'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        ActimeTextFormField(
+                          controller: _confirmPasswordController,
+                          labelText: 'Potvrdi lozinku',
+                          hintText: 'Ponovite lozinku',
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleSignUp(),
+                          validator: (value) {
+                            final requiredError = Validators.required(value, 'Potvrda lozinke');
+                            if (requiredError != null) return requiredError;
+                            return Validators.match(value, _passwordController.text, 'Lozinke');
+                          },
+                          errorText: _fieldErrors['confirmPassword'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        _buildOrganizationCheckbox(),
+                        const SizedBox(height: AppDimensions.spacingXLarge),
+                        _isLoading
+                            ? const CircularProgressIndicator(
+                                color: AppColors.primary,
+                              )
+                            : ActimePrimaryButton(
+                                label: 'Registruj se',
+                                onPressed: _handleSignUp,
+                              ),
+                        const SizedBox(height: AppDimensions.spacingDefault),
+                        _buildSignInLink(),
+                      ],
+                    ),
                   ),
                 ),
               ],

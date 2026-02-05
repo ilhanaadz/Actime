@@ -64,8 +64,10 @@ class EventCard extends StatelessWidget {
               border: Border.all(color: AppColors.border),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (imageUrl != null && imageUrl!.isNotEmpty)
                       Container(
@@ -102,18 +104,16 @@ class EventCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: AppDimensions.spacingSmall,
+                            runSpacing: AppDimensions.spacingXSmall,
                             children: [
                               PriceBadge(price: price),
-                              if (statusText != null) ...[
-                                const SizedBox(
-                                  width: AppDimensions.spacingSmall,
-                                ),
+                              if (statusText != null)
                                 StatusBadge(
                                   status: statusText!,
                                   color: statusColor,
                                 ),
-                              ],
                             ],
                           ),
                           const SizedBox(height: AppDimensions.spacingSmall),
@@ -127,11 +127,14 @@ class EventCard extends StatelessWidget {
                               const SizedBox(
                                 width: AppDimensions.spacingXSmall,
                               ),
-                              Text(
-                                participants,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
+                              Flexible(
+                                child: Text(
+                                  participants,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -144,50 +147,49 @@ class EventCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: AppColors.primary,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.spacingSmall),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: AppDimensions.spacingXSmall),
+                    Expanded(
+                      child: Text(
+                        date,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     const SizedBox(width: AppDimensions.spacingDefault),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              date,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.spacingXSmall),
-                            const Icon(
-                              Icons.calendar_today,
-                              size: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: AppDimensions.spacingXSmall),
+                    Flexible(
+                      child: Text(
+                        location,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
                         ),
-                        const SizedBox(height: AppDimensions.spacingXSmall),
-                        Row(
-                          children: [
-                            Text(
-                              location,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.spacingXSmall),
-                            const Icon(
-                              Icons.location_on_outlined,
-                              size: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
-                        ),
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -216,7 +218,6 @@ class EventCard extends StatelessWidget {
               ],
             ),
           ),
-          // Favorite button positioned at top-right corner
           if (showFavorite)
             Positioned(
               top: AppDimensions.spacingSmall,

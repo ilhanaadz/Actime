@@ -323,107 +323,103 @@ class _LandingPageNotLoggedState extends State<LandingPageNotLogged> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: logoUrl.isNotEmpty
-                  ? ClipOval(
-                      child: Image.network(
-                        logoUrl,
-                        fit: BoxFit.cover,
-                        width: 50,
-                        height: 50,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(icon, color: Colors.orange, size: 24);
-                        },
-                      ),
-                    )
-                  : Icon(icon, color: Colors.orange, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D7C8C),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          event.formattedPrice,
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: event.status.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: event.status.color, width: 1),
-                        ),
-                        child: Text(
-                          event.status.displayName,
-                          style: TextStyle(color: event.status.color, fontSize: 10, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text('${event.participantsCount}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    event.name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF0D7C8C),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            Row(
               children: [
-                Row(
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: logoUrl.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            logoUrl,
+                            fit: BoxFit.cover,
+                            width: 50,
+                            height: 50,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(icon, color: Colors.orange, size: 24);
+                            },
+                          ),
+                        )
+                      : Icon(icon, color: Colors.orange, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
-                    Text(
-                      _formatDate(event.startDate),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D7C8C),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        event.formattedPrice,
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: event.status.color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: event.status.color, width: 1),
+                      ),
+                      child: Text(
+                        event.status.displayName,
+                        style: TextStyle(color: event.status.color, fontSize: 10, fontWeight: FontWeight.w500),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const Spacer(),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      event.location ?? '',
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
+                    const Icon(Icons.person_outline, size: 14, color: Colors.grey),
                     const SizedBox(width: 4),
-                    const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                    Text('${event.participantsCount}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              event.name,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0D7C8C),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  _formatDate(event.startDate),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(width: 16),
+                const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    event.location ?? '',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
               ],
             ),

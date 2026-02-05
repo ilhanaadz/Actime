@@ -1,8 +1,6 @@
 import 'organization.dart';
 import 'user.dart';
 
-/// Authentication response from backend
-/// Maps to backend AuthResponse
 class AuthResponse {
   final String id;
   final String email;
@@ -32,7 +30,6 @@ class AuthResponse {
     this.profileImageUrl,
   });
 
-  /// Get full name
   String get fullName {
     if (name != null && name!.isNotEmpty) return name!;
     if (firstName != null && lastName != null) {
@@ -43,23 +40,18 @@ class AuthResponse {
     return email;
   }
 
-  /// Check if user has a specific role
   bool hasRole(String role) => roles.contains(role);
 
-  /// Check if user is admin
   bool get isAdmin => hasRole('Admin') || hasRole('admin');
 
-  /// Check if user is organization
   bool get isOrganization => hasRole('Organization') || hasRole('organization');
 
-  /// Get user role
   UserRole get role {
     if (isAdmin) return UserRole.admin;
     if (isOrganization) return UserRole.organization;
     return UserRole.user;
   }
 
-  /// Get user object from auth response
   User get user {
     return User(
       id: id,
@@ -134,7 +126,6 @@ class AuthResponse {
   }
 }
 
-/// Registration request data
 class RegisterRequest {
   final String name;
   final String email;
@@ -173,7 +164,6 @@ class RegisterRequest {
   }
 }
 
-/// Login request data
 class LoginRequest {
   final String email;
   final String password;
@@ -191,7 +181,6 @@ class LoginRequest {
   }
 }
 
-/// Complete organization setup request
 class CompleteOrganizationRequest {
   final String name;
   final String? description;
@@ -221,7 +210,6 @@ class CompleteOrganizationRequest {
   }
 }
 
-/// Change password request
 class ChangePasswordRequest {
   final String currentPassword;
   final String newPassword;
@@ -242,7 +230,6 @@ class ChangePasswordRequest {
   }
 }
 
-/// Forgot password request
 class ForgotPasswordRequest {
   final String email;
 
@@ -251,7 +238,6 @@ class ForgotPasswordRequest {
   Map<String, dynamic> toJson() => {'Email': email};
 }
 
-/// Reset password request
 class ResetPasswordRequest {
   final String email;
   final String token;
@@ -273,4 +259,29 @@ class ResetPasswordRequest {
       'ConfirmPassword': confirmPassword,
     };
   }
+}
+
+class ConfirmEmailRequest {
+  final String userId;
+  final String token;
+
+  ConfirmEmailRequest({
+    required this.userId,
+    required this.token,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'UserId': userId,
+      'Token': token,
+    };
+  }
+}
+
+class ResendConfirmationEmailRequest {
+  final String email;
+
+  ResendConfirmationEmailRequest({required this.email});
+
+  Map<String, dynamic> toJson() => {'Email': email};
 }

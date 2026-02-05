@@ -7,11 +7,19 @@ class ApiConfig {
   // Set to false to use real backend API
   static const bool useMockApi = false;
 
-  // Base URL for the API - Update this to match your backend server
+  // Base URL for the API - Can be overridden at compile time
+  // Default: http://10.0.2.2:5171 (Android emulator)
   // For Android emulator use: http://10.0.2.2:8080
   // For iOS simulator use: http://localhost:8080
   // For physical device use your computer's IP: http://192.168.x.x:8080
-  static const String baseUrl = 'http://10.0.2.2:5171';
+  //
+  // To override at compile/run time, use:
+  // flutter run --dart-define=BASE_URL=http://your-api-url:port
+  // flutter build apk --dart-define=BASE_URL=http://your-api-url:port
+  static const String baseUrl = String.fromEnvironment(
+    'BASE_URL',
+    defaultValue: 'http://10.0.2.2:5171',
+  );
 
   // SignalR Hub URL for real-time notifications
   static const String signalRHubUrl = '$baseUrl/notificationHub';
@@ -83,6 +91,10 @@ class ApiConfig {
 
   // Recommendation endpoints (backend: RecommendationController)
   static const String recommendations = '/api/recommendations';
+
+  // Payment endpoints (backend: PaymentController)
+  static const String payment = '/Payment';
+  static const String paymentCreateIntent = '$payment/create-intent';
 
   // Health check
   static const String health = '/health';

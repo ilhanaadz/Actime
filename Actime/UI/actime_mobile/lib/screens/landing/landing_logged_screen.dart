@@ -428,164 +428,172 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
 
     return GestureDetector(
       onTap: () => _navigateToEventDetail(event),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: logoUrl.isNotEmpty
-                  ? ClipOval(
-                      child: Image.network(
-                        logoUrl,
-                        fit: BoxFit.cover,
-                        width: 50,
-                        height: 50,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(icon, color: Colors.orange, size: 24);
-                        },
-                      ),
-                    )
-                  : Icon(icon, color: Colors.orange, size: 24),
+      child: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: logoUrl.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            logoUrl,
+                            fit: BoxFit.cover,
+                            width: 50,
+                            height: 50,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(icon, color: Colors.orange, size: 24);
+                            },
+                          ),
+                        )
+                      : Icon(icon, color: Colors.orange, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              event.formattedPrice,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: event.status.color.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: event.status.color,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              event.status.displayName,
+                              style: TextStyle(
+                                color: event.status.color,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.person_outline,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${event.participantsCount}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        event.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(
-                          event.formattedPrice,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: event.status.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: event.status.color,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          event.status.displayName,
-                          style: TextStyle(
-                            color: event.status.color,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () => _toggleEventFavorite(event),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: isFavorite ? AppColors.red : AppColors.primary,
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.person_outline,
-                        size: 14,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${event.participantsCount}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          _formatDate(event.startDate),
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 12,
                           color: Colors.grey,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    event.name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      ],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      _formatDate(event.startDate),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 12,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      event.location ?? '',
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.location_on_outlined,
-                      size: 12,
-                      color: Colors.grey,
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          event.location ?? '',
+                          style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 12,
+                          color: Colors.grey,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          // Favorite button positioned at top-right corner
+          Positioned(
+            top: 16,
+            right: 24,
+            child: GestureDetector(
+              onTap: () => _toggleEventFavorite(event),
+              child: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                size: 20,
+                color: isFavorite ? AppColors.red : AppColors.primary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

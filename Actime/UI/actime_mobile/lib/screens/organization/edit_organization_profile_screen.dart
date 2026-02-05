@@ -7,6 +7,8 @@ import '../../components/add_address_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../../services/image_service.dart';
+import '../../utils/validators.dart';
+import '../../utils/form_error_handler.dart';
 
 class EditOrganizationProfileScreen extends StatefulWidget {
   final String organizationId;
@@ -44,6 +46,7 @@ class _EditOrganizationProfileScreenState
   bool _isAddressesLoading = true;
   bool _isUploadingImage = false;
   String? _error;
+  Map<String, String> _fieldErrors = {};
 
   @override
   void initState() {
@@ -219,6 +222,8 @@ class _EditOrganizationProfileScreenState
   }
 
   Future<void> _saveChanges() async {
+    setState(() => _fieldErrors = {});
+
     if (!_formKey.currentState!.validate()) return;
 
     final confirmed = await _showConfirmationDialog();
@@ -229,7 +234,6 @@ class _EditOrganizationProfileScreenState
     });
 
     try {
-      // Use updateMyOrganization for organization users editing their own profile
       final response = await _organizationService.updateMyOrganization({
         'Name': _nameController.text,
         'PhoneNumber': _phoneController.text,
@@ -245,19 +249,34 @@ class _EditOrganizationProfileScreenState
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Promjene su uspjesno sacuvane')),
+          const SnackBar(
+            content: Text('Promjene su uspješno sačuvane'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? 'Greska pri spremanju')),
-        );
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri spremanju'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Doslo je do greske')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Došlo je do greške'),
+          backgroundColor: AppColors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -404,7 +423,6 @@ class _EditOrganizationProfileScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Image with edit icon
             Center(
               child: Stack(
                 children: [
@@ -479,19 +497,28 @@ class _EditOrganizationProfileScreenState
             // Name
             TextFormField(
               controller: _nameController,
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Naziv je obavezan';
+                if (_fieldErrors['name'] != null) {
+                  return _fieldErrors['name'];
                 }
-                return null;
+                return Validators.required(value, 'Naziv');
               },
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: 'Naziv organizacije',
+                hintText: 'Unesite naziv organizacije',
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primary),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
                 ),
               ),
             ),
@@ -533,24 +560,28 @@ class _EditOrganizationProfileScreenState
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
-                if (value == null || value.isEmpty)
-                  return null; // ako nije obavezno
-
-                final phoneRegex = RegExp(r'^\+?[0-9\s\-]{8,15}$');
-                if (!phoneRegex.hasMatch(value)) {
-                  return 'Unesite validan broj telefona';
+                if (_fieldErrors['phone'] != null) {
+                  return _fieldErrors['phone'];
                 }
-
-                return null;
+                return Validators.phone(value);
               },
               decoration: InputDecoration(
-                labelText: 'Phone',
+                labelText: 'Telefon',
+                hintText: 'Unesite broj telefona (8-15 cifara)',
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primary),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
                 ),
               ),
             ),
@@ -580,20 +611,28 @@ class _EditOrganizationProfileScreenState
               enabled: false,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
-                if (value != null && value.isNotEmpty) {
-                  if (!value.contains('@')) {
-                    return 'Unesite validan email';
-                  }
+                if (_fieldErrors['email'] != null) {
+                  return _fieldErrors['email'];
                 }
-                return null;
+                return Validators.email(value);
               },
               decoration: InputDecoration(
                 labelText: 'E-mail',
+                hintText: 'Email adresa',
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primary),
+                ),
+                disabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
                 ),
               ),
             ),
@@ -603,13 +642,27 @@ class _EditOrganizationProfileScreenState
             TextFormField(
               controller: _aboutController,
               maxLines: 4,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (_fieldErrors['description'] != null) {
+                  return _fieldErrors['description'];
+                }
+                return Validators.maxLength(value, 500, 'Opis');
+              },
               decoration: InputDecoration(
-                labelText: 'About us',
+                labelText: 'O nama',
+                hintText: 'Opišite svoju organizaciju',
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primary),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
                 ),
               ),
             ),

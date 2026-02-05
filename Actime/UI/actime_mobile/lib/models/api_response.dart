@@ -14,7 +14,6 @@ class ApiResponse<T> {
     this.errors,
   });
 
-  /// Create a successful response
   factory ApiResponse.success(T data, {String? message, int statusCode = 200}) {
     return ApiResponse(
       success: true,
@@ -24,7 +23,6 @@ class ApiResponse<T> {
     );
   }
 
-  /// Create an error response
   factory ApiResponse.error(
     String message, {
     int statusCode = 400,
@@ -38,11 +36,49 @@ class ApiResponse<T> {
     );
   }
 
-  /// Check if the response has data
   bool get hasData => data != null;
 
-  /// Check if there are validation errors
   bool get hasErrors => errors != null && errors!.isNotEmpty;
+
+  String? getFieldError(String fieldName) {
+    if (errors == null) return null;
+
+    final error = errors![fieldName];
+    if (error != null) {
+      if (error is List && error.isNotEmpty) {
+        return error.first.toString();
+      } else if (error is String) {
+        return error;
+      }
+    }
+
+    final pascalCase = fieldName[0].toUpperCase() + fieldName.substring(1);
+    final pascalError = errors![pascalCase];
+    if (pascalError != null) {
+      if (pascalError is List && pascalError.isNotEmpty) {
+        return pascalError.first.toString();
+      } else if (pascalError is String) {
+        return pascalError;
+      }
+    }
+
+    return null;
+  }
+
+  Map<String, String> getAllFieldErrors() {
+    if (errors == null) return {};
+
+    final result = <String, String>{};
+    errors!.forEach((key, value) {
+      final camelCaseKey = key[0].toLowerCase() + key.substring(1);
+      if (value is List && value.isNotEmpty) {
+        result[camelCaseKey] = value.first.toString();
+      } else if (value is String) {
+        result[camelCaseKey] = value;
+      }
+    });
+    return result;
+  }
 }
 
 /// API Exception for handling errors
@@ -60,18 +96,13 @@ class ApiException implements Exception {
   @override
   String toString() => 'ApiException: $statusCode - $message';
 
-  /// Check if it's an authentication error
   bool get isAuthError => statusCode == 401;
 
-  /// Check if it's a forbidden error
   bool get isForbiddenError => statusCode == 403;
 
-  /// Check if it's a not found error
   bool get isNotFoundError => statusCode == 404;
 
-  /// Check if it's a validation error
   bool get isValidationError => statusCode == 422;
 
-  /// Check if it's a server error
   bool get isServerError => statusCode >= 500;
 }

@@ -4,7 +4,10 @@ import '../../components/actime_text_field.dart';
 import '../../components/actime_button.dart';
 import '../../services/services.dart';
 import '../../models/models.dart';
+import '../../utils/validators.dart';
+import '../../utils/form_error_handler.dart';
 import 'sign_up_screen.dart';
+import 'forgot_password_screen.dart';
 import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import '../organization/organization_profile_screen.dart';
@@ -18,10 +21,12 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  Map<String, String> _fieldErrors = {};
 
   @override
   void dispose() {
@@ -31,10 +36,9 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _handleSignIn() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unesite email i lozinku')),
-      );
+    setState(() => _fieldErrors = {});
+
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -52,17 +56,7 @@ class _SignInScreenState extends State<SignInScreen> {
         final authResponse = response.data!;
         final user = authResponse.user;
 
-        // Debug: Log organization data
-        print('=== LOGIN DEBUG ===');
-        print('User role: ${user.role}');
-        print('Is organization: ${authResponse.isOrganization}');
-        print('Organization: ${authResponse.organization}');
-        print('Organization ID: ${authResponse.organization?.id}');
-        print('===================');
-
-        // Route based on user role
         if (user.role == UserRole.organization) {
-          // Check if organization setup is required
           if (authResponse.requiresOrganizationSetup) {
             Navigator.pushReplacement(
               context,
@@ -85,14 +79,26 @@ class _SignInScreenState extends State<SignInScreen> {
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? 'Greška pri prijavi')),
-        );
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri prijavi'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške. Pokušajte ponovo.')),
+        const SnackBar(
+          content: Text('Došlo je do greške. Pokušajte ponovo.'),
+          backgroundColor: AppColors.red,
+        ),
       );
     } finally {
       if (mounted) {
@@ -127,36 +133,58 @@ class _SignInScreenState extends State<SignInScreen> {
                 _buildHeader('Prijava'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    children: [
-                      ActimeTextField(
-                        controller: _emailController,
-                        hintText: 'Email',
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingLarge),
-                      ActimeTextField(
-                        controller: _passwordController,
-                        hintText: 'Lozinka',
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXLarge),
-                      _isLoading
-                          ? const CircularProgressIndicator(
-                              color: AppColors.primary,
-                            )
-                          : ActimePrimaryButton(
-                              label: 'Prijavi se',
-                              onPressed: _handleSignIn,
-                            ),
-                      const SizedBox(height: AppDimensions.spacingDefault),
-                      ActimeTextButton(
-                        label: 'Zaboravljena lozinka?',
-                        onPressed: () {},
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXLarge),
-                      _buildSignUpLink(),
-                    ],
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        ActimeTextFormField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Unesite email adresu',
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Email'),
+                            Validators.email,
+                          ]),
+                          errorText: _fieldErrors['email'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        ActimeTextFormField(
+                          controller: _passwordController,
+                          labelText: 'Lozinka',
+                          hintText: 'Unesite lozinku',
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleSignIn(),
+                          validator: Validators.requiredField('Lozinka'),
+                          errorText: _fieldErrors['password'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingXLarge),
+                        _isLoading
+                            ? const CircularProgressIndicator(
+                                color: AppColors.primary,
+                              )
+                            : ActimePrimaryButton(
+                                label: 'Prijavi se',
+                                onPressed: _handleSignIn,
+                              ),
+                        const SizedBox(height: AppDimensions.spacingDefault),
+                        ActimeTextButton(
+                          label: 'Zaboravljena lozinka?',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: AppDimensions.spacingXLarge),
+                        _buildSignUpLink(),
+                      ],
+                    ),
                   ),
                 ),
               ],

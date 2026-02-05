@@ -19,28 +19,20 @@ class AuthService {
 
   AuthResponse? _currentAuth;
 
-  /// Get current auth response
   AuthResponse? get currentAuth => _currentAuth;
 
-  /// Get current user ID
   int? get currentUserId => _currentAuth?.userId;
 
-  /// Get current user ID as String
   String? get currentUserIdString => _currentAuth?.id;
 
-  /// Get current user
   User? get currentUser => _currentAuth?.user;
 
-  /// Check if user is logged in
   bool get isLoggedIn => _currentAuth != null;
 
-  /// Check if user is admin
   bool get isAdmin => _currentAuth?.isAdmin ?? false;
 
-  /// Check if user is organization
   bool get isOrganization => _currentAuth?.isOrganization ?? false;
 
-  /// Login with email and password
   Future<ApiResponse<AuthResponse>> login(String email, String password) async {
     ApiResponse<AuthResponse> response;
 
@@ -69,7 +61,6 @@ class AuthService {
     return response;
   }
 
-  /// Register new user
   Future<ApiResponse<AuthResponse>> register(RegisterRequest request) async {
     ApiResponse<AuthResponse> response;
 
@@ -95,13 +86,11 @@ class AuthService {
     return response;
   }
 
-  /// Logout
   Future<void> logout() async {
     // Disconnect from SignalR
     await _signalRService.disconnect();
 
     if (!ApiConfig.useMockApi) {
-      // Call backend logout endpoint
       await _apiService.post<Map<String, dynamic>>(
         ApiConfig.logout,
         fromJson: (json) => json,
@@ -111,7 +100,6 @@ class AuthService {
     await _tokenService.clearTokens();
   }
 
-  /// Refresh access token
   Future<ApiResponse<AuthResponse>> refreshToken() async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.error('Mock API ne podržava refresh token');
@@ -134,7 +122,6 @@ class AuthService {
     return response;
   }
 
-  /// Get current user info from /auth/me
   Future<ApiResponse<AuthResponse>> getCurrentUser() async {
     if (ApiConfig.useMockApi) {
       return await _mockService.getCurrentUserAuth();
@@ -155,12 +142,10 @@ class AuthService {
     return response;
   }
 
-  /// Check if user has valid session
   Future<bool> hasValidSession() async {
     return await _tokenService.hasValidToken();
   }
 
-  /// Load current user from stored token
   Future<ApiResponse<AuthResponse>?> loadCurrentUser() async {
     final hasToken = await _tokenService.hasValidToken();
     if (!hasToken) return null;
@@ -168,7 +153,6 @@ class AuthService {
     return await getCurrentUser();
   }
 
-  /// Complete organization setup
   Future<ApiResponse<AuthResponse>> completeOrganization(
     CompleteOrganizationRequest request,
   ) async {
@@ -189,7 +173,6 @@ class AuthService {
     return response;
   }
 
-  /// Change password
   Future<ApiResponse<Map<String, dynamic>>> changePassword(
     ChangePasswordRequest request,
   ) async {
@@ -204,7 +187,6 @@ class AuthService {
     );
   }
 
-  /// Forgot password - request reset email
   Future<ApiResponse<Map<String, dynamic>>> forgotPassword(String email) async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.success({'message': 'Email za resetiranje lozinke je poslan'});
@@ -217,7 +199,6 @@ class AuthService {
     );
   }
 
-  /// Reset password with token
   Future<ApiResponse<Map<String, dynamic>>> resetPassword(
     ResetPasswordRequest request,
   ) async {
@@ -228,6 +209,34 @@ class AuthService {
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.resetPassword,
       body: request.toJson(),
+      fromJson: (json) => json,
+    );
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> confirmEmail(
+    ConfirmEmailRequest request,
+  ) async {
+    if (ApiConfig.useMockApi) {
+      return ApiResponse.success({'message': 'Email je uspješno potvrđen'});
+    }
+
+    return await _apiService.post<Map<String, dynamic>>(
+      ApiConfig.confirmEmail,
+      body: request.toJson(),
+      fromJson: (json) => json,
+    );
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> resendConfirmationEmail(
+    String email,
+  ) async {
+    if (ApiConfig.useMockApi) {
+      return ApiResponse.success({'message': 'Email za potvrdu je ponovo poslan'});
+    }
+
+    return await _apiService.post<Map<String, dynamic>>(
+      ApiConfig.resendConfirmationEmail,
+      body: {'Email': email},
       fromJson: (json) => json,
     );
   }

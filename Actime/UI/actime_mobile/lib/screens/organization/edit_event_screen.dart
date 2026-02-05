@@ -8,6 +8,8 @@ import '../../components/searchable_dropdown.dart';
 import '../../components/add_location_modal.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../utils/validators.dart';
+import '../../utils/form_error_handler.dart';
 
 class EditEventScreen extends StatefulWidget {
   final String eventId;
@@ -19,6 +21,7 @@ class EditEventScreen extends StatefulWidget {
 }
 
 class _EditEventScreenState extends State<EditEventScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _eventService = EventService();
   final _locationService = LocationService();
 
@@ -39,6 +42,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   bool _isLoading = false;
   bool _isLoadingData = true;
   bool _isLocationsLoading = true;
+  Map<String, String> _fieldErrors = {};
+  String? _dateError;
 
   @override
   void initState() {
@@ -136,19 +141,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
   }
 
   Future<void> _updateEvent() async {
-    if (_eventNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unesite naziv događaja')),
-      );
-      return;
-    }
+    setState(() {
+      _fieldErrors = {};
+      _dateError = null;
+    });
+
+    bool isValid = _formKey.currentState!.validate();
 
     if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Odaberite datum događaja')),
-      );
-      return;
+      setState(() => _dateError = 'Odaberite datum događaja');
+      isValid = false;
     }
+
+    if (!isValid) return;
 
     setState(() => _isLoading = true);
 
@@ -190,14 +195,20 @@ class _EditEventScreenState extends State<EditEventScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Return true za refresh liste
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message ?? 'Greška pri ažuriranju događaja'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri ažuriranju događaja'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -229,7 +240,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
             backgroundColor: Colors.orange,
           ),
         );
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Return true for list refresh
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -286,55 +297,67 @@ class _EditEventScreenState extends State<EditEventScreen> {
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(AppDimensions.spacingLarge),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCoverImageSection(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    ActimeTextField(
-                      controller: _eventNameController,
-                      labelText: 'Naziv događaja',
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildActivityTypeDropdown(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildEventStatusDropdown(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildDateTimeRow(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    SearchableDropdown<Location>(
-                      labelText: 'Lokacija',
-                      hintText: 'Odaberi lokaciju',
-                      selectedValue: _selectedLocation,
-                      items: _locations,
-                      itemLabel: (location) => location.name,
-                      itemSubtitle: (location) => location.address?.displayAddress ?? '',
-                      isLoading: _isLocationsLoading,
-                      isOutlined: false,
-                      onChanged: (location) => setState(() => _selectedLocation = location),
-                      onAddNew: _showAddLocationModal,
-                      addNewLabel: 'Dodaj novu lokaciju',
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    _buildPriceParticipantsRow(),
-                    const SizedBox(height: AppDimensions.spacingLarge),
-                    ActimeTextField(
-                      controller: _descriptionController,
-                      labelText: 'Opis',
-                      maxLines: 4,
-                      isOutlined: true,
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXLarge),
-                    _isLoading
-                        ? const Center(
-                            child:
-                                CircularProgressIndicator(color: AppColors.primary),
-                          )
-                        : ActimePrimaryButton(
-                            label: 'Spremi promjene',
-                            onPressed: _updateEvent,
-                          ),
-                  ],
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCoverImageSection(),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      ActimeTextFormField(
+                        controller: _eventNameController,
+                        labelText: 'Naziv događaja',
+                        hintText: 'Unesite naziv događaja',
+                        validator: Validators.compose([
+                          Validators.requiredField('Naziv događaja'),
+                          Validators.minLengthField(2, 'Naziv događaja'),
+                        ]),
+                        errorText: _fieldErrors['title'],
+                      ),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      _buildActivityTypeDropdown(),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      _buildEventStatusDropdown(),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      _buildDateTimeRow(),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      SearchableDropdown<Location>(
+                        labelText: 'Lokacija',
+                        hintText: 'Odaberi lokaciju',
+                        selectedValue: _selectedLocation,
+                        items: _locations,
+                        itemLabel: (location) => location.name,
+                        itemSubtitle: (location) => location.address?.displayAddress ?? '',
+                        isLoading: _isLocationsLoading,
+                        isOutlined: false,
+                        onChanged: (location) => setState(() => _selectedLocation = location),
+                        onAddNew: _showAddLocationModal,
+                        addNewLabel: 'Dodaj novu lokaciju',
+                      ),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      _buildPriceParticipantsRow(),
+                      const SizedBox(height: AppDimensions.spacingLarge),
+                      ActimeTextFormField(
+                        controller: _descriptionController,
+                        labelText: 'Opis',
+                        hintText: 'Unesite opis događaja (opcionalno)',
+                        maxLines: 4,
+                        isOutlined: true,
+                        validator: Validators.maxLengthField(2000, 'Opis'),
+                        errorText: _fieldErrors['description'],
+                      ),
+                      const SizedBox(height: AppDimensions.spacingXLarge),
+                      _isLoading
+                          ? const Center(
+                              child:
+                                  CircularProgressIndicator(color: AppColors.primary),
+                            )
+                          : ActimePrimaryButton(
+                              label: 'Spremi promjene',
+                              onPressed: _updateEvent,
+                            ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -415,54 +438,76 @@ class _EditEventScreenState extends State<EditEventScreen> {
   }
 
   Widget _buildDateTimeRow() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: ActimeTextField(
-            controller: _dateController,
-            labelText: 'Datum',
-            readOnly: true,
-            suffixIcon:
-                const Icon(Icons.calendar_today, color: AppColors.primary),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _selectedDate ?? DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2030),
-              );
-              if (date != null) {
-                setState(() {
-                  _selectedDate = date;
-                  _dateController.text = DateFormat('dd.MM.yyyy.').format(date);
-                });
-              }
-            },
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: ActimeTextFormField(
+                controller: _dateController,
+                labelText: 'Datum',
+                hintText: 'Odaberite datum',
+                readOnly: true,
+                suffixIcon:
+                    const Icon(Icons.calendar_today, color: AppColors.primary),
+                validator: (value) {
+                  if (_selectedDate == null) {
+                    return 'Datum je obavezan';
+                  }
+                  return null;
+                },
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2030),
+                  );
+                  if (date != null) {
+                    setState(() {
+                      _selectedDate = date;
+                      _dateController.text = DateFormat('dd.MM.yyyy.').format(date);
+                      _dateError = null;
+                    });
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: AppDimensions.spacingDefault),
+            Expanded(
+              child: ActimeTextFormField(
+                controller: _timeController,
+                labelText: 'Vrijeme',
+                hintText: 'Odaberite vrijeme',
+                readOnly: true,
+                suffixIcon:
+                    const Icon(Icons.access_time, color: AppColors.primary),
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: _selectedTime ?? TimeOfDay.now(),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      _selectedTime = time;
+                      _timeController.text =
+                          '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                    });
+                  }
+                },
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: AppDimensions.spacingDefault),
-        Expanded(
-          child: ActimeTextField(
-            controller: _timeController,
-            labelText: 'Vrijeme',
-            readOnly: true,
-            suffixIcon:
-                const Icon(Icons.access_time, color: AppColors.primary),
-            onTap: () async {
-              final time = await showTimePicker(
-                context: context,
-                initialTime: _selectedTime ?? TimeOfDay.now(),
-              );
-              if (time != null) {
-                setState(() {
-                  _selectedTime = time;
-                  _timeController.text =
-                      '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
-                });
-              }
-            },
+        if (_dateError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 12),
+            child: Text(
+              _dateError!,
+              style: const TextStyle(color: AppColors.red, fontSize: 12),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -471,19 +516,32 @@ class _EditEventScreenState extends State<EditEventScreen> {
     return Row(
       children: [
         Expanded(
-          child: ActimeTextField(
+          child: ActimeTextFormField(
             controller: _priceController,
             labelText: 'Cijena (opcionalno)',
+            hintText: '0.00',
             keyboardType: TextInputType.number,
             prefixText: 'BAM ',
+            validator: (value) => Validators.positiveNumber(value, 'Cijena'),
+            errorText: _fieldErrors['price'],
           ),
         ),
         const SizedBox(width: AppDimensions.spacingDefault),
         Expanded(
-          child: ActimeTextField(
+          child: ActimeTextFormField(
             controller: _maxParticipantsController,
             labelText: 'Max učesnika',
+            hintText: 'Opcionalno',
             keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) return null;
+              final num = int.tryParse(value);
+              if (num == null || num < 1) {
+                return 'Unesite validan broj';
+              }
+              return null;
+            },
+            errorText: _fieldErrors['maxParticipants'],
           ),
         ),
       ],

@@ -5,6 +5,8 @@ import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../../services/image_service.dart';
+import '../../utils/validators.dart';
+import '../../utils/form_error_handler.dart';
 
 class EditUserProfileScreen extends StatefulWidget {
   const EditUserProfileScreen({super.key});
@@ -25,6 +27,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isUploadingImage = false;
+  Map<String, String> _fieldErrors = {};
 
   @override
   void initState() {
@@ -62,6 +65,8 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   }
 
   Future<void> _saveChanges() async {
+    setState(() => _fieldErrors = {});
+
     if (!_formKey.currentState!.validate()) return;
     if (_user == null) return;
 
@@ -80,18 +85,33 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil je uspješno ažuriran')),
+          const SnackBar(
+            content: Text('Profil je uspješno ažuriran'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? 'Greška pri spremanju')),
-        );
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri spremanju'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške')),
+        const SnackBar(
+          content: Text('Došlo je do greške'),
+          backgroundColor: AppColors.red,
+        ),
       );
     } finally {
       if (mounted) {
@@ -259,19 +279,28 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                     // First Name
                     TextFormField(
                       controller: _firstNameController,
+                      textInputAction: TextInputAction.next,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Ime je obavezno';
+                        if (_fieldErrors['firstName'] != null) {
+                          return _fieldErrors['firstName'];
                         }
-                        return null;
+                        return Validators.required(value, 'Ime');
                       },
                       decoration: InputDecoration(
                         labelText: 'Ime',
+                        hintText: 'Unesite ime',
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
                         focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                        errorBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.red),
+                        ),
+                        focusedErrorBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.red),
                         ),
                       ),
                     ),
@@ -280,19 +309,28 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                     // Last Name
                     TextFormField(
                       controller: _lastNameController,
+                      textInputAction: TextInputAction.done,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Prezime je obavezno';
+                        if (_fieldErrors['lastName'] != null) {
+                          return _fieldErrors['lastName'];
                         }
-                        return null;
+                        return Validators.required(value, 'Prezime');
                       },
                       decoration: InputDecoration(
                         labelText: 'Prezime',
+                        hintText: 'Unesite prezime',
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
                         focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                        errorBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.red),
+                        ),
+                        focusedErrorBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.red),
                         ),
                       ),
                     ),

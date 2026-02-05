@@ -4,6 +4,8 @@ import '../models/address.dart';
 import '../models/city.dart';
 import '../services/address_service.dart';
 import '../services/city_service.dart';
+import '../utils/validators.dart';
+import '../utils/form_error_handler.dart';
 import 'actime_button.dart';
 import 'actime_text_field.dart';
 import 'searchable_dropdown.dart';
@@ -53,6 +55,8 @@ class _AddAddressModalState extends State<AddAddressModal> {
   bool _isLoading = false;
   bool _isCitiesLoading = true;
   String? _errorMessage;
+  Map<String, String> _fieldErrors = {};
+  String? _cityError;
 
   @override
   void initState() {
@@ -71,15 +75,24 @@ class _AddAddressModalState extends State<AddAddressModal> {
   }
 
   Future<void> _createAddress() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Očisti greške
+    setState(() {
+      _fieldErrors = {};
+      _cityError = null;
+      _errorMessage = null;
+    });
+
+    bool isValid = _formKey.currentState!.validate();
+
     if (_selectedCity == null) {
-      setState(() => _errorMessage = 'Odaberite grad');
-      return;
+      setState(() => _cityError = 'Odaberite grad');
+      isValid = false;
     }
+
+    if (!isValid) return;
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     try {
@@ -95,10 +108,17 @@ class _AddAddressModalState extends State<AddAddressModal> {
       if (response.success && response.data != null) {
         widget.onAddressCreated(response.data!);
       } else {
-        setState(() => _errorMessage = response.message ?? 'Greska pri kreiranju adrese');
+        // Mapiraj API greške na polja
+        if (response.hasErrors) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          setState(() => _errorMessage = response.message ?? 'Greška pri kreiranju adrese');
+        }
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Doslo je do greske');
+      setState(() => _errorMessage = 'Došlo je do greške');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -211,45 +231,74 @@ class _AddAddressModalState extends State<AddAddressModal> {
                 const SizedBox(height: 24),
 
                 // Street
-                ActimeTextField(
+                ActimeTextFormField(
                   controller: _streetController,
                   labelText: 'Ulica i broj *',
                   hintText: 'npr. Zmaja od Bosne 10',
                   isOutlined: true,
+                  textInputAction: TextInputAction.next,
+                  validator: Validators.compose([
+                    Validators.requiredField('Ulica'),
+                    Validators.minLengthField(2, 'Ulica'),
+                  ]),
+                  errorText: _fieldErrors['street'],
                 ),
                 const SizedBox(height: 16),
 
                 // City dropdown
-                SearchableDropdown<City>(
-                  labelText: 'Grad *',
-                  hintText: 'Odaberi grad',
-                  selectedValue: _selectedCity,
-                  items: _cities,
-                  itemLabel: (city) => city.name,
-                  itemSubtitle: (city) => city.country?.name ?? city.countryName ?? '',
-                  isLoading: _isCitiesLoading,
-                  onChanged: (city) => setState(() => _selectedCity = city),
-                  onAddNew: _showAddCityDialog,
-                  addNewLabel: 'Dodaj novi grad',
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SearchableDropdown<City>(
+                      labelText: 'Grad *',
+                      hintText: 'Odaberi grad',
+                      selectedValue: _selectedCity,
+                      items: _cities,
+                      itemLabel: (city) => city.name,
+                      itemSubtitle: (city) => city.country?.name ?? city.countryName ?? '',
+                      isLoading: _isCitiesLoading,
+                      onChanged: (city) {
+                        setState(() {
+                          _selectedCity = city;
+                          _cityError = null;
+                        });
+                      },
+                      onAddNew: _showAddCityDialog,
+                      addNewLabel: 'Dodaj novi grad',
+                    ),
+                    if (_cityError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 12),
+                        child: Text(
+                          _cityError!,
+                          style: const TextStyle(color: AppColors.red, fontSize: 12),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 16),
 
                 // Postal code
-                ActimeTextField(
+                ActimeTextFormField(
                   controller: _postalCodeController,
-                  labelText: 'Postanski broj *',
+                  labelText: 'Poštanski broj *',
                   hintText: 'npr. 71000',
                   isOutlined: true,
                   keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  validator: Validators.requiredField('Poštanski broj'),
+                  errorText: _fieldErrors['postalCode'],
                 ),
                 const SizedBox(height: 16),
 
                 // Coordinates (optional)
-                ActimeTextField(
+                ActimeTextFormField(
                   controller: _coordinatesController,
                   labelText: 'Koordinate (opciono)',
                   hintText: 'npr. 43.8563, 18.4131',
                   isOutlined: true,
+                  textInputAction: TextInputAction.done,
+                  errorText: _fieldErrors['coordinates'],
                 ),
 
                 // Error message
