@@ -32,7 +32,6 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   bool _isLoading = true;
   String? _error;
 
-  StreamSubscription<SignalRNotification>? _notificationSubscription;
 
   String get _organizationId {
     // Priority 1: If logged in as organization, use organization.id from auth
@@ -52,53 +51,11 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
   void initState() {
     super.initState();
     _loadOrganization();
-    _setupNotificationListener();
   }
 
   @override
   void dispose() {
-    _notificationSubscription?.cancel();
     super.dispose();
-  }
-
-  void _setupNotificationListener() {
-    _notificationSubscription = _signalRService.notificationStream.listen((notification) {
-      if (mounted) {
-        _showNotificationSnackbar(notification);
-      }
-    });
-  }
-
-  void _showNotificationSnackbar(SignalRNotification notification) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(notification.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(notification.message, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'Pogledaj',
-          textColor: Colors.white,
-          onPressed: () => _navigateToNotifications(),
-        ),
-      ),
-    );
-  }
-
-  void _navigateToNotifications() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-    );
   }
 
   Future<void> _loadOrganization() async {
@@ -185,25 +142,6 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String? categoryName) {
-    switch (categoryName?.toLowerCase()) {
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'kultura':
-        return Icons.palette;
-      case 'edukacija':
-        return Icons.school;
-      case 'zdravlje':
-        return Icons.favorite;
-      case 'muzika':
-        return Icons.music_note;
-      case 'tehnologija':
-        return Icons.computer;
-      default:
-        return Icons.groups;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,13 +162,6 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
         ),
         leadingWidth: 100,
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: NotificationBadge(
-              onTap: _navigateToNotifications,
-              iconColor: AppColors.primary,
-            ),
-          ),
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.primary),
             onPressed: _showLogoutDialog,

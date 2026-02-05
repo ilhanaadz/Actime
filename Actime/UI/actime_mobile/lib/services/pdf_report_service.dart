@@ -72,6 +72,116 @@ class PdfReportService {
     }
   }
 
+  /// Generate and share participations by month report
+  Future<ApiResponse<void>> generateParticipationsByMonthReport({
+    required String organizationId,
+    required String organizationName,
+    String? organizationLogoUrl,
+    required List<ParticipationByMonth> participations,
+    required int totalParticipations,
+  }) async {
+    try {
+      final pdf = await _buildParticipationsByMonthDocument(
+        organizationName: organizationName,
+        organizationLogoUrl: organizationLogoUrl,
+        participations: participations,
+        totalParticipations: totalParticipations,
+      );
+
+      final dateStr = DateFormat('dd_MM_yyyy').format(DateTime.now());
+      await _shareOrSavePdf(pdf, 'Actime_Participations_By_Month_$dateStr.pdf');
+
+      return ApiResponse.success(
+        null,
+        message: 'Izvještaj uspješno generisan',
+      );
+    } catch (e) {
+      return ApiResponse.error(_getErrorMessage(e));
+    }
+  }
+
+  /// Generate and share participations by year report
+  Future<ApiResponse<void>> generateParticipationsByYearReport({
+    required String organizationId,
+    required String organizationName,
+    String? organizationLogoUrl,
+    required List<ParticipationByYear> participations,
+    required int totalParticipations,
+  }) async {
+    try {
+      final pdf = await _buildParticipationsByYearDocument(
+        organizationName: organizationName,
+        organizationLogoUrl: organizationLogoUrl,
+        participations: participations,
+        totalParticipations: totalParticipations,
+      );
+
+      final dateStr = DateFormat('dd_MM_yyyy').format(DateTime.now());
+      await _shareOrSavePdf(pdf, 'Actime_Participations_By_Year_$dateStr.pdf');
+
+      return ApiResponse.success(
+        null,
+        message: 'Izvještaj uspješno generisan',
+      );
+    } catch (e) {
+      return ApiResponse.error(_getErrorMessage(e));
+    }
+  }
+
+  /// Generate and share event participants list report
+  Future<ApiResponse<void>> generateEventParticipantsReport({
+    required String organizationName,
+    required String eventName,
+    String? organizationLogoUrl,
+    required List<User> participants,
+  }) async {
+    try {
+      final pdf = await _buildEventParticipantsDocument(
+        organizationName: organizationName,
+        eventName: eventName,
+        organizationLogoUrl: organizationLogoUrl,
+        participants: participants,
+      );
+
+      final dateStr = DateFormat('dd_MM_yyyy').format(DateTime.now());
+      await _shareOrSavePdf(pdf, 'Actime_Event_Participants_$dateStr.pdf');
+
+      return ApiResponse.success(
+        null,
+        message: 'Izvještaj uspješno generisan',
+      );
+    } catch (e) {
+      return ApiResponse.error(_getErrorMessage(e));
+    }
+  }
+
+  /// Generate and share period participants list report
+  Future<ApiResponse<void>> generatePeriodParticipantsReport({
+    required String organizationName,
+    required String periodName,
+    String? organizationLogoUrl,
+    required List<User> participants,
+  }) async {
+    try {
+      final pdf = await _buildPeriodParticipantsDocument(
+        organizationName: organizationName,
+        periodName: periodName,
+        organizationLogoUrl: organizationLogoUrl,
+        participants: participants,
+      );
+
+      final dateStr = DateFormat('dd_MM_yyyy').format(DateTime.now());
+      await _shareOrSavePdf(pdf, 'Actime_Period_Participants_$dateStr.pdf');
+
+      return ApiResponse.success(
+        null,
+        message: 'Izvještaj uspješno generisan',
+      );
+    } catch (e) {
+      return ApiResponse.error(_getErrorMessage(e));
+    }
+  }
+
   /// Build participations PDF document
   Future<pw.Document> _buildParticipationsDocument({
     required String organizationName,
@@ -511,6 +621,621 @@ class PdfReportService {
           ),
         ],
       ),
+    );
+  }
+
+  /// Build participations by month PDF document
+  Future<pw.Document> _buildParticipationsByMonthDocument({
+    required String organizationName,
+    String? organizationLogoUrl,
+    required List<ParticipationByMonth> participations,
+    required int totalParticipations,
+  }) async {
+    final pdf = pw.Document();
+
+    // Load logo if available
+    pw.ImageProvider? logoImage;
+    if (organizationLogoUrl != null && organizationLogoUrl.isNotEmpty) {
+      try {
+        logoImage = await networkImage(organizationLogoUrl);
+      } catch (e) {
+        logoImage = null;
+      }
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              _buildReportHeader(
+                organizationName: organizationName,
+                logoImage: logoImage,
+              ),
+              pw.SizedBox(height: 30),
+
+              // Report title
+              pw.Text(
+                'Participations by Month Report',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _primaryColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Generated date
+              pw.Text(
+                'Generated: ${DateFormat('dd.MM.yyyy. HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Summary statistics
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: _alternateRowColor,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
+                child: pw.Row(
+                  children: [
+                    pw.Text(
+                      'Total Participations: ',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '$totalParticipations',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: _primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Participations table
+              if (participations.isEmpty)
+                pw.Center(
+                  child: pw.Padding(
+                    padding: const pw.EdgeInsets.all(40),
+                    child: pw.Text(
+                      'No participations to display',
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                _buildParticipationsByMonthTable(participations),
+
+              // Footer
+              pw.Spacer(),
+              _buildReportFooter(),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  /// Build participations by year PDF document
+  Future<pw.Document> _buildParticipationsByYearDocument({
+    required String organizationName,
+    String? organizationLogoUrl,
+    required List<ParticipationByYear> participations,
+    required int totalParticipations,
+  }) async {
+    final pdf = pw.Document();
+
+    // Load logo if available
+    pw.ImageProvider? logoImage;
+    if (organizationLogoUrl != null && organizationLogoUrl.isNotEmpty) {
+      try {
+        logoImage = await networkImage(organizationLogoUrl);
+      } catch (e) {
+        logoImage = null;
+      }
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              _buildReportHeader(
+                organizationName: organizationName,
+                logoImage: logoImage,
+              ),
+              pw.SizedBox(height: 30),
+
+              // Report title
+              pw.Text(
+                'Participations by Year Report',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _primaryColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Generated date
+              pw.Text(
+                'Generated: ${DateFormat('dd.MM.yyyy. HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Summary statistics
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: _alternateRowColor,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
+                child: pw.Row(
+                  children: [
+                    pw.Text(
+                      'Total Participations: ',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '$totalParticipations',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: _primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Participations table
+              if (participations.isEmpty)
+                pw.Center(
+                  child: pw.Padding(
+                    padding: const pw.EdgeInsets.all(40),
+                    child: pw.Text(
+                      'No participations to display',
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                _buildParticipationsByYearTable(participations),
+
+              // Footer
+              pw.Spacer(),
+              _buildReportFooter(),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  /// Build participations by month table
+  pw.Widget _buildParticipationsByMonthTable(List<ParticipationByMonth> participations) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: _borderColor, width: 1),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(3),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        // Header row
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: _primaryColor),
+          children: [
+            _buildTableCell(
+              'Month',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+            _buildTableCell(
+              'Participants',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+          ],
+        ),
+        // Data rows
+        ...participations.asMap().entries.map((entry) {
+          final index = entry.key;
+          final participation = entry.value;
+          final isAlternate = index % 2 == 1;
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: isAlternate ? _alternateRowColor : PdfColors.white,
+            ),
+            children: [
+              _buildTableCell('${participation.monthName} ${participation.year}'),
+              _buildTableCell(
+                '${participation.participantsCount}',
+                alignment: pw.Alignment.center,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Build participations by year table
+  pw.Widget _buildParticipationsByYearTable(List<ParticipationByYear> participations) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: _borderColor, width: 1),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(3),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        // Header row
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: _primaryColor),
+          children: [
+            _buildTableCell(
+              'Year',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+            _buildTableCell(
+              'Participants',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+          ],
+        ),
+        // Data rows
+        ...participations.asMap().entries.map((entry) {
+          final index = entry.key;
+          final participation = entry.value;
+          final isAlternate = index % 2 == 1;
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: isAlternate ? _alternateRowColor : PdfColors.white,
+            ),
+            children: [
+              _buildTableCell('${participation.year}'),
+              _buildTableCell(
+                '${participation.participantsCount}',
+                alignment: pw.Alignment.center,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Build event participants PDF document
+  Future<pw.Document> _buildEventParticipantsDocument({
+    required String organizationName,
+    required String eventName,
+    String? organizationLogoUrl,
+    required List<User> participants,
+  }) async {
+    final pdf = pw.Document();
+
+    // Load logo if available
+    pw.ImageProvider? logoImage;
+    if (organizationLogoUrl != null && organizationLogoUrl.isNotEmpty) {
+      try {
+        logoImage = await networkImage(organizationLogoUrl);
+      } catch (e) {
+        logoImage = null;
+      }
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              _buildReportHeader(
+                organizationName: organizationName,
+                logoImage: logoImage,
+              ),
+              pw.SizedBox(height: 30),
+
+              // Report title
+              pw.Text(
+                'Event Participants',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _primaryColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Event name
+              pw.Text(
+                eventName,
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Generated date
+              pw.Text(
+                'Generated: ${DateFormat('dd.MM.yyyy. HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Summary statistics
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: _alternateRowColor,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
+                child: pw.Row(
+                  children: [
+                    pw.Text(
+                      'Total Participants: ',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '${participants.length}',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: _primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Participants table
+              if (participants.isEmpty)
+                pw.Center(
+                  child: pw.Padding(
+                    padding: const pw.EdgeInsets.all(40),
+                    child: pw.Text(
+                      'No participants to display',
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                _buildParticipantsListTable(participants),
+
+              // Footer
+              pw.Spacer(),
+              _buildReportFooter(),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  /// Build period participants PDF document
+  Future<pw.Document> _buildPeriodParticipantsDocument({
+    required String organizationName,
+    required String periodName,
+    String? organizationLogoUrl,
+    required List<User> participants,
+  }) async {
+    final pdf = pw.Document();
+
+    // Load logo if available
+    pw.ImageProvider? logoImage;
+    if (organizationLogoUrl != null && organizationLogoUrl.isNotEmpty) {
+      try {
+        logoImage = await networkImage(organizationLogoUrl);
+      } catch (e) {
+        logoImage = null;
+      }
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              _buildReportHeader(
+                organizationName: organizationName,
+                logoImage: logoImage,
+              ),
+              pw.SizedBox(height: 30),
+
+              // Report title
+              pw.Text(
+                'Period Participants',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _primaryColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Period name
+              pw.Text(
+                periodName,
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              // Generated date
+              pw.Text(
+                'Generated: ${DateFormat('dd.MM.yyyy. HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Summary statistics
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: _alternateRowColor,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
+                child: pw.Row(
+                  children: [
+                    pw.Text(
+                      'Total Participants: ',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '${participants.length}',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: _primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 20),
+
+              // Participants table
+              if (participants.isEmpty)
+                pw.Center(
+                  child: pw.Padding(
+                    padding: const pw.EdgeInsets.all(40),
+                    child: pw.Text(
+                      'No participants to display',
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                _buildParticipantsListTable(participants),
+
+              // Footer
+              pw.Spacer(),
+              _buildReportFooter(),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  /// Build participants list table
+  pw.Widget _buildParticipantsListTable(List<User> participants) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: _borderColor, width: 1),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(3),
+        1: const pw.FlexColumnWidth(3),
+      },
+      children: [
+        // Header row
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: _primaryColor),
+          children: [
+            _buildTableCell(
+              'Name',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+            _buildTableCell(
+              'Email',
+              isHeader: true,
+              textColor: PdfColors.white,
+            ),
+          ],
+        ),
+        // Data rows
+        ...participants.asMap().entries.map((entry) {
+          final index = entry.key;
+          final participant = entry.value;
+          final isAlternate = index % 2 == 1;
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: isAlternate ? _alternateRowColor : PdfColors.white,
+            ),
+            children: [
+              _buildTableCell(participant.name),
+              _buildTableCell(participant.email),
+            ],
+          );
+        }),
+      ],
     );
   }
 

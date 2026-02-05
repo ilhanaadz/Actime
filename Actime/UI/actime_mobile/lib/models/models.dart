@@ -20,3 +20,7 @@ export 'notification.dart';
 export 'enrollment.dart';
 export 'event_participation.dart';
 export 'gallery_image.dart';
+export 'participation_by_month.dart';
+export 'participation_by_year.dart';
+export 'enrollment_by_month.dart';
+export 'enrollment_by_year.dart';

@@ -123,7 +123,7 @@ class OrganizationService {
   Future<ApiResponse<PaginatedResponse<Membership>>> getOrganizationEnrollments(
     String organizationId, {
     int page = 1,
-    int pageSize = 10,
+    int pageSize = 999999,
     EnrollmentStatus? status,
   }) async {
     if (ApiConfig.useMockApi) {
@@ -241,26 +241,108 @@ class OrganizationService {
   }
 
   /// Get organization participations summary
-  Future<ApiResponse<PaginatedResponse<EventParticipation>>> getOrganizationParticipations(
-    String organizationId, {
-    int page = 1,
-    int perPage = 10,
-  }) async {
+  Future<ApiResponse<List<EventParticipation>>> getOrganizationParticipations(
+    String organizationId,
+  ) async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getOrganizationParticipations(
+      final mockResponse = await _mockService.getOrganizationParticipations(
         organizationId,
-        page: page,
-        perPage: perPage,
+        page: 1,
+        perPage: 999999,
       );
+      if (mockResponse.success && mockResponse.data != null) {
+        return ApiResponse.success(mockResponse.data!.data);
+      }
+      return ApiResponse.error(mockResponse.message ?? 'Greška');
     }
 
-    return await _apiService.get<PaginatedResponse<EventParticipation>>(
+    return await _apiService.get<List<EventParticipation>>(
       '${ApiConfig.organization}/$organizationId/participations',
-      queryParams: {
-        'page': page.toString(),
-        'perPage': perPage.toString(),
-      },
-      fromJson: (json) => PaginatedResponse.fromJson(json, EventParticipation.fromJson),
+      fromJson: (json) => (json as List).map((item) => EventParticipation.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get organization participations by month
+  Future<ApiResponse<List<ParticipationByMonth>>> getOrganizationParticipationsByMonth(
+    String organizationId,
+  ) async {
+    return await _apiService.get<List<ParticipationByMonth>>(
+      '${ApiConfig.organization}/$organizationId/participations/by-month',
+      fromJson: (json) => (json as List).map((item) => ParticipationByMonth.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get organization participations by year
+  Future<ApiResponse<List<ParticipationByYear>>> getOrganizationParticipationsByYear(
+    String organizationId,
+  ) async {
+    return await _apiService.get<List<ParticipationByYear>>(
+      '${ApiConfig.organization}/$organizationId/participations/by-year',
+      fromJson: (json) => (json as List).map((item) => ParticipationByYear.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get participants for a specific month
+  Future<ApiResponse<List<User>>> getParticipantsByMonth(
+    String organizationId,
+    int month,
+  ) async {
+    return await _apiService.get<List<User>>(
+      '${ApiConfig.organization}/$organizationId/participants/month/$month',
+      fromJson: (json) => (json as List).map((item) => User.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get participants for a specific year
+  Future<ApiResponse<List<User>>> getParticipantsByYear(
+    String organizationId,
+    int year,
+  ) async {
+    return await _apiService.get<List<User>>(
+      '${ApiConfig.organization}/$organizationId/participants/year/$year',
+      fromJson: (json) => (json as List).map((item) => User.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get organization enrollments by month
+  Future<ApiResponse<List<EnrollmentByMonth>>> getOrganizationEnrollmentsByMonth(
+    String organizationId,
+  ) async {
+    return await _apiService.get<List<EnrollmentByMonth>>(
+      '${ApiConfig.organization}/$organizationId/enrollments/by-month',
+      fromJson: (json) => (json as List).map((item) => EnrollmentByMonth.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get organization enrollments by year
+  Future<ApiResponse<List<EnrollmentByYear>>> getOrganizationEnrollmentsByYear(
+    String organizationId,
+  ) async {
+    return await _apiService.get<List<EnrollmentByYear>>(
+      '${ApiConfig.organization}/$organizationId/enrollments/by-year',
+      fromJson: (json) => (json as List).map((item) => EnrollmentByYear.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get members for a specific month
+  Future<ApiResponse<List<User>>> getMembersByMonth(
+    String organizationId,
+    int month,
+  ) async {
+    return await _apiService.get<List<User>>(
+      '${ApiConfig.organization}/$organizationId/members/month/$month',
+      fromJson: (json) => (json as List).map((item) => User.fromJson(item)).toList(),
+    );
+  }
+
+  /// Get members for a specific year
+  Future<ApiResponse<List<User>>> getMembersByYear(
+    String organizationId,
+    int year,
+  ) async {
+    return await _apiService.get<List<User>>(
+      '${ApiConfig.organization}/$organizationId/members/year/$year',
+      fromJson: (json) => (json as List).map((item) => User.fromJson(item)).toList(),
     );
   }
 }

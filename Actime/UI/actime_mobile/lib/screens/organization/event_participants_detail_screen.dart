@@ -6,11 +6,13 @@ import '../../services/services.dart';
 class EventParticipantsDetailScreen extends StatefulWidget {
   final String eventId;
   final String eventName;
+  final String? organizationId;
 
   const EventParticipantsDetailScreen({
     super.key,
     required this.eventId,
     required this.eventName,
+    this.organizationId,
   });
 
   @override
@@ -21,10 +23,16 @@ class EventParticipantsDetailScreen extends StatefulWidget {
 class _EventParticipantsDetailScreenState
     extends State<EventParticipantsDetailScreen> {
   final _eventService = EventService();
+  final _pdfReportService = PdfReportService();
+  final _organizationService = OrganizationService();
 
   List<User> _participants = [];
   bool _isLoading = true;
+  bool _isGeneratingReport = false;
   String? _error;
+  String? _organizationId;
+  String? _organizationName;
+  String? _organizationLogoUrl;
 
   @override
   void initState() {
@@ -56,6 +64,64 @@ class _EventParticipantsDetailScreenState
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _generateReport() async {
+    if (widget.organizationId == null) {
+      _showErrorSnackbar('Organization information not available');
+      return;
+    }
+
+    setState(() => _isGeneratingReport = true);
+
+    try {
+      // Fetch organization details if not already loaded
+      if (_organizationName == null) {
+        final orgResponse = await _organizationService.getOrganizationById(widget.organizationId!);
+        if (orgResponse.success && orgResponse.data != null) {
+          _organizationName = orgResponse.data!.name;
+          _organizationLogoUrl = orgResponse.data!.logoUrl;
+        } else {
+          throw Exception('Failed to load organization details');
+        }
+      }
+
+      final response = await _pdfReportService.generateEventParticipantsReport(
+        organizationName: _organizationName!,
+        eventName: widget.eventName,
+        organizationLogoUrl: _organizationLogoUrl,
+        participants: _participants,
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Izvještaj uspješno generisan'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      } else {
+        _showErrorSnackbar(response.message ?? 'Greška pri generisanju izvještaja');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackbar('Greška: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingReport = false);
+      }
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -124,17 +190,55 @@ class _EventParticipantsDetailScreenState
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadParticipants,
-      color: AppColors.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _participants.length,
-        itemBuilder: (context, index) {
-          final participant = _participants[index];
-          return _buildParticipantCard(participant);
-        },
-      ),
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadParticipants,
+            color: AppColors.primary,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _participants.length,
+              itemBuilder: (context, index) {
+                final participant = _participants[index];
+                return _buildParticipantCard(participant);
+              },
+            ),
+          ),
+        ),
+        // Generate report button
+        if (widget.organizationId != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: ElevatedButton.icon(
+              onPressed: _isGeneratingReport ? null : _generateReport,
+              icon: _isGeneratingReport
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.picture_as_pdf),
+              label: Text(_isGeneratingReport ? 'Generisanje...' : 'Generiši izvještaj'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
