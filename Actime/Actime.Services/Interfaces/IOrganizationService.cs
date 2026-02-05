@@ -13,5 +13,9 @@ namespace Actime.Services.Interfaces
         Task<Organization?> GetByUserIdAsync(int userId);
         Task<Organization?> GetByIdForUserAsync(int organizationId, int? currentUserId);
         Task<PagedResult<EventParticipation>> GetOrganizationParticipationsAsync(int organizationId, int page = 1, int perPage = 10);
+        Task<PagedResult<ParticipationByMonth>> GetOrganizationParticipationsByMonthAsync(int organizationId, int page = 1, int perPage = 10);
+        Task<PagedResult<ParticipationByYear>> GetOrganizationParticipationsByYearAsync(int organizationId, int page = 1, int perPage = 10);
+        Task<List<User>> GetParticipantsByMonthAsync(int organizationId, int month);
+        Task<List<User>> GetParticipantsByYearAsync(int organizationId, int year);
     }
 }

@@ -294,5 +294,123 @@ namespace Actime.Services.Services
                 TotalCount = totalCount
             };
         }
+
+        public async Task<Model.Common.PagedResult<Model.Entities.ParticipationByMonth>> GetOrganizationParticipationsByMonthAsync(int organizationId, int page = 1, int perPage = 10)
+        {
+            var participationsQuery = _context.Participations
+                .Include(p => p.Event)
+                .Where(p => p.Event.OrganizationId == organizationId && !p.IsDeleted && !p.Event.IsDeleted);
+
+            // Group by month only (not by year) in database
+            var grouped = await participationsQuery
+                .GroupBy(p => p.Event.Start.Month)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    ParticipantsCount = g.Count()
+                })
+                .OrderBy(x => x.Month)
+                .ToListAsync();
+
+            // Map to result model with month names (in memory)
+            var items = grouped.Select(g => new Model.Entities.ParticipationByMonth
+            {
+                Year = 0, // Not used when grouping by month only
+                Month = g.Month,
+                MonthName = GetMonth(g.Month),
+                ParticipantsCount = g.ParticipantsCount
+            }).ToList();
+
+            var totalCount = items.Count;
+            var skip = (page - 1) * perPage;
+            var pagedItems = items.Skip(skip).Take(perPage).ToList();
+
+            return new Model.Common.PagedResult<Model.Entities.ParticipationByMonth>
+            {
+                Items = pagedItems,
+                TotalCount = totalCount
+            };
+        }
+
+        private string GetMonth(int month)
+        {
+            return month switch
+            {
+                1 => "January",
+                2 => "February",
+                3 => "March",
+                4 => "April",
+                5 => "May",
+                6 => "June",
+                7 => "July",
+                8 => "August",
+                9 => "September",
+                10 => "October",
+                11 => "November",
+                12 => "December",
+                _ => "Unknown"
+            };
+        }
+
+        public async Task<Model.Common.PagedResult<Model.Entities.ParticipationByYear>> GetOrganizationParticipationsByYearAsync(int organizationId, int page = 1, int perPage = 10)
+        {
+            var participationsQuery = _context.Participations
+                .Include(p => p.Event)
+                .Where(p => p.Event.OrganizationId == organizationId && !p.IsDeleted && !p.Event.IsDeleted);
+
+            var grouped = await participationsQuery
+                .GroupBy(p => p.Event.Start.Year)
+                .Select(g => new Model.Entities.ParticipationByYear
+                {
+                    Year = g.Key,
+                    ParticipantsCount = g.Count()
+                })
+                .OrderByDescending(x => x.Year)
+                .ToListAsync();
+
+            var totalCount = grouped.Count;
+            var skip = (page - 1) * perPage;
+            var items = grouped.Skip(skip).Take(perPage).ToList();
+
+            return new Model.Common.PagedResult<Model.Entities.ParticipationByYear>
+            {
+                Items = items,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<List<Model.Entities.User>> GetParticipantsByMonthAsync(int organizationId, int month)
+        {
+            var users = await _context.Participations
+                .Include(p => p.Event)
+                .Include(p => p.User)
+                .Where(p => p.Event.OrganizationId == organizationId
+                    && p.Event.Start.Month == month
+                    && !p.IsDeleted
+                    && !p.Event.IsDeleted
+                    && !p.User.IsDeleted)
+                .Select(p => p.User)
+                .Distinct()
+                .ToListAsync();
+
+            return _mapper.Map<List<Model.Entities.User>>(users);
+        }
+
+        public async Task<List<Model.Entities.User>> GetParticipantsByYearAsync(int organizationId, int year)
+        {
+            var users = await _context.Participations
+                .Include(p => p.Event)
+                .Include(p => p.User)
+                .Where(p => p.Event.OrganizationId == organizationId
+                    && p.Event.Start.Year == year
+                    && !p.IsDeleted
+                    && !p.Event.IsDeleted
+                    && !p.User.IsDeleted)
+                .Select(p => p.User)
+                .Distinct()
+                .ToListAsync();
+
+            return _mapper.Map<List<Model.Entities.User>>(users);
+        }
     }
 }

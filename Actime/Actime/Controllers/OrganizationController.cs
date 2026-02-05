@@ -91,6 +91,38 @@ namespace Actime.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id:int}/participations/by-month")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PagedResult<ParticipationByMonth>>> GetOrganizationParticipationsByMonth(int id, [FromQuery] int page = 1, [FromQuery] int perPage = 10)
+        {
+            var result = await _organizationService.GetOrganizationParticipationsByMonthAsync(id, page, perPage);
+            return Ok(result);
+        }
+
+        [HttpGet("{id:int}/participations/by-year")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PagedResult<ParticipationByYear>>> GetOrganizationParticipationsByYear(int id, [FromQuery] int page = 1, [FromQuery] int perPage = 10)
+        {
+            var result = await _organizationService.GetOrganizationParticipationsByYearAsync(id, page, perPage);
+            return Ok(result);
+        }
+
+        [HttpGet("{id:int}/participants/month/{month:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<User>>> GetParticipantsByMonth(int id, int month)
+        {
+            var result = await _organizationService.GetParticipantsByMonthAsync(id, month);
+            return Ok(result);
+        }
+
+        [HttpGet("{id:int}/participants/year/{year:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<User>>> GetParticipantsByYear(int id, int year)
+        {
+            var result = await _organizationService.GetParticipantsByYearAsync(id, year);
+            return Ok(result);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
