@@ -77,6 +77,18 @@ namespace Actime.Services.Database
                 .HasForeignKey(s => s.LocationId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Event)
+                .WithMany()
+                .HasForeignKey(p => p.EventId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Location>()
                 .HasOne(l => l.Address)
                 .WithMany()
@@ -121,5 +133,6 @@ namespace Actime.Services.Database
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<GalleryImage> GalleryImages { get; set; }
+        public DbSet<Payment> Payments { get; set; }
     }
 }

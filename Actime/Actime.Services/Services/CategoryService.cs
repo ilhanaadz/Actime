@@ -36,5 +36,18 @@ namespace Actime.Services.Services
 
             return base.ApplyFilter(query, search);
         }
+
+        protected override async Task OnCreating(Category entity, CategoryRequest request)
+        {
+            var exists = await _context.Categories
+                .AnyAsync(c => c.Name.ToLower() == entity.Name.ToLower());
+
+            if (exists)
+            {
+                throw new InvalidOperationException($"Category with name '{entity.Name}' already exists.");
+            }
+
+            await base.OnCreating(entity, request);
+        }
     }
 }

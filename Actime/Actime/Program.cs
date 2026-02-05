@@ -32,6 +32,7 @@ builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IGalleryImageService, GalleryImageService>();
+builder.Services.AddTransient<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddSingleton<IEventRecommenderService, EventRecommenderService>();
@@ -49,6 +50,7 @@ builder.Services.AddHostedService<EventRecommenderBackgroundService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -146,7 +148,25 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new
+            {
+                message = "Validacija nije uspjela",
+                errors = errors
+            });
+        };
+    });
 builder.Services.AddHealthChecks();
 
 builder.Services.AddSignalR();

@@ -32,5 +32,20 @@ namespace Actime.Services.Services
 
             return base.ApplyFilter(query, search);
         }
+
+        protected override async Task OnCreating(Address entity, AddressRequest request)
+        {
+            var exists = await _context.Addresses
+                .AnyAsync(a => a.Street.ToLower() == entity.Street.ToLower()
+                            && a.CityId == entity.CityId);
+
+            if (exists)
+            {
+                var city = await _context.Cities.FindAsync(entity.CityId);
+                throw new InvalidOperationException($"Address '{entity.Street}' in city '{city?.Name}' already exists.");
+            }
+
+            await base.OnCreating(entity, request);
+        }
     }
 }

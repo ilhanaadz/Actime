@@ -28,5 +28,18 @@ namespace Actime.Services.Services
 
             return base.ApplyFilter(query, search);
         }
+
+        protected override async Task OnCreating(City entity, CityRequest request)
+        {
+            var exists = await _context.Cities
+                .AnyAsync(c => c.Name.ToLower() == entity.Name.ToLower());
+
+            if (exists)
+            {
+                throw new InvalidOperationException($"City with name '{entity.Name}' already exists.");
+            }
+
+            await base.OnCreating(entity, request);
+        }
     }
 }
