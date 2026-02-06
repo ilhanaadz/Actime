@@ -213,7 +213,10 @@ class ClubMemberViewScreen extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Membership cancelled')),
+                  const SnackBar(
+                    content: Text('Članstvo je uspješno otkazano'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
               },
               child: const Text(

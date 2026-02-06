@@ -9,6 +9,10 @@ class Validators {
     r'^\+?[0-9\s\-]{8,15}$',
   );
 
+  static final RegExp _usernameRegex = RegExp(
+    r'^[a-zA-Z0-9_]+$',
+  );
+
   /// Validira da polje nije prazno
   static String? required(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
@@ -22,6 +26,21 @@ class Validators {
     if (value == null || value.isEmpty) return null; // Let required handle empty
     if (!_emailRegex.hasMatch(value.trim())) {
       return 'Unesite validnu email adresu (npr. korisnik@primjer.com)';
+    }
+    return null;
+  }
+
+  /// Validira username format (samo slova, brojevi i donja crta)
+  static String? username(String? value) {
+    if (value == null || value.isEmpty) return null; // Let required handle empty
+    if (value.length < 3) {
+      return 'Korisničko ime mora imati najmanje 3 znaka';
+    }
+    if (value.length > 50) {
+      return 'Korisničko ime može imati maksimalno 50 znakova';
+    }
+    if (!_usernameRegex.hasMatch(value.trim())) {
+      return 'Korisničko ime može sadržavati samo slova, brojeve i donju crtu';
     }
     return null;
   }
@@ -145,6 +164,39 @@ class Validators {
     );
     if (!urlRegex.hasMatch(value)) {
       return 'Unesite validan URL';
+    }
+    return null;
+  }
+
+  /// Validira IBAN format (za bankarske račune)
+  static String? iban(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final cleaned = value.replaceAll(RegExp(r'\s'), '');
+    final ibanRegex = RegExp(r'^[A-Z]{2}\d{2}[A-Z0-9]+$');
+    if (!ibanRegex.hasMatch(cleaned) || cleaned.length < 15 || cleaned.length > 34) {
+      return 'Unesite validan IBAN (npr. BA391234567890123456)';
+    }
+    return null;
+  }
+
+  /// Validira PDV/PIB broj
+  static String? taxId(String? value) {
+    if (value == null || value.isEmpty) return null;
+    if (value.length < 12 || value.length > 13) {
+      return 'Unesite validan broj (12-13 cifara)';
+    }
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
+      return 'PIB može sadržavati samo brojeve';
+    }
+    return null;
+  }
+
+  /// Validira pozitivan cijeli broj
+  static String? positiveInteger(String? value, String fieldName) {
+    if (value == null || value.isEmpty) return null;
+    final number = int.tryParse(value);
+    if (number == null || number <= 0) {
+      return '$fieldName mora biti pozitivan cijeli broj';
     }
     return null;
   }

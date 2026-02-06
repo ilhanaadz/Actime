@@ -244,6 +244,7 @@ class ActimeTextFormField extends StatelessWidget {
             color: AppColors.red,
             fontSize: 12,
           ),
+          errorMaxLines: 3,
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.borderLight),
             borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
@@ -298,6 +299,7 @@ class ActimeTextFormField extends StatelessWidget {
           color: AppColors.red,
           fontSize: 12,
         ),
+        errorMaxLines: 3,
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.borderLight),
         ),

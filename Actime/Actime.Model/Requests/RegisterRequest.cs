@@ -4,6 +4,10 @@ namespace Actime.Model.Requests
 {
     public class RegisterRequest
     {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Ime i prezime je obavezno")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Ime i prezime mora imati između 2 i 100 znakova")]
+        public required string Name { get; set; }
+
         [Required(AllowEmptyStrings = false, ErrorMessage = "Korisničko ime je obavezno")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Korisničko ime mora imati između 3 i 50 znakova")]
         [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Korisničko ime može sadržavati samo slova, brojeve i donju crtu")]

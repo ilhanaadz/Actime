@@ -3,7 +3,10 @@ import '../components/admin_layout.dart';
 import '../components/pagination_widget.dart';
 import '../components/search_sort_header.dart';
 import '../components/delete_confirmation_dialog.dart';
-import '../components/input_dialog.dart';
+import '../components/app_text_field.dart';
+import '../components/app_button.dart';
+import '../constants/constants.dart';
+import '../utils/utils.dart';
 import '../services/services.dart';
 import '../models/models.dart';
 
@@ -87,13 +90,16 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category "$name" added successfully')),
+          SnackBar(
+            content: Text('Kategorija "$name" uspješno dodana'),
+            backgroundColor: Colors.green,
+          ),
         );
         _loadCategories();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message ?? 'Failed to create category'),
+            content: Text(response.message ?? 'Greška pri dodavanju kategorije'),
             backgroundColor: Colors.red,
           ),
         );
@@ -125,13 +131,16 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category updated to "$newName"')),
+          SnackBar(
+            content: Text('Kategorija uspješno ažurirana'),
+            backgroundColor: Colors.green,
+          ),
         );
         _loadCategories();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message ?? 'Failed to update category'),
+            content: Text(response.message ?? 'Greška pri ažuriranju kategorije'),
             backgroundColor: Colors.red,
           ),
         );
@@ -168,13 +177,16 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category "${category.name}" deleted successfully')),
+          SnackBar(
+            content: Text('Kategorija "${category.name}" uspješno obrisana'),
+            backgroundColor: Colors.green,
+          ),
         );
         _loadCategories();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message ?? 'Failed to delete category'),
+            content: Text(response.message ?? 'Greška pri brisanju kategorije'),
             backgroundColor: Colors.red,
           ),
         );
@@ -439,11 +451,9 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   }
 
   Future<void> _showAddCategoryDialog() async {
-    final categoryName = await InputDialog.show(
+    final categoryName = await CategoryFormDialog.show(
       context: context,
-      title: 'Add Category',
-      label: 'Category Name',
-      confirmText: 'Add',
+      isEdit: false,
     );
 
     if (categoryName != null && categoryName.isNotEmpty && mounted) {
@@ -452,12 +462,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   }
 
   Future<void> _showEditCategoryDialog(Category category) async {
-    final categoryName = await InputDialog.show(
+    final categoryName = await CategoryFormDialog.show(
       context: context,
-      title: 'Edit Category',
-      label: 'Category Name',
-      initialValue: category.name,
-      confirmText: 'Save',
+      initialName: category.name,
+      isEdit: true,
     );
 
     if (categoryName != null && categoryName.isNotEmpty && mounted) {
@@ -470,5 +478,95 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+// Category Form Dialog with Validation
+class CategoryFormDialog extends StatefulWidget {
+  final String? initialName;
+  final bool isEdit;
+
+  const CategoryFormDialog({
+    super.key,
+    this.initialName,
+    this.isEdit = false,
+  });
+
+  static Future<String?> show({
+    required BuildContext context,
+    String? initialName,
+    bool isEdit = false,
+  }) {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => CategoryFormDialog(
+        initialName: initialName,
+        isEdit: isEdit,
+      ),
+    );
+  }
+
+  @override
+  State<CategoryFormDialog> createState() => _CategoryFormDialogState();
+}
+
+class _CategoryFormDialogState extends State<CategoryFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _handleSubmit() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, _nameController.text.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.isEdit ? 'Uredi kategoriju' : 'Nova kategorija'),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: _formKey,
+          child: AppTextField(
+            controller: _nameController,
+            labelText: 'Naziv kategorije',
+            hintText: 'Unesite naziv',
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            validator: Validators.compose([
+              Validators.requiredField('Naziv'),
+              Validators.minLengthField(2, 'Naziv'),
+              Validators.maxLengthField(100, 'Naziv'),
+            ]),
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            onFieldSubmitted: (_) => _handleSubmit(),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Odustani'),
+        ),
+        AppButton(
+          text: widget.isEdit ? 'Spremi' : 'Dodaj',
+          onPressed: _handleSubmit,
+          size: AppButtonSize.small,
+        ),
+      ],
+    );
   }
 }

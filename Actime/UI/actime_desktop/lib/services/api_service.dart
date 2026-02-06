@@ -23,12 +23,14 @@ class ApiResponse<T> {
   final T? data;
   final String? message;
   final int statusCode;
+  final Map<String, dynamic>? errors;
 
   ApiResponse({
     required this.success,
     this.data,
     this.message,
     required this.statusCode,
+    this.errors,
   });
 }
 
@@ -177,10 +179,16 @@ class ApiService {
 
   ApiResponse<T> _handleError<T>(dynamic error) {
     if (error is ApiException) {
+      Map<String, dynamic>? errors;
+      if (error.data is Map && error.data.containsKey('errors')) {
+        errors = error.data['errors'];
+      }
+
       return ApiResponse<T>(
         success: false,
         message: error.message,
         statusCode: error.statusCode,
+        errors: errors,
       );
     }
 

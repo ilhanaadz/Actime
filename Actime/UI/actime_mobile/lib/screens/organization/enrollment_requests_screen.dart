@@ -65,7 +65,10 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
       _loadEnrollments();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request approved')),
+          const SnackBar(
+            content: Text('Zahtjev je uspješno odobren'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     }
@@ -77,7 +80,10 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
       _loadEnrollments();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request rejected')),
+          const SnackBar(
+            content: Text('Zahtjev je uspješno odbijen'),
+            backgroundColor: Colors.orange,
+          ),
         );
       }
     }

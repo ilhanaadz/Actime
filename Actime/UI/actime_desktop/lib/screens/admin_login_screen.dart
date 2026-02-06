@@ -3,6 +3,7 @@ import '../constants/constants.dart';
 import '../components/app_text_field.dart';
 import '../components/app_button.dart';
 import '../services/services.dart';
+import '../utils/utils.dart';
 import 'admin_dashboard_screen.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -13,15 +14,20 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+  Map<String, String> _fieldErrors = {};
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showError('Please fill in all fields');
+    // Clear previous API errors
+    setState(() => _fieldErrors = {});
+
+    // Frontend validation
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -41,11 +47,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
         );
       } else {
-        _showError(response.message ?? 'Login failed. Please try again.');
+        // Check for field-level errors
+        if (response.errors != null && response.errors!.isNotEmpty) {
+          setState(() {
+            _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
+          });
+        } else {
+          // Generic error in SnackBar
+          _showError(response.message ?? 'Prijava nije uspjela. Provjerite podatke.');
+        }
       }
     } catch (e) {
       if (mounted) {
-        _showError('Connection error. Please check your internet connection.');
+        _showError('Greška pri povezivanju. Provjerite internet vezu.');
       }
     } finally {
       if (mounted) {
@@ -144,43 +158,76 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                   const SizedBox(height: AppDimensions.spacingXXL),
 
-                  // Email Field
-                  AppTextField(
-                    controller: _emailController,
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: Icons.email_outlined,
-                  ),
+                  // Form with validation
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Email Field
+                        AppTextField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Unesite email',
+                          prefixIcon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Email'),
+                            Validators.email,
+                          ]),
+                          errorText: _fieldErrors['email'],
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          onChanged: (value) {
+                            if (_fieldErrors['email'] != null) {
+                              setState(() => _fieldErrors.remove('email'));
+                            }
+                          },
+                        ),
 
-                  const SizedBox(height: AppDimensions.spacingXL),
+                        const SizedBox(height: AppDimensions.spacingXL),
 
-                  // Password Field
-                  AppTextField(
-                    controller: _passwordController,
-                    labelText: 'Password',
-                    hintText: 'Enter your password',
-                    prefixIcon: Icons.lock_outline,
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.grey600,
-                      ),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
+                        // Password Field
+                        AppTextField(
+                          controller: _passwordController,
+                          labelText: 'Password',
+                          hintText: 'Unesite lozinku',
+                          prefixIcon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          validator: Validators.requiredField('Lozinka'),
+                          errorText: _fieldErrors['password'],
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          onFieldSubmitted: (_) {
+                            if (!_isLoading) _handleLogin();
+                          },
+                          onChanged: (value) {
+                            if (_fieldErrors['password'] != null) {
+                              setState(() => _fieldErrors.remove('password'));
+                            }
+                          },
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: AppColors.grey600,
+                            ),
+                            onPressed: () {
+                              setState(() => _obscurePassword = !_obscurePassword);
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: AppDimensions.spacingXXL),
+
+                        // Sign In Button
+                        AppButton(
+                          text: _isLoading ? 'Signing In...' : 'Sign In',
+                          onPressed: _isLoading ? null : _handleLogin,
+                          fullWidth: true,
+                          size: AppButtonSize.large,
+                          isLoading: _isLoading,
+                        ),
+                      ],
                     ),
-                  ),
-
-                  const SizedBox(height: AppDimensions.spacingXXL),
-
-                  // Sign In Button
-                  AppButton(
-                    text: _isLoading ? 'Signing In...' : 'Sign In',
-                    onPressed: _isLoading ? null : _handleLogin,
-                    fullWidth: true,
-                    size: AppButtonSize.large,
-                    isLoading: _isLoading,
                   ),
                 ],
               ),

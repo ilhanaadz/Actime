@@ -46,12 +46,16 @@ namespace Actime.Services.Services
             if (existingUser != null)
                 throw new Exception("User with this email already exists");
 
-            var nameParts = request.Username.Trim().Split(' ', 2);
+            var existingUsername = await _userManager.FindByNameAsync(request.Username);
+            if (existingUsername != null)
+                throw new Exception("User with this username already exists");
+
+            var nameParts = request.Name.Trim().Split(' ', 2);
 
             var user = new User
             {
                 Email = request.Email,
-                UserName = request.Email,
+                UserName = request.Username,
                 FirstName = nameParts[0],
                 LastName = nameParts.Length > 1 ? nameParts[1] : null,
                 CreatedAt = DateTime.UtcNow,
@@ -226,7 +230,7 @@ namespace Actime.Services.Services
 
                 var organization = new Organization
                 {
-                    Name = user.UserName!,
+                    Name = request.Name,
                     Email = user.Email!,
                     Description = request.Description,
                     PhoneNumber = request.PhoneNumber,

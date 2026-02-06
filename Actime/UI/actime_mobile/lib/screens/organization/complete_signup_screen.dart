@@ -15,20 +15,48 @@ class CompleteSignUpScreen extends StatefulWidget {
 
 class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
   final _categoryService = CategoryService();
+  final _authService = AuthService();
+  final _cityService = CityService();
+  final _addressService = AddressService();
   final _formKey = GlobalKey<FormState>();
 
+  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
+  final _streetController = TextEditingController();
+  final _postalCodeController = TextEditingController();
   final _descriptionController = TextEditingController();
 
   List<Category> _categories = [];
+  List<City> _cities = [];
   String? _selectedCategoryId;
+  String? _selectedCityId;
   bool _isLoadingCategories = true;
+  bool _isLoadingCities = true;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _loadCities();
+  }
+
+  Future<void> _loadCities() async {
+    try {
+      final cities = await _cityService.getAllCities();
+      if (mounted) {
+        setState(() {
+          _cities = cities;
+          _isLoadingCities = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingCities = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -55,10 +83,81 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
     }
   }
 
+  Future<void> _handleComplete() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      // First, create the address
+      final addressResponse = await _addressService.createAddress(
+        street: _streetController.text.trim(),
+        postalCode: _postalCodeController.text.trim(),
+        cityId: int.parse(_selectedCityId!),
+      );
+
+      if (!mounted) return;
+
+      if (!addressResponse.success || addressResponse.data == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(addressResponse.message ?? 'Greška pri kreiranju adrese'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+        return;
+      }
+
+      // Then complete organization with the created address
+      final request = CompleteOrganizationRequest(
+        name: _nameController.text.trim(),
+        categoryId: int.parse(_selectedCategoryId!),
+        phoneNumber: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        addressId: addressResponse.data!.id,
+      );
+
+      final response = await _authService.completeOrganization(request);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const OrganizationProfileScreen()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Greška pri završavanju registracije'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Došlo je do greške: $e'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _nameController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
+    _streetController.dispose();
+    _postalCodeController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -139,6 +238,33 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
             ),
             const SizedBox(height: 32),
 
+            // Organization Name
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Ime organizacije',
+                hintText: 'Unesite ime organizacije',
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0D7C8C)),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+              ),
+              validator: Validators.compose([
+                Validators.requiredField('Ime organizacije'),
+                Validators.minLengthField(2, 'Ime organizacije'),
+              ]),
+            ),
+            const SizedBox(height: 24),
+
             // Category Dropdown
             _isLoadingCategories
                 ? const Padding(
@@ -207,12 +333,55 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Address
+            // City Dropdown
+            _isLoadingCities
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF0D7C8C),
+                      ),
+                    ),
+                  )
+                : DropdownButtonFormField<String>(
+                    value: _selectedCityId,
+                    decoration: InputDecoration(
+                      labelText: 'Grad',
+                      hintText: 'Odaberite grad',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF0D7C8C)),
+                      ),
+                    ),
+                    items: _cities.map((city) {
+                      return DropdownMenuItem<String>(
+                        value: city.id.toString(),
+                        child: Text(city.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCityId = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Grad je obavezan';
+                      }
+                      return null;
+                    },
+                  ),
+            const SizedBox(height: 24),
+
+            // Street
             TextFormField(
-              controller: _addressController,
+              controller: _streetController,
               decoration: InputDecoration(
-                labelText: 'Adresa',
-                hintText: 'Unesite adresu',
+                labelText: 'Ulica',
+                hintText: 'Unesite ulicu i broj',
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[300]!),
@@ -227,6 +396,34 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                   borderSide: BorderSide(color: AppColors.red),
                 ),
               ),
+              validator: Validators.compose([
+                Validators.requiredField('Ulica'),
+                Validators.minLengthField(2, 'Ulica'),
+              ]),
+            ),
+            const SizedBox(height: 24),
+
+            // Postal Code
+            TextFormField(
+              controller: _postalCodeController,
+              decoration: InputDecoration(
+                labelText: 'Poštanski broj',
+                hintText: 'Unesite poštanski broj',
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0D7C8C)),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+                focusedErrorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.red),
+                ),
+              ),
+              validator: Validators.requiredField('Poštanski broj'),
             ),
             const SizedBox(height: 24),
 
@@ -261,19 +458,7 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                 width: 200,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Validate form before proceeding
-                    if (_formKey.currentState!.validate()) {
-                      // Clear navigation stack and go to organization profile
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OrganizationProfileScreen(),
-                        ),
-                        (route) => false,
-                      );
-                    }
-                  },
+                  onPressed: _isSubmitting ? null : _handleComplete,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D7C8C),
                     shape: RoundedRectangleBorder(
@@ -281,14 +466,23 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Complete',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Complete',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),

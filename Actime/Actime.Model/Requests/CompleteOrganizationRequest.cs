@@ -4,6 +4,10 @@ namespace Actime.Model.Requests
 {
     public class CompleteOrganizationRequest
     {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Ime organizacije je obavezno")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Ime organizacije mora imati između 2 i 100 znakova")]
+        public required string Name { get; set; }
+
         [Required(ErrorMessage = "Kategorija je obavezna")]
         [Range(1, int.MaxValue, ErrorMessage = "Odaberite kategoriju")]
         public int CategoryId { get; set; }

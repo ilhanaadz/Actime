@@ -21,6 +21,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -32,6 +33,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -50,6 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final request = RegisterRequest(
         name: _nameController.text.trim(),
+        username: _usernameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
         role: _isOrganization ? UserRole.organization : UserRole.user,
@@ -144,6 +147,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           validator: Validators.compose([
                             Validators.requiredField('Ime i prezime'),
                             Validators.minLengthField(2, 'Ime i prezime'),
+                          ]),
+                          errorText: _fieldErrors['name'],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLarge),
+                        ActimeTextFormField(
+                          controller: _usernameController,
+                          labelText: 'Korisničko ime',
+                          hintText: 'Unesite korisničko ime',
+                          textInputAction: TextInputAction.next,
+                          validator: Validators.compose([
+                            Validators.requiredField('Korisničko ime'),
+                            Validators.username,
                           ]),
                           errorText: _fieldErrors['username'],
                         ),
