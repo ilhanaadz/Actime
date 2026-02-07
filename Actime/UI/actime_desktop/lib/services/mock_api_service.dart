@@ -197,16 +197,16 @@ class MockApiService {
   ];
 
   // AUTH
-  Future<ApiResponse<AuthResponse>> login(String email, String password) async {
+  Future<ApiResponse<AuthResponse>> login(String emailOrUsername, String password) async {
     await _simulateDelay();
 
     // Accept any credentials for mock
-    if (email.isNotEmpty && password.isNotEmpty) {
+    if (emailOrUsername.isNotEmpty && password.isNotEmpty) {
       return ApiResponse(
         success: true,
         data: AuthResponse(
           userId: 0,
-          email: email,
+          email: emailOrUsername,
           firstName: 'Admin',
           lastName: 'User',
           accessToken: 'mock_token_${DateTime.now().millisecondsSinceEpoch}',

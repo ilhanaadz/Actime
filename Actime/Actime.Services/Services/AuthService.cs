@@ -83,13 +83,22 @@ namespace Actime.Services.Services
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            User? user;
+            if (request.EmailOrUsername.Contains('@'))
+            {
+                user = await _userManager.FindByEmailAsync(request.EmailOrUsername);
+            }
+            else
+            {
+                user = await _userManager.FindByNameAsync(request.EmailOrUsername);
+            }
+
             if (user == null || user.IsDeleted)
-                throw new Exception("Invalid email or password");
+                throw new Exception("Invalid email/username or password");
 
             var validPassword = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!validPassword)
-                throw new Exception("Invalid email or password");
+                throw new Exception("Invalid email/username or password");
 
             if (!user.EmailConfirmed)
                 throw new Exception("Please confirm your email before logging in");

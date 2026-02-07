@@ -15,7 +15,7 @@ class AdminLoginScreen extends StatefulWidget {
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   Map<String, String> _fieldErrors = {};
@@ -33,7 +33,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
     try {
       final response = await _authService.login(
-        email: _emailController.text.trim(),
+        emailOrUsername: _emailOrUsernameController.text.trim(),
         password: _passwordController.text,
       );
 
@@ -165,23 +165,20 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Email Field
+                        // Email or Username Field
                         AppTextField(
-                          controller: _emailController,
-                          labelText: 'Email',
-                          hintText: 'Unesite email',
-                          prefixIcon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
+                          controller: _emailOrUsernameController,
+                          labelText: 'Email ili korisničko ime',
+                          hintText: 'Unesite email ili korisničko ime',
+                          prefixIcon: Icons.person_outline,
+                          keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
-                          validator: Validators.compose([
-                            Validators.requiredField('Email'),
-                            Validators.email,
-                          ]),
-                          errorText: _fieldErrors['email'],
+                          validator: Validators.requiredField('Email ili korisničko ime'),
+                          errorText: _fieldErrors['emailOrUsername'],
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           onChanged: (value) {
-                            if (_fieldErrors['email'] != null) {
-                              setState(() => _fieldErrors.remove('email'));
+                            if (_fieldErrors['emailOrUsername'] != null) {
+                              setState(() => _fieldErrors.remove('emailOrUsername'));
                             }
                           },
                         ),
@@ -242,7 +239,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _emailOrUsernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

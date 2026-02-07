@@ -17,12 +17,12 @@ class AuthService {
   User? get currentUser => _currentUser;
 
   Future<ApiResponse<AuthResponse>> login({
-    required String email,
+    required String emailOrUsername,
     required String password,
   }) async {
     // Use mock API if enabled
     if (ApiConfig.useMockApi) {
-      final response = await _mockService.login(email, password);
+      final response = await _mockService.login(emailOrUsername, password);
       if (response.success && response.data != null) {
         await _tokenService.saveTokens(
           accessToken: response.data!.accessToken,
@@ -37,7 +37,7 @@ class AuthService {
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.login,
       body: {
-        'Email': email,
+        'EmailOrUsername': emailOrUsername,
         'Password': password,
       },
       requiresAuth: false,
