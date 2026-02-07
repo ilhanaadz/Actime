@@ -18,9 +18,13 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   final _searchController = TextEditingController();
   final _organizationService = OrganizationService();
   final _galleryService = GalleryService();
+  final _categoryService = CategoryService();
 
   Organization? _selectedOrg;
   List<GalleryImage> _galleryImages = [];
+  List<Category> _categories = [];
+  int? _selectedCategoryId;
+  String? _emailVerificationFilter; // 'all', 'verified', 'pending'
   int _currentPage = 1;
   int _totalPages = 1;
   String _sortBy = 'name';
@@ -31,8 +35,22 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     _loadOrganizations();
     _searchController.addListener(_onSearchChanged);
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final response = await _categoryService.getAllCategories();
+      if (response.success && response.data != null) {
+        setState(() {
+          _categories = response.data!;
+        });
+      }
+    } catch (e) {
+      // Categories are non-critical - fail silently
+    }
   }
 
   void _onSearchChanged() {
@@ -49,11 +67,20 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
     });
 
     try {
+      bool? emailConfirmed;
+      if (_emailVerificationFilter == 'verified') {
+        emailConfirmed = true;
+      } else if (_emailVerificationFilter == 'pending') {
+        emailConfirmed = false;
+      }
+
       final response = await _organizationService.getOrganizations(
         page: _currentPage,
         perPage: 10,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
+        categoryId: _selectedCategoryId,
         sortBy: _sortBy,
+        emailConfirmed: emailConfirmed,
       );
 
       if (!mounted) return;
@@ -223,6 +250,135 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
           },
         ),
 
+        // Category Filter
+        if (_categories.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.filter_list, size: 20, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Filter by Category:',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    DropdownButton<int?>(
+                      value: _selectedCategoryId,
+                      hint: const Text('All Categories'),
+                      underline: Container(),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('All Categories'),
+                        ),
+                        ..._categories.map((category) => DropdownMenuItem<int?>(
+                              value: category.id,
+                              child: Text(category.name),
+                            )),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                          _currentPage = 1;
+                        });
+                        _loadOrganizations();
+                      },
+                    ),
+                    if (_selectedCategoryId != null) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategoryId = null;
+                            _currentPage = 1;
+                          });
+                          _loadOrganizations();
+                        },
+                        tooltip: 'Clear filter',
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+        // Email Verification Filter
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          color: Colors.white,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.verified_user, size: 20, color: Colors.grey),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Filter by Email Status:',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  DropdownButton<String?>(
+                    value: _emailVerificationFilter,
+                    hint: const Text('All Organizations'),
+                    underline: Container(),
+                    items: const [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All Organizations'),
+                      ),
+                      DropdownMenuItem<String?>(
+                        value: 'verified',
+                        child: Text('Verified Only'),
+                      ),
+                      DropdownMenuItem<String?>(
+                        value: 'pending',
+                        child: Text('Pending Only'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _emailVerificationFilter = value;
+                        _currentPage = 1;
+                      });
+                      _loadOrganizations();
+                    },
+                  ),
+                  if (_emailVerificationFilter != null) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          _emailVerificationFilter = null;
+                          _currentPage = 1;
+                        });
+                        _loadOrganizations();
+                      },
+                      tooltip: 'Clear filter',
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+
         // Organizations List
         Expanded(
           child: _isLoading
@@ -346,15 +502,54 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          org.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0D7C8C),
-                          ),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                org.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0D7C8C),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: org.emailConfirmed ? Colors.green[50] : Colors.orange[50],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: org.emailConfirmed ? Colors.green : Colors.orange,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    org.emailConfirmed ? Icons.verified : Icons.pending,
+                                    size: 12,
+                                    color: org.emailConfirmed ? Colors.green : Colors.orange,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    org.emailConfirmed ? 'Verified' : 'Pending',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: org.emailConfirmed ? Colors.green[800] : Colors.orange[800],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(width: 12),
                       Row(
                         children: [
                           const Icon(Icons.event, size: 16, color: Colors.grey),
@@ -367,6 +562,32 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
                       ),
                     ],
                   ),
+
+                  if (org.categoryName != null) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D7C8C).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.category, size: 12, color: const Color(0xFF0D7C8C)),
+                          const SizedBox(width: 4),
+                          Text(
+                            org.categoryName!,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF0D7C8C),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
 
                   if (org.phone != null) ...[
                     const SizedBox(height: 8),
@@ -539,11 +760,67 @@ class _AdminOrganizationsScreenState extends State<AdminOrganizationsScreen> {
               color: Color(0xFF0D7C8C),
             ),
           ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: org.emailConfirmed ? Colors.green[50] : Colors.orange[50],
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: org.emailConfirmed ? Colors.green : Colors.orange,
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  org.emailConfirmed ? Icons.verified : Icons.pending,
+                  size: 18,
+                  color: org.emailConfirmed ? Colors.green : Colors.orange,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  org.emailConfirmed ? 'Email Verified' : 'Email Pending Verification',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: org.emailConfirmed ? Colors.green[800] : Colors.orange[800],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (org.email != null) ...[
             const SizedBox(height: 8),
             Text(
               org.email!,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+          if (org.categoryName != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D7C8C).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.category, size: 16, color: Color(0xFF0D7C8C)),
+                  const SizedBox(width: 6),
+                  Text(
+                    org.categoryName!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF0D7C8C),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 16),

@@ -19,6 +19,7 @@ class OrganizationService {
     String? sortBy,
     String? sortOrder,
     int? categoryId,
+    bool? emailConfirmed,
   }) async {
     // Use perPage if provided, otherwise use pageSize
     final effectivePageSize = perPage ?? pageSize;
@@ -49,6 +50,9 @@ class OrganizationService {
     }
     if (categoryId != null) {
       queryParams['CategoryId'] = categoryId.toString();
+    }
+    if (emailConfirmed != null) {
+      queryParams['EmailConfirmed'] = emailConfirmed.toString();
     }
 
     return await _apiService.get<PaginatedResponse<Organization>>(

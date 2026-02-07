@@ -14,11 +14,13 @@ class Organization {
   final DateTime? lastModifiedAt;
 
   // Additional properties from API responses
+  final String? categoryName;
   final String? address;
   final String? website;
   final List<String>? gallery;
   final int? eventsCount;
   final int? membersCount;
+  final bool emailConfirmed;
 
   Organization({
     required this.id,
@@ -32,11 +34,13 @@ class Organization {
     required this.addressId,
     required this.createdAt,
     this.lastModifiedAt,
+    this.categoryName,
     this.address,
     this.website,
     this.gallery,
     this.eventsCount,
     this.membersCount,
+    this.emailConfirmed = false,
   });
 
   /// Alias for phoneNumber (used in admin screens)
@@ -58,11 +62,13 @@ class Organization {
       addressId: _parseInt(json['AddressId'] ?? json['addressId']) ?? 0,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       lastModifiedAt: _parseDateTime(json['LastModifiedAt'] ?? json['lastModifiedAt']),
+      categoryName: json['CategoryName'] as String? ?? json['categoryName'] as String?,
       address: json['Address'] as String? ?? json['address'] as String?,
       website: json['Website'] as String? ?? json['website'] as String?,
       gallery: _parseStringList(json['Gallery'] ?? json['gallery']),
       eventsCount: _parseInt(json['EventsCount'] ?? json['eventsCount']),
       membersCount: _parseInt(json['MembersCount'] ?? json['membersCount']),
+      emailConfirmed: json['EmailConfirmed'] as bool? ?? json['emailConfirmed'] as bool? ?? false,
     );
   }
 
@@ -101,11 +107,13 @@ class Organization {
       'AddressId': addressId,
       'CreatedAt': createdAt.toIso8601String(),
       'LastModifiedAt': lastModifiedAt?.toIso8601String(),
+      'CategoryName': categoryName,
       'Address': address,
       'Website': website,
       'Gallery': gallery,
       'EventsCount': eventsCount,
       'MembersCount': membersCount,
+      'EmailConfirmed': emailConfirmed,
     };
   }
 
@@ -121,11 +129,13 @@ class Organization {
     int? addressId,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
+    String? categoryName,
     String? address,
     String? website,
     List<String>? gallery,
     int? eventsCount,
     int? membersCount,
+    bool? emailConfirmed,
   }) {
     return Organization(
       id: id ?? this.id,
@@ -139,11 +149,13 @@ class Organization {
       addressId: addressId ?? this.addressId,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
+      categoryName: categoryName ?? this.categoryName,
       address: address ?? this.address,
       website: website ?? this.website,
       gallery: gallery ?? this.gallery,
       eventsCount: eventsCount ?? this.eventsCount,
       membersCount: membersCount ?? this.membersCount,
+      emailConfirmed: emailConfirmed ?? this.emailConfirmed,
     );
   }
 

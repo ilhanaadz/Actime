@@ -5,7 +5,7 @@ using Actime.Model.SearchObjects;
 
 namespace Actime.Services.Interfaces
 {
-    public interface IOrganizationService : IService<Organization, TextSearchObject>
+    public interface IOrganizationService : IService<Organization, OrganizationSearchObject>
     {
         Task<Organization> UpdateAsync(int organizationId, int userId, OrganizationUpdateRequest request);
         Task SoftDeleteAsync(int organizationId, int deletedByUserId);

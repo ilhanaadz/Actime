@@ -33,7 +33,7 @@ namespace Actime.Controllers
         public async Task<ActionResult> GetStats()
         {
             var users = await _userService.GetAsync(new Model.SearchObjects.UserSearchObject());
-            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.TextSearchObject());
+            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.OrganizationSearchObject());
             var events = await _eventService.GetAsync(new Model.SearchObjects.EventSearchObject());
 
             var stats = new
@@ -49,7 +49,7 @@ namespace Actime.Controllers
         [HttpGet("users-per-organization")]
         public async Task<ActionResult> GetUsersPerOrganization()
         {
-            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.TextSearchObject());
+            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.OrganizationSearchObject());
             var memberships = await _membershipService.GetAsync(new Model.SearchObjects.MembershipSearchObject());
             var participations = await _participationService.GetAsync(new Model.SearchObjects.ParticipationSearchObject());
             var events = await _eventService.GetAsync(new Model.SearchObjects.EventSearchObject());

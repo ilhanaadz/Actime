@@ -20,5 +20,6 @@
         public int EventsCount { get; set; }
         public bool IsMember { get; set; }
         public int? MembershipStatusId { get; set; }
+        public bool EmailConfirmed { get; set; }
     }
 }

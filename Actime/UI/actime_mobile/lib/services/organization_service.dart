@@ -15,13 +15,14 @@ class OrganizationService {
   final MockApiService _mockService = MockApiService();
 
   /// Get organizations (paginated)
-  /// Backend uses TextSearchObject for filtering
+  /// Backend uses OrganizationSearchObject for filtering
   Future<ApiResponse<PaginatedResponse<Organization>>> getOrganizations({
     int page = 1,
     int pageSize = 10,
     int? perPage,
     String? text,
     String? search,
+    int? categoryId,
     String? sortBy,
     bool sortDescending = false,
     bool includeTotalCount = true,
@@ -45,6 +46,7 @@ class OrganizationService {
         'PageSize': effectivePageSize.toString(),
         'IncludeTotalCount': includeTotalCount.toString(),
         if (effectiveSearch != null && effectiveSearch.isNotEmpty) 'Text': effectiveSearch,
+        if (categoryId != null) 'CategoryId': categoryId.toString(),
         if (sortBy != null) 'SortBy': sortBy,
         'SortDescending': sortDescending.toString(),
       },

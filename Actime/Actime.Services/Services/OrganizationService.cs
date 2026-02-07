@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Actime.Services.Services
 {
-    public class OrganizationService : BaseService<Model.Entities.Organization, TextSearchObject, Organization>, IOrganizationService
+    public class OrganizationService : BaseService<Model.Entities.Organization, OrganizationSearchObject, Organization>, IOrganizationService
     {
         public OrganizationService(ActimeContext context, IMapper mapper) : base(context, mapper)
         {
@@ -35,9 +35,9 @@ namespace Actime.Services.Services
             return dto;
         }
 
-        public override async Task<Model.Common.PagedResult<Model.Entities.Organization>> GetAsync(TextSearchObject search)
+        public override async Task<Model.Common.PagedResult<Model.Entities.Organization>> GetAsync(OrganizationSearchObject search)
         {
-            search ??= new TextSearchObject();
+            search ??= new OrganizationSearchObject();
 
             var query = _context.Set<Organization>().AsQueryable();
             query = ApplyFilter(query, search);
@@ -75,7 +75,7 @@ namespace Actime.Services.Services
             };
         }
 
-        protected override IQueryable<Organization> ApplyFilter(IQueryable<Organization> query, TextSearchObject search)
+        protected override IQueryable<Organization> ApplyFilter(IQueryable<Organization> query, OrganizationSearchObject search)
         {
             query = query
                 .Include(o => o.User)
@@ -86,12 +86,27 @@ namespace Actime.Services.Services
                 .Include(o => o.Memberships)
                 .Include(o => o.Events);
 
-            query = query.Where(o => o.User.EmailConfirmed);
+            // Only filter by EmailConfirmed if IncludeUnconfirmed is false
+            if (search?.IncludeUnconfirmed != true)
+            {
+                query = query.Where(o => o.User.EmailConfirmed);
+            }
+
+            // Apply EmailConfirmed if specified (admin only)
+            if (search?.EmailConfirmed.HasValue == true)
+            {
+                query = query.Where(o => o.User.EmailConfirmed == search.EmailConfirmed.Value);
+            }
 
             if (!string.IsNullOrWhiteSpace(search?.Text))
             {
                 query = query.Where(o => o.Name.Contains(search.Text) ||
                                         (o.Description != null && o.Description.Contains(search.Text)));
+            }
+
+            if (search?.CategoryId.HasValue == true)
+            {
+                query = query.Where(o => o.CategoryId == search.CategoryId.Value);
             }
 
             return query;
@@ -237,6 +252,9 @@ namespace Actime.Services.Services
 
         private void PopulateOrganizationFields(Model.Entities.Organization dto, Organization entity, int? currentUserId = null)
         {
+            // Set EmailConfirmed from User (default to false if User is null)
+            dto.EmailConfirmed = entity.User?.EmailConfirmed ?? false;
+
             if (entity.Category != null)
             {
                 dto.CategoryName = entity.Category.Name;

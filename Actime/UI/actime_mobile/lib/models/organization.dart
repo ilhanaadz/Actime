@@ -100,7 +100,8 @@ class Organization {
       categoryName: json['CategoryName'] as String? ?? json['categoryName'] as String?,
       membersCount: _parseInt(json['MembersCount'] ?? json['membersCount']) ?? 0,
       eventsCount: _parseInt(json['EventsCount'] ?? json['eventsCount']) ?? 0,
-      isVerified: json['IsVerified'] as bool? ?? json['isVerified'] as bool? ?? false,
+      isVerified: json['EmailConfirmed'] as bool? ?? json['emailConfirmed'] as bool? ??
+                  json['IsVerified'] as bool? ?? json['isVerified'] as bool? ?? false,
       isMember: json['IsMember'] as bool? ?? json['isMember'] as bool? ?? false,
       membershipStatusId: _parseInt(json['MembershipStatusId'] ?? json['membershipStatusId']),
       status: OrganizationStatus.fromString(json['Status'] as String? ?? json['status'] as String?),
@@ -140,6 +141,7 @@ class Organization {
       'CategoryName': categoryName,
       'MembersCount': membersCount,
       'EventsCount': eventsCount,
+      'EmailConfirmed': isVerified,
       'IsVerified': isVerified,
       'IsMember': isMember,
       'MembershipStatusId': membershipStatusId,

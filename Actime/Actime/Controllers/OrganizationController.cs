@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace Actime.Controllers
 {
-    public class OrganizationController : BaseController<Organization, TextSearchObject>
+    public class OrganizationController : BaseController<Organization, OrganizationSearchObject>
     {
         private readonly IOrganizationService _organizationService;
 
@@ -21,13 +21,26 @@ namespace Actime.Controllers
         [AllowAnonymous]
         public override Task<Organization?> GetById(int id)
         {
+            // Admin users can see all organization details, including unconfirmed
+            if (User.IsInRole("Admin"))
+            {
+                return _organizationService.GetByIdAsync(id);
+            }
+
             var currentUserId = GetCurrentUserIdOrNull();
             return _organizationService.GetByIdForUserAsync(id, currentUserId);
         }
 
         [AllowAnonymous]
-        public override Task<PagedResult<Organization>> Get([FromQuery] TextSearchObject? search = null)
+        public override Task<PagedResult<Organization>> Get([FromQuery] OrganizationSearchObject? search = null)
         {
+            // Admin users can see all organizations, including unconfirmed
+            if (User.IsInRole("Admin"))
+            {
+                search ??= new OrganizationSearchObject();
+                search.IncludeUnconfirmed = true;
+            }
+
             return base.Get(search);
         }
 
