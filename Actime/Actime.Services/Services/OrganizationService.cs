@@ -296,7 +296,7 @@ namespace Actime.Services.Services
                 .Select(g => new
                 {
                     Month = g.Key,
-                    ParticipantsCount = g.Count()
+                    ParticipantsCount = g.Select(p => p.UserId).Distinct().Count()
                 })
                 .OrderBy(x => x.Month)
                 .ToListAsync();
@@ -341,7 +341,7 @@ namespace Actime.Services.Services
                 .Select(g => new Model.Entities.ParticipationByYear
                 {
                     Year = g.Key,
-                    ParticipantsCount = g.Count()
+                    ParticipantsCount = g.Select(p => p.UserId).Distinct().Count()
                 })
                 .OrderByDescending(x => x.Year)
                 .ToListAsync();
@@ -395,7 +395,7 @@ namespace Actime.Services.Services
                 .Select(g => new
                 {
                     Month = g.Key,
-                    MembersCount = g.Count()
+                    MembersCount = g.Select(m => m.UserId).Distinct().Count()
                 })
                 .OrderBy(x => x.Month)
                 .ToListAsync();
@@ -421,7 +421,7 @@ namespace Actime.Services.Services
                 .Select(g => new Model.Entities.EnrollmentByYear
                 {
                     Year = g.Key,
-                    MembersCount = g.Count()
+                    MembersCount = g.Select(m => m.UserId).Distinct().Count()
                 })
                 .OrderByDescending(x => x.Year)
                 .ToListAsync();

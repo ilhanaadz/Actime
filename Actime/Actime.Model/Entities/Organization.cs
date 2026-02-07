@@ -3,7 +3,7 @@
     public class Organization
     {
         public int Id { get; set; }
-        public required string Name { get; set; } //NOTE: Could be username (from user entity) or separate
+        public required string Name { get; set; }
         public required string Email { get; set; }
         public string? Description { get; set; }
         public string? LogoUrl { get; set; }
