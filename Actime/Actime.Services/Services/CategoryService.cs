@@ -49,5 +49,20 @@ namespace Actime.Services.Services
 
             await base.OnCreating(entity, request);
         }
+
+        protected override async Task<bool> OnDeleting(Category entity)
+        {
+            var hasOrganizations = await _context.Organizations
+                .AnyAsync(o => o.CategoryId == entity.Id);
+
+            if (hasOrganizations)
+            {
+                throw new InvalidOperationException(
+                    "Cannot delete category because it has associated organizations. " +
+                    "Please move or delete all organizations first.");
+            }
+
+            return await base.OnDeleting(entity);
+        }
     }
 }
