@@ -99,7 +99,15 @@ class NotificationService {
 
     return await _apiService.get<int>(
       ApiConfig.notificationUnreadCount(userId),
-      fromJson: (json) => json['count'] as int? ?? 0,
+      fromJson: (json) {
+        // Backend returns the count directly as a number
+        if (json is int) return json;
+        // Or as an object with 'count' key
+        if (json is Map<String, dynamic>) {
+          return json['count'] as int? ?? json['Count'] as int? ?? 0;
+        }
+        return 0;
+      },
     );
   }
 

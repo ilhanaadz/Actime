@@ -86,6 +86,8 @@ namespace Actime.Services.Services
                 .Include(o => o.Memberships)
                 .Include(o => o.Events);
 
+            query = query.Where(o => o.User.EmailConfirmed);
+
             if (!string.IsNullOrWhiteSpace(search?.Text))
             {
                 query = query.Where(o => o.Name.Contains(search.Text) ||
@@ -118,9 +120,6 @@ namespace Actime.Services.Services
             if (request.Description != null)
                 organization.Description = request.Description;
 
-            if (request.LogoUrl != null)
-                organization.LogoUrl = request.LogoUrl;
-
             if (request.PhoneNumber != null)
                 organization.PhoneNumber = request.PhoneNumber;
 
@@ -133,12 +132,36 @@ namespace Actime.Services.Services
                 organization.CategoryId = request.CategoryId.Value;
             }
 
+            if (request.AddressId.HasValue)
+            {
+                var addressExists = await _context.Addresses.AnyAsync(a => a.Id == request.AddressId.Value);
+                if (!addressExists)
+                    throw new ValidationException("Invalid address");
+
+                organization.AddressId = request.AddressId.Value;
+            }
+
+            // Handle LogoUrl - empty string => remove logo
+            if (request.LogoUrl == "")
+                organization.LogoUrl = null;
+            else if (request.LogoUrl != null)
+                organization.LogoUrl = request.LogoUrl;
+
             organization.LastModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
             await _context.Entry(organization).Reference(o => o.Category).LoadAsync();
-           
+            await _context.Entry(organization).Reference(o => o.Address).LoadAsync();
+            if (organization.Address != null)
+            {
+                await _context.Entry(organization.Address).Reference(a => a.City).LoadAsync();
+                if (organization.Address.City != null)
+                {
+                    await _context.Entry(organization.Address.City).Reference(c => c.Country).LoadAsync();
+                }
+            }
+
             var dto = _mapper.Map<Model.Entities.Organization>(organization);
             PopulateOrganizationFields(dto, organization);
             return dto;
@@ -201,7 +224,7 @@ namespace Actime.Services.Services
                         .ThenInclude(c => c.Country)
                 .Include(o => o.Memberships)
                 .Include(o => o.Events)
-                .FirstOrDefaultAsync(o => o.Id == organizationId);
+                .FirstOrDefaultAsync(o => o.Id == organizationId && o.User.EmailConfirmed);
 
             if (entity == null)
                 return null;

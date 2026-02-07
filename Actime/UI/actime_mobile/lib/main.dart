@@ -7,6 +7,7 @@ import 'screens/auth/forgot_password_screen.dart';
 import 'screens/auth/reset_password_screen.dart';
 import 'screens/auth/email_confirmation_screen.dart';
 import 'screens/auth/email_verification_screen.dart';
+import 'services/navigation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class ActimeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: NavigationService().navigatorKey,
       title: 'Actime',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

@@ -109,7 +109,6 @@ class OrganizationService {
     return await _apiService.delete('${ApiConfig.organization}/$id');
   }
 
-  /// Delete my organization (for organization role)
   Future<ApiResponse<void>> deleteMyOrganization() async {
     if (ApiConfig.useMockApi) {
       return ApiResponse.success(null, message: 'Organizacija je uspješno obrisana');
@@ -118,19 +117,13 @@ class OrganizationService {
     return await _apiService.delete(ApiConfig.organizationMy());
   }
 
-  /// Get organization enrollments (memberships/applications to join)
-  /// Uses /Membership endpoint with OrganizationId filter
-  Future<ApiResponse<PaginatedResponse<Membership>>> getOrganizationEnrollments(
+  Future<ApiResponse<List<Membership>>> getOrganizationEnrollments(
     String organizationId, {
-    int page = 1,
-    int pageSize = 999999,
     EnrollmentStatus? status,
   }) async {
     if (ApiConfig.useMockApi) {
       final mockResponse = await _mockService.getOrganizationEnrollments(
         organizationId,
-        page: page,
-        perPage: pageSize,
         status: status,
       );
       // Convert mock Enrollments to Memberships
@@ -142,13 +135,7 @@ class OrganizationService {
           membershipStatusId: _mapEnrollmentStatusToMembershipStatusId(e.status),
           createdAt: e.createdAt,
         )).toList();
-        return ApiResponse.success(PaginatedResponse(
-          data: memberships,
-          currentPage: mockResponse.data!.currentPage,
-          lastPage: mockResponse.data!.lastPage,
-          perPage: mockResponse.data!.perPage,
-          total: mockResponse.data!.total,
-        ));
+        return ApiResponse.success(memberships);
       }
       return ApiResponse.error(mockResponse.message ?? 'Greška');
     }
@@ -159,16 +146,17 @@ class OrganizationService {
       membershipStatusId = _mapEnrollmentStatusToMembershipStatusId(status);
     }
 
-    return await _apiService.get<PaginatedResponse<Membership>>(
-      ApiConfig.membership,
+    return await _apiService.get<List<Membership>>(
+      '${ApiConfig.membership}/organization/$organizationId',
       queryParams: {
-        'Page': page.toString(),
-        'PageSize': pageSize.toString(),
-        'OrganizationId': organizationId,
-        'IncludeUser': 'true',
-        if (membershipStatusId != null) 'MembershipStatusId': membershipStatusId.toString(),
+        if (membershipStatusId != null) 'statusId': membershipStatusId.toString(),
       },
-      fromJson: (json) => PaginatedResponse.fromJson(json, Membership.fromJson),
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => Membership.fromJson(item as Map<String, dynamic>)).toList();
+        }
+        return [];
+      },
     );
   }
 

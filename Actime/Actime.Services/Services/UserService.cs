@@ -35,7 +35,10 @@ namespace Actime.Services.Services
             if (request.LastName != null)
                 user.LastName = request.LastName;
 
-            if (request.ProfileImageUrl != null)
+            // Handle ProfileImageUrl - empty string => remove image
+            if (request.ProfileImageUrl == "")
+                user.ProfileImageUrl = null;
+            else if (request.ProfileImageUrl != null)
                 user.ProfileImageUrl = request.ProfileImageUrl;
 
             user.LastModifiedAt = DateTime.UtcNow;

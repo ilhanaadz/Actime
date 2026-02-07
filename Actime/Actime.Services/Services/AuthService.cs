@@ -203,6 +203,73 @@ namespace Actime.Services.Services
             }
         }
 
+        public async Task DeleteMyAccountAsync(int userId, bool hardDelete = false)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null || user.IsDeleted)
+                throw new Exception("User not found");
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                if (hardDelete)
+                {
+                    // Hard delete - incomplete registration
+
+                    var userTokens = await _context.RefreshTokens
+                        .Where(r => r.UserId == userId)
+                        .ToListAsync();
+                    _context.RefreshTokens.RemoveRange(userTokens);
+
+                    var organization = await _context.Organizations
+                        .FirstOrDefaultAsync(o => o.UserId == userId);
+                    if (organization != null)
+                    {
+                        _context.Organizations.Remove(organization);
+                    }
+
+                    await _userManager.DeleteAsync(user);
+                }
+                else
+                {
+                    // Soft delete - profile
+                    user.IsDeleted = true;
+                    user.DeletedAt = DateTime.UtcNow;
+                    user.DeletedBy = userId;
+
+                    await _userManager.UpdateAsync(user);
+
+                    var activeTokens = await _context.RefreshTokens
+                        .Where(r => r.UserId == userId && r.RevokedAt == null && r.ExpiresAt > DateTime.UtcNow)
+                        .ToListAsync();
+
+                    foreach (var token in activeTokens)
+                    {
+                        token.RevokedAt = DateTime.UtcNow;
+                        token.ReasonRevoked = "User deleted account";
+                    }
+
+                    var organization = await _context.Organizations
+                      .FirstOrDefaultAsync(o => o.UserId == userId);
+                    if (organization != null)
+                    {
+                        organization.IsDeleted = true;
+                        organization.DeletedAt = DateTime.UtcNow;
+                        organization.DeletedBy = userId;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task<AuthResponse> CompleteOrganizationSetupAsync(int userId, CompleteOrganizationRequest request)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -314,6 +381,7 @@ namespace Actime.Services.Services
                 ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
                 Roles = roles.ToList(),
                 RequiresOrganizationSetup = roles.Contains("Organization") && organizationDto == null,
+                EmailConfirmed = user.EmailConfirmed,
                 Organization = organizationDto
             };
         }

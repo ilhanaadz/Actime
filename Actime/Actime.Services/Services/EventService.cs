@@ -6,14 +6,16 @@ using Actime.Services.Interfaces;
 using EasyNetQ;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Actime.Services.Services
 {
     public class EventService : BaseCrudService<Model.Entities.Event, EventSearchObject, Database.Event, EventInsertRequest, EventUpdateRequest>, IEventService
     {
-        public EventService(Database.ActimeContext context, IMapper mapper) : base(context, mapper)
+        private readonly IBus _bus;
+
+        public EventService(Database.ActimeContext context, IMapper mapper, IBus bus) : base(context, mapper)
         {
+            _bus = bus;
         }
 
         public override async Task<PagedResult<Model.Entities.Event>> GetAsync(EventSearchObject search)
@@ -22,6 +24,7 @@ namespace Actime.Services.Services
 
             var query = _context.Set<Database.Event>()
                 .Include(e => e.Organization)
+                    .ThenInclude(o => o.User)
                 .Include(e => e.Location)
                 .Include(e => e.ActivityType)
                 .Include(e => e.Participations)
@@ -64,10 +67,14 @@ namespace Actime.Services.Services
         {
             var entity = await _context.Set<Database.Event>()
                 .Include(e => e.Organization)
+                    .ThenInclude(o => o.User)
                 .Include(e => e.Location)
                 .Include(e => e.ActivityType)
                 .Include(e => e.Participations)
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id
+                    && !e.IsDeleted
+                    && !e.Organization.IsDeleted
+                    && e.Organization.User.EmailConfirmed);
 
             if (entity == null)
                 return null;
@@ -99,21 +106,21 @@ namespace Actime.Services.Services
             var createdEvent = _mapper.Map<Model.Entities.Event>(entity);
 
             createdEvent.OrganizationName = _context.Organizations.Find(entity.OrganizationId)?.Name;
-            
-            var services = new ServiceCollection();
 
-            services.AddEasyNetQ("host=localhost");
-
-            var provider = services.BuildServiceProvider();
-            var bus = provider.GetRequiredService<IBus>();
-
-            bus.PubSub.PublishAsync(createdEvent);
+            // Publish event to RabbitMQ for notification service
+            _bus.PubSub.PublishAsync(createdEvent);
 
             return base.OnCreated(entity);
         }
 
         protected override IQueryable<Database.Event> ApplyFilter(IQueryable<Database.Event> query, EventSearchObject search)
         {
+            // Filter out deleted events
+            query = query.Where(e => !e.IsDeleted);
+
+            // Filter out events from deleted organizations or organizations whose owner hasn't confirmed email
+            query = query.Where(e => !e.Organization.IsDeleted && e.Organization.User.EmailConfirmed);
+
             if (search.OrganizationId.HasValue)
             {
                 query = query.Where(e => e.OrganizationId == search.OrganizationId.Value);

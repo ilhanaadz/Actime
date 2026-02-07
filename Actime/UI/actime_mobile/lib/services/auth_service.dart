@@ -4,20 +4,59 @@ import 'api_service.dart';
 import 'mock_api_service.dart';
 import 'signalr_service.dart';
 import 'token_service.dart';
+import 'navigation_service.dart';
 
 /// Authentication service
 /// Handles login, register, logout, and token management
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
-  AuthService._internal();
+  AuthService._internal() {
+    _setupApiCallbacks();
+  }
 
   final ApiService _apiService = ApiService();
   final MockApiService _mockService = MockApiService();
   final TokenService _tokenService = TokenService();
   final SignalRService _signalRService = SignalRService();
+  final NavigationService _navigationService = NavigationService();
 
   AuthResponse? _currentAuth;
+
+  /// Setup callbacks for ApiService to handle token expiration
+  void _setupApiCallbacks() {
+    _apiService.onTokenRefresh = () async {
+      if (!isLoggedIn) return false;
+
+      try {
+        final response = await refreshToken();
+        return response.success;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    _apiService.onAuthenticationFailed = () async {
+      await _handleExpiredSession();
+    };
+  }
+
+  bool _isLoggingOut = false;
+
+  /// Handle expired session - logout and navigate to login
+  Future<void> _handleExpiredSession() async {
+    if (!isLoggedIn || _isLoggingOut) return;
+
+    _isLoggingOut = true;
+
+    try {
+      await logout();
+
+      _navigationService.navigateToAndClearStack('/sign-in');
+    } finally {
+      _isLoggingOut = false;
+    }
+  }
 
   AuthResponse? get currentAuth => _currentAuth;
 
@@ -160,9 +199,17 @@ class AuthService {
       return ApiResponse.error('Mock API ne podržava ovu funkciju');
     }
 
+    final requestData = request.toJson();
+    if (requestData.containsKey('LogoUrl')) {
+      final path = requestData['LogoUrl'] as String?;
+      if (path != null && !path.startsWith(RegExp(r'https?:\/\/'))) {
+        requestData['LogoUrl'] = '${ApiConfig.baseUrl}$path';
+      }
+    }
+
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.completeOrganization,
-      body: request.toJson(),
+      body: requestData,
       fromJson: (json) => AuthResponse.fromJson(json),
     );
 
@@ -239,5 +286,27 @@ class AuthService {
       body: {'Email': email},
       fromJson: (json) => json,
     );
+  }
+
+  Future<ApiResponse<void>> deleteMyAccount({bool hardDelete = false}) async {
+    if (ApiConfig.useMockApi) {
+      _currentAuth = null;
+      await _tokenService.clearTokens();
+      return ApiResponse.success(null);
+    }
+
+    final endpoint = hardDelete
+        ? '${ApiConfig.deleteMyAccount}?hardDelete=true'
+        : ApiConfig.deleteMyAccount;
+
+    final response = await _apiService.delete(endpoint);
+
+    if (response.success) {
+      _currentAuth = null;
+      await _tokenService.clearTokens();
+      await _signalRService.disconnect();
+    }
+
+    return response;
   }
 }

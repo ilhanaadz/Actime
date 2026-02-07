@@ -5,6 +5,7 @@ using MapsterMapper;
 using Microsoft.ML;
 using Microsoft.ML.Trainers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Actime.Services.Services
 {
@@ -96,11 +97,15 @@ namespace Actime.Services.Services
             if (!userEventIds.Any())
             {
                 var popularEvents = context.Events
+                    .Include(e => e.Organization)
+                    .Include(e => e.Location)
+                    .Include(e => e.ActivityType)
+                    .Include(e => e.Participations)
                     .OrderByDescending(e => e.Participations.Count)
                     .Take(numberOfResults)
                     .ToList();
 
-                return _mapper.Map<List<Model.Entities.Event>>(popularEvents);
+                return MapEventsWithRelations(popularEvents);
             }
 
             var candidateEventIds = context.Events
@@ -130,10 +135,30 @@ namespace Actime.Services.Services
                 .ToList();
 
             var topEvents = context.Events
+                .Include(e => e.Organization)
+                .Include(e => e.Location)
+                .Include(e => e.ActivityType)
+                .Include(e => e.Participations)
                 .Where(e => topEventIds.Contains(e.Id))
                 .ToList();
 
-            return _mapper.Map<List<Model.Entities.Event>>(topEvents);
+            return MapEventsWithRelations(topEvents);
+        }
+
+        private List<Model.Entities.Event> MapEventsWithRelations(List<Database.Event> entities)
+        {
+            return entities.Select(entity =>
+            {
+                var mapped = _mapper.Map<Model.Entities.Event>(entity);
+
+                mapped.OrganizationName = entity.Organization?.Name;
+                mapped.OrganizationLogoUrl = entity.Organization?.LogoUrl;
+                mapped.Location = entity.Location?.Name;
+                mapped.ActivityTypeName = entity.ActivityType?.Name;
+                mapped.ParticipantsCount = entity.Participations?.Count ?? 0;
+
+                return mapped;
+            }).ToList();
         }
     }
 }

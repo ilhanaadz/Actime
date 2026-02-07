@@ -18,6 +18,7 @@ namespace Actime.Model.Responses
         public DateTime ExpiresAt { get; set; }
         public List<string> Roles { get; set; } = new();
         public bool RequiresOrganizationSetup { get; set; }
+        public bool EmailConfirmed { get; set; }
         public Organization? Organization { get; set; }
         public string? ProfileImageUrl { get; set; }
     }

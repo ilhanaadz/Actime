@@ -127,23 +127,23 @@ class UserService {
     );
   }
 
-  /// Get user's memberships (organizations they belong to)
-  Future<ApiResponse<PaginatedResponse<Enrollment>>> getUserMemberships({
-    int page = 1,
-    int perPage = 10,
-  }) async {
+  Future<ApiResponse<List<Enrollment>>> getUserMemberships() async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getUserMemberships(
-        '1',
-        page: page,
-        perPage: perPage,
-      );
+      final response = await _mockService.getUserMemberships('1');
+      if (response.success && response.data != null) {
+        return ApiResponse.success(response.data!.data);
+      }
+      return ApiResponse.error(response.message ?? 'Greška');
     }
 
-    return await _apiService.get<PaginatedResponse<Enrollment>>(
+    return await _apiService.get<List<Enrollment>>(
       '${ApiConfig.membership}/my',
-      queryParams: {'page': page.toString(), 'perPage': perPage.toString()},
-      fromJson: (json) => PaginatedResponse.fromJson(json, Enrollment.fromJson),
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => Enrollment.fromJson(item as Map<String, dynamic>)).toList();
+        }
+        return [];
+      },
     );
   }
 

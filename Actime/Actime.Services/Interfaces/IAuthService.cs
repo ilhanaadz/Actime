@@ -18,6 +18,7 @@ namespace Actime.Services.Interfaces
         Task ForgotPasswordAsync(ForgotPasswordRequest request);
         Task ResetPasswordAsync(ResetPasswordRequest request);
         Task ChangePasswordAsync(int userId, ChangePasswordRequest request);
+        Task DeleteMyAccountAsync(int userId, bool hardDelete = false);
 
         Task<AuthResponse> GetCurrentUserAsync(int userId);
     }
