@@ -23,10 +23,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   bool _isLoading = false;
 
   Future<void> _handleLogin() async {
-    // Clear previous API errors
     setState(() => _fieldErrors = {});
 
-    // Frontend validation
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -41,20 +39,24 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
       if (!mounted) return;
 
-      if (response.success) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-        );
+      if (response.success && response.data != null) {
+        // Check if user has Admin role
+        if (response.data!.isAdmin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+          );
+        } else {
+          await _authService.logout();
+          _showError('Pristup odbijen. Nalog nije validan.');
+        }
       } else {
-        // Check for field-level errors
         if (response.errors != null && response.errors!.isNotEmpty) {
           setState(() {
             _fieldErrors = FormErrorHandler.mapApiErrors(response.errors);
           });
         } else {
-          // Generic error in SnackBar
-          _showError(response.message ?? 'Prijava nije uspjela. Provjerite podatke.');
+         _showError(response.message ?? 'Prijava nije uspjela. Provjerite podatke.');
         }
       }
     } catch (e) {
