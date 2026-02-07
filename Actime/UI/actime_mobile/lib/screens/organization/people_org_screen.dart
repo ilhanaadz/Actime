@@ -77,7 +77,7 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
           _participationsByYear = participationsByYearResponse.data!;
         }
         if (approvedEnrollmentsResponse.success && approvedEnrollmentsResponse.data != null) {
-          _approvedEnrollments = approvedEnrollmentsResponse.data!.data;
+          _approvedEnrollments = approvedEnrollmentsResponse.data!;
         }
         if (enrollmentsByMonthResponse.success && enrollmentsByMonthResponse.data != null) {
           _enrollmentsByMonth = enrollmentsByMonthResponse.data!;
@@ -86,7 +86,7 @@ class _PeopleOrgScreenState extends State<PeopleOrgScreen> {
           _enrollmentsByYear = enrollmentsByYearResponse.data!;
         }
         if (pendingEnrollmentsResponse.success && pendingEnrollmentsResponse.data != null) {
-          _pendingEnrollments = pendingEnrollmentsResponse.data!.data;
+          _pendingEnrollments = pendingEnrollmentsResponse.data!;
         }
         _isLoading = false;
       });

@@ -121,7 +121,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
   }
 
   Future<void> _changeProfileImage() async {
-    final source = await showModalBottomSheet<ImageSource>(
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       builder: (context) => SafeArea(
         child: Wrap(
@@ -136,13 +136,30 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
               title: const Text('Kamera'),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
+            if (_user?.avatar != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.red),
+                title: const Text(
+                  'Ukloni sliku',
+                  style: TextStyle(color: AppColors.red),
+                ),
+                onTap: () => Navigator.pop(context, 'remove'),
+              ),
           ],
         ),
       ),
     );
 
-    if (source == null) return;
+    if (result == null) return;
 
+    // Handle remove action
+    if (result == 'remove') {
+      await _removeProfileImage();
+      return;
+    }
+
+    // Handle image source selection
+    final source = result as ImageSource;
     final xFile = source == ImageSource.gallery
         ? await _imageService.pickImageFromGallery()
         : await _imageService.pickImageFromCamera();
@@ -196,6 +213,41 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
     }
   }
 
+  Future<void> _removeProfileImage() async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final updateResponse = await _userService.updateProfile({
+        'ProfileImageUrl': '',
+      });
+
+      if (!mounted) return;
+
+      if (updateResponse.success) {
+        await _loadUser();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Slika je uspješno uklonjena')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(updateResponse.message ?? 'Greška pri uklanjanju slike')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,6 +284,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                       child: Stack(
                         children: [
                           CircleAvatar(
+                            key: ValueKey(_user?.avatar ?? 'no-avatar'),
                             radius: 50,
                             backgroundColor: AppColors.borderLight,
                             backgroundImage: _user?.avatar != null

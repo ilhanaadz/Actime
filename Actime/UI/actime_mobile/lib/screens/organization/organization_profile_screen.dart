@@ -210,6 +210,7 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
             child: Stack(
               children: [
                 CircleAvatar(
+                  key: ValueKey(_organization?.logoUrl ?? 'no-logo'),
                   radius: 50,
                   backgroundColor: AppColors.borderLight,
                   backgroundImage: _organization?.logoUrl != null
@@ -270,8 +271,88 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen> {
               );
             },
           ),
+          const SizedBox(height: AppDimensions.spacingDefault),
+          ActimeOutlinedButton(
+            label: 'Obriši nalog',
+            icon: Icons.delete_forever_outlined,
+            borderColor: AppColors.red,
+            textColor: AppColors.red,
+            onPressed: _showDeleteAccountDialog,
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _showDeleteAccountDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Obriši nalog'),
+        content: const Text(
+          'Da li ste sigurni da želite trajno obrisati nalog vaše organizacije?\n\n'
+          'Ova akcija je nepovratna i svi podaci organizacije će biti obrisani.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Odustani'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.red),
+            child: const Text('Obriši nalog'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+
+      try {
+        final response = await _authService.deleteMyAccount();
+
+        if (!mounted) return;
+
+        // Close loading dialog
+        Navigator.pop(context);
+
+        if (response.success) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SignInScreen()),
+            (route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message ?? 'Greška pri brisanju naloga'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+
+        // Close loading dialog
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Došlo je do greške pri brisanju naloga'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
+    }
   }
 }

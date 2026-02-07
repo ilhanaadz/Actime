@@ -64,7 +64,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       setState(() {
         if (membershipResponse.success && membershipResponse.data != null) {
-          _memberships = membershipResponse.data!.data;
+          _memberships = membershipResponse.data!;
         }
         if (eventsResponse.success && eventsResponse.data != null) {
           // Sort events by start date (newest first)

@@ -46,7 +46,7 @@ class _EnrollmentRequestsScreenState extends State<EnrollmentRequestsScreen> {
 
       setState(() {
         if (response.success && response.data != null) {
-          _pendingEnrollments = response.data!.data;
+          _pendingEnrollments = response.data!;
         }
         _isLoading = false;
       });

@@ -50,7 +50,7 @@ class _EnrollmentApplicationsScreenState extends State<EnrollmentApplicationsScr
 
       if (membershipsResponse.success && membershipsResponse.data != null) {
         setState(() {
-          _memberships = membershipsResponse.data!.data;
+          _memberships = membershipsResponse.data!;
           _isLoading = false;
         });
       } else {

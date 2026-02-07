@@ -140,7 +140,7 @@ class _EditOrganizationProfileScreenState
   }
 
   Future<void> _changeLogo() async {
-    final source = await showModalBottomSheet<ImageSource>(
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       builder: (context) => SafeArea(
         child: Wrap(
@@ -155,13 +155,28 @@ class _EditOrganizationProfileScreenState
               title: const Text('Kamera'),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
+            if (_organization?.logoUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.red),
+                title: const Text(
+                  'Ukloni sliku',
+                  style: TextStyle(color: AppColors.red),
+                ),
+                onTap: () => Navigator.pop(context, 'remove'),
+              ),
           ],
         ),
       ),
     );
 
-    if (source == null) return;
+    if (result == null) return;
 
+    if (result == 'remove') {
+      await _removeLogo();
+      return;
+    }
+
+    final source = result as ImageSource;
     final xFile = source == ImageSource.gallery
         ? await _imageService.pickImageFromGallery()
         : await _imageService.pickImageFromCamera();
@@ -214,6 +229,43 @@ class _EditOrganizationProfileScreenState
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Došlo je do greške')));
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+      }
+    }
+  }
+
+  Future<void> _removeLogo() async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final updateResponse = await _organizationService.updateMyOrganization({
+        'LogoUrl': '',
+      });
+
+      if (!mounted) return;
+
+      if (updateResponse.success) {
+        await _loadOrganization();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logo je uspješno uklonjen')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(updateResponse.message ?? 'Greška pri uklanjanju logoa'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Došlo je do greške')),
+      );
     } finally {
       if (mounted) {
         setState(() => _isUploadingImage = false);
@@ -427,6 +479,7 @@ class _EditOrganizationProfileScreenState
               child: Stack(
                 children: [
                   Container(
+                    key: ValueKey(_organization?.logoUrl ?? 'no-logo'),
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(

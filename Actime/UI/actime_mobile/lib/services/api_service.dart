@@ -24,8 +24,23 @@ class ApiService {
 
   final TokenService _tokenService = TokenService();
 
-  /// GET request
-  /// Unified method that handles both single objects and lists automatically
+  /// Callback for refreshing expired token
+  Future<bool> Function()? onTokenRefresh;
+
+  /// Callback for when authentication fails and can't be recovered
+  Future<void> Function()? onAuthenticationFailed;
+
+  bool _isRefreshing = false;
+
+  final List<String> _excludedEndpoints = [
+    '/login',
+    '/register',
+    '/refresh-token',
+    '/forgot-password',
+    '/reset-password',
+    '/confirm-email',
+  ];
+
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, String>? queryParams,
@@ -39,13 +54,12 @@ class ApiService {
           .get(uri, headers: headers)
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleUnifiedResponse<T>(response, fromJson);
+      return await _handleUnifiedResponse<T>(response, fromJson, endpoint);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
   }
 
-  /// POST request
   Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic>? body,
@@ -61,13 +75,12 @@ class ApiService {
           )
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleUnifiedResponse<T>(response, fromJson);
+      return await _handleUnifiedResponse<T>(response, fromJson, endpoint);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
   }
 
-  /// PUT request
   Future<ApiResponse<T>> put<T>(
     String endpoint, {
     Map<String, dynamic>? body,
@@ -83,13 +96,12 @@ class ApiService {
           )
           .timeout(ApiConfig.connectionTimeout);
 
-      return _handleUnifiedResponse<T>(response, fromJson);
+      return await _handleUnifiedResponse<T>(response, fromJson, endpoint);
     } catch (e) {
       return ApiResponse.error(_getErrorMessage(e));
     }
   }
 
-  /// DELETE request
   Future<ApiResponse<void>> delete(String endpoint) async {
     try {
       final uri = _buildUri(endpoint);
@@ -111,7 +123,6 @@ class ApiService {
     }
   }
 
-  /// Build URI with query parameters
   Uri _buildUri(String endpoint, [Map<String, String>? queryParams]) {
     final baseUrl = ApiConfig.fullUrl;
     final url = '$baseUrl$endpoint';
@@ -123,7 +134,6 @@ class ApiService {
     return Uri.parse(url);
   }
 
-  /// Get headers with authorization token
   Future<Map<String, String>> _getHeaders() async {
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -138,19 +148,53 @@ class ApiService {
     return headers;
   }
 
-  /// Unified response handler that works with both objects and lists
-  /// The fromJson function receives decoded data (Map, List, or primitive)
-  /// and is responsible for converting it to the appropriate type T
-  ApiResponse<T> _handleUnifiedResponse<T>(
+  bool _shouldHandleAuth(String endpoint) {
+    return !_excludedEndpoints.any((excluded) => endpoint.contains(excluded));
+  }
+
+  /// Returns true if we should retry the request after refresh
+  Future<bool> _handle401(String endpoint) async {
+    // Don't handle auth for excluded endpoints (login, register, etc.)
+    if (!_shouldHandleAuth(endpoint)) {
+      return false;
+    }
+
+    if (_isRefreshing) {
+      return false;
+    }
+
+    // Try to refresh token if callback is available
+    if (onTokenRefresh != null) {
+      _isRefreshing = true;
+      try {
+        final refreshSuccess = await onTokenRefresh!();
+        _isRefreshing = false;
+
+        if (refreshSuccess) {
+          return true;
+        }
+      } catch (e) {
+        _isRefreshing = false;
+      }
+    }
+
+    if (onAuthenticationFailed != null) {
+      await onAuthenticationFailed!();
+    }
+
+    return false;
+  }
+
+  Future<ApiResponse<T>> _handleUnifiedResponse<T>(
     http.Response response,
     T Function(dynamic) fromJson,
-  ) {
+    String endpoint,
+  ) async {
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 300) {
       if (response.body.isEmpty) {
         try {
-          // For empty response, try to create default value
           return ApiResponse.success(fromJson(null), statusCode: statusCode);
         } catch (e) {
           return ApiResponse.error('Prazan odgovor', statusCode: statusCode);
@@ -159,7 +203,6 @@ class ApiService {
 
       try {
         final data = jsonDecode(response.body);
-        // Pass decoded data (can be Map, List, or primitive) to fromJson
         final result = fromJson(data);
         return ApiResponse.success(result, statusCode: statusCode);
       } catch (e) {
@@ -167,7 +210,10 @@ class ApiService {
       }
     }
 
-    // Handle error responses
+    if (statusCode == 401) {
+      await _handle401(endpoint);
+    }
+
     String message = 'Došlo je do greške';
     Map<String, dynamic>? errors;
 
@@ -176,14 +222,12 @@ class ApiService {
       message = errorBody['message'] as String? ?? message;
       errors = errorBody['errors'] as Map<String, dynamic>?;
     } catch (_) {
-      // If body is not JSON, use default message
       print('Error body not JSON: ${response.body}');
     }
 
     return ApiResponse.error(message, statusCode: statusCode, errors: errors);
   }
 
-  /// Get user-friendly error message
   String _getErrorMessage(dynamic error) {
     if (error.toString().contains('SocketException')) {
       return 'Nema internet veze';
