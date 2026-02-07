@@ -64,8 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (response.success && response.data != null) {
         if (_isOrganization) {
-          // Navigate to complete organization signup
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CompleteSignUpScreen()),
           );

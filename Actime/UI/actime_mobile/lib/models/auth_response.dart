@@ -12,6 +12,7 @@ class AuthResponse {
   final DateTime expiresAt;
   final List<String> roles;
   final bool requiresOrganizationSetup;
+  final bool emailConfirmed;
   final Organization? organization;
   final String? profileImageUrl;
 
@@ -26,6 +27,7 @@ class AuthResponse {
     required this.expiresAt,
     required this.roles,
     this.requiresOrganizationSetup = false,
+    this.emailConfirmed = false,
     this.organization,
     this.profileImageUrl,
   });
@@ -83,6 +85,10 @@ class AuthResponse {
           json['RequiresOrganizationSetup'] as bool? ??
           json['requiresOrganizationSetup'] as bool? ??
           false,
+      emailConfirmed:
+          json['EmailConfirmed'] as bool? ??
+          json['emailConfirmed'] as bool? ??
+          false,
       organization: json['Organization'] != null
           ? Organization.fromJson(json['Organization'] as Map<String, dynamic>)
           : json['organization'] != null
@@ -120,6 +126,7 @@ class AuthResponse {
       'ExpiresAt': expiresAt.toIso8601String(),
       'Roles': roles,
       'RequiresOrganizationSetup': requiresOrganizationSetup,
+      'EmailConfirmed': emailConfirmed,
       'Organization': organization?.toJson(),
       'ProfileImageUrl': profileImageUrl,
     };

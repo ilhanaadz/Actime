@@ -27,7 +27,7 @@ namespace Actime.Controllers
         public async Task<ActionResult> GetStats()
         {
             var users = await _userService.GetAsync(new Model.SearchObjects.UserSearchObject());
-            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.OrganizationSearchObject());
+            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.TextSearchObject());
             var events = await _eventService.GetAsync(new Model.SearchObjects.EventSearchObject());
 
             var stats = new
@@ -70,7 +70,7 @@ namespace Actime.Controllers
             var start = startDate ?? DateTime.Now.AddYears(-1);
             var end = endDate ?? DateTime.Now;
 
-            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.OrganizationSearchObject());
+            var organizations = await _organizationService.GetAsync(new Model.SearchObjects.TextSearchObject());
 
             var growthData = organizations.Items
                 .Where(o => o.CreatedAt >= start && o.CreatedAt <= end)

@@ -10,7 +10,6 @@ import 'actime_button.dart';
 import 'actime_text_field.dart';
 import 'searchable_dropdown.dart';
 
-/// Modal dialog for adding a new address
 class AddAddressModal extends StatefulWidget {
   final Function(Address) onAddressCreated;
 
@@ -19,7 +18,6 @@ class AddAddressModal extends StatefulWidget {
     required this.onAddressCreated,
   });
 
-  /// Show the modal and return the created address
   static Future<Address?> show(BuildContext context) async {
     Address? createdAddress;
 
@@ -126,54 +124,114 @@ class _AddAddressModalState extends State<AddAddressModal> {
 
   Future<void> _showAddCityDialog() async {
     final nameController = TextEditingController();
+    String? errorMessage;
+    bool isLoading = false;
 
     final result = await showDialog<City>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Dodaj novi grad'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ActimeTextField(
-              controller: nameController,
-              labelText: 'Naziv grada',
-              isOutlined: true,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Napomena: Grad ce biti dodan za BiH',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Dodaj novi grad'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ActimeTextField(
+                controller: nameController,
+                labelText: 'Naziv grada',
+                isOutlined: true,
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Napomena: Grad ce biti dodan za BiH',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              if (errorMessage != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: AppColors.red,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: const TextStyle(
+                            color: AppColors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: const Text('Odustani'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (nameController.text.trim().isEmpty) {
+                        setState(() => errorMessage = 'Unesite naziv grada');
+                        return;
+                      }
+
+                      setState(() {
+                        isLoading = true;
+                        errorMessage = null;
+                      });
+
+                      final response = await _cityService.createCity(
+                        name: nameController.text.trim(),
+                        countryId: 1, // Default to BiH
+                      );
+
+                      if (!context.mounted) return;
+
+                      setState(() => isLoading = false);
+
+                      if (response.success && response.data != null) {
+                        Navigator.pop(context, response.data);
+                      } else {
+                        setState(() {
+                          errorMessage = response.message ?? 'Grad već postoji ili greška pri dodavanju';
+                        });
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: AppColors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text('Dodaj'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Odustani'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.trim().isEmpty) return;
-
-              final response = await _cityService.createCity(
-                name: nameController.text.trim(),
-                countryId: 1, // Default to BiH
-              );
-
-              if (response.success && response.data != null && context.mounted) {
-                Navigator.pop(context, response.data);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-            ),
-            child: const Text('Dodaj'),
-          ),
-        ],
       ),
     );
 

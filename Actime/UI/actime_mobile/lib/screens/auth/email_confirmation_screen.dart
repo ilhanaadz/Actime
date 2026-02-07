@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/actime_button.dart';
 import '../../services/services.dart';
+import 'sign_in_screen.dart';
 
 class EmailConfirmationScreen extends StatefulWidget {
   final String email;
@@ -181,7 +182,6 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                   ),
                   const SizedBox(height: AppDimensions.spacingXLarge),
 
-                  // Success message after resend
                   if (_emailSent)
                     Container(
                       margin: const EdgeInsets.only(bottom: AppDimensions.spacingLarge),
@@ -212,18 +212,22 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                       ),
                     ),
 
-                  // Resend button
                   ActimeTextButton(
                     label: 'Niste primili email? Pošaljite ponovo',
                     onPressed: _isResending ? null : _handleResendEmail,
                   ),
                   const SizedBox(height: AppDimensions.spacingMedium),
 
-                  // Back to login
                   ActimeOutlinedButton(
                     label: 'Povratak na prijavu',
                     onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                        (route) => false,
+                      );
                     },
                   ),
                 ],

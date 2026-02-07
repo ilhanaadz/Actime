@@ -152,6 +152,30 @@ namespace Actime.Controllers
             return Ok(new { message = "Password changed successfully." });
         }
 
+        /// <summary>
+        /// Delete my account (for logged-in users)
+        /// </summary>
+        /// <remarks>
+        /// Allows users to delete their own account without admin privileges.
+        /// Use hardDelete=true for incomplete registrations (completely removes from DB).
+        /// Use hardDelete=false (default) for regular profiles (soft delete).
+        /// </remarks>
+        [HttpDelete("delete-my-account")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult> DeleteMyAccount([FromQuery] bool hardDelete = false)
+        {
+            var userId = GetCurrentUserId();
+            await _authService.DeleteMyAccountAsync(userId, hardDelete);
+
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(refreshToken))
+                await _authService.RevokeTokenAsync(refreshToken);
+
+            DeleteRefreshTokenCookie();
+            return NoContent();
+        }
+
         private void SetRefreshTokenCookie(string token)
         {
             var cookieOptions = new CookieOptions

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../components/app_bar_component.dart';
 import '../../components/bottom_nav_user.dart';
+import '../../components/event_card.dart';
 import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../services/organization_service.dart';
@@ -313,7 +315,25 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                       ),
                     )
                   else
-                    ..._events.map((event) => _buildEventCard(event)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        children: _events.map((event) => EventCard(
+                          title: event.name,
+                          price: event.formattedPrice,
+                          date: _formatDate(event.startDate),
+                          location: event.location ?? 'Nije određeno',
+                          participants: event.participantsCount.toString(),
+                          icon: Icons.event,
+                          imageUrl: ImageService().getFullImageUrl(event.organizationLogoUrl),
+                          statusText: event.status.displayName,
+                          statusColor: event.status.color,
+                          isFavorite: _favoriteEventIds.contains(event.id),
+                          onTap: () => _navigateToEventDetail(event),
+                          onFavoriteTap: () => _toggleEventFavorite(event),
+                        )).toList(),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -378,7 +398,7 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
                         isFavorite ? Icons.favorite : Icons.favorite_border,
                         size: 16,
                         color: isFavorite
-                            ? AppColors.red
+                            ? AppColors.primary
                             : Colors.grey.shade400,
                       ),
                     ),
@@ -421,182 +441,6 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
     );
   }
 
-  Widget _buildEventCard(Event event) {
-    final icon = Icons.event;
-    final logoUrl = ImageService().getFullImageUrl(event.organizationLogoUrl);
-    final isFavorite = _favoriteEventIds.contains(event.id);
-
-    return GestureDetector(
-      onTap: () => _navigateToEventDetail(event),
-      child: Stack(
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: logoUrl.isNotEmpty
-                      ? ClipOval(
-                          child: Image.network(
-                            logoUrl,
-                            fit: BoxFit.cover,
-                            width: 50,
-                            height: 50,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(icon, color: Colors.orange, size: 24);
-                            },
-                          ),
-                        )
-                      : Icon(icon, color: Colors.orange, size: 24),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              event.formattedPrice,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: event.status.color.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: event.status.color,
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              event.status.displayName,
-                              style: TextStyle(
-                                color: event.status.color,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.person_outline,
-                            size: 14,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${event.participantsCount}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        event.name,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          _formatDate(event.startDate),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 12,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          event.location ?? '',
-                          style: const TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Favorite button positioned at top-right corner
-          Positioned(
-            top: 16,
-            right: 24,
-            child: GestureDetector(
-              onTap: () => _toggleEventFavorite(event),
-              child: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                size: 20,
-                color: isFavorite ? AppColors.red : AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   IconData _getCategoryIcon(String? category) {
     switch (category?.toLowerCase()) {
@@ -649,6 +493,6 @@ class _LandingPageLoggedState extends State<LandingPageLogged> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+    return DateFormat('dd.MM.yyyy.').format(date);
   }
 }

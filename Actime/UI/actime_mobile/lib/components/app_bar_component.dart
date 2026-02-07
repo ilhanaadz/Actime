@@ -59,6 +59,7 @@ class ActimeAppBar extends StatelessWidget implements PreferredSizeWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: NotificationBadge(
+              key: notificationBadgeKey,
               onTap: onNotificationTap,
               iconColor: const Color(0xFF0D7C8C),
             ),

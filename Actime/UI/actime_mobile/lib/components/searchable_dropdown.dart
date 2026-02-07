@@ -107,7 +107,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
             elevation: 4,
             borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
             child: Container(
-              constraints: const BoxConstraints(maxHeight: 300),
+              constraints: const BoxConstraints(maxHeight: 250),
               decoration: BoxDecoration(
                 color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
@@ -143,6 +143,26 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                     ),
                   ),
                   const Divider(height: 1),
+                  // Add new option
+                  if (widget.onAddNew != null) ...[
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.add_circle_outline,
+                          color: AppColors.primary),
+                      title: Text(
+                        widget.addNewLabel,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onTap: () {
+                        _hideOverlay();
+                        widget.onAddNew!();
+                      },
+                    ),
+                    const Divider(height: 1),
+                  ],
                   // Items list
                   Flexible(
                     child: widget.isLoading
@@ -189,26 +209,6 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                             ],
                           ),
                   ),
-                  // Add new option
-                  if (widget.onAddNew != null) ...[
-                    const Divider(height: 1),
-                    ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.add_circle_outline,
-                          color: AppColors.primary),
-                      title: Text(
-                        widget.addNewLabel,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onTap: () {
-                        _hideOverlay();
-                        widget.onAddNew!();
-                      },
-                    ),
-                  ],
                 ],
               ),
             ),

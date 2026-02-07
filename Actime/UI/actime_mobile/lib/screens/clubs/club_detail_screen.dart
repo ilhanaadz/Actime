@@ -66,7 +66,15 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    if (!widget.isLoggedIn || _organization == null) return;
+    if (!widget.isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+      );
+      return;
+    }
+
+    if (_organization == null) return;
     final isFavorite = await _favoriteService.toggleClubFavorite(
       _organization!,
     );

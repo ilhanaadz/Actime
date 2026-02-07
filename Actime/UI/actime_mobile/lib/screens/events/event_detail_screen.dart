@@ -80,6 +80,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Future<void> _toggleFavorite() async {
+    if (!widget.isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+      );
+      return;
+    }
+
     if (_event == null) return;
     final newStatus = await _favoriteService.toggleEventFavorite(_event!);
     if (mounted) {

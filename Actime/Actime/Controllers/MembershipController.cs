@@ -18,13 +18,11 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Get memberships for the currently authenticated user
-        /// Returns active memberships (status = 2) with organization details
+        /// Get all memberships for the currently authenticated user
+        /// Returns all active memberships (status = 2) with organization details
         /// </summary>
         [HttpGet("my")]
-        public async Task<ActionResult<PagedResult<Membership>>> GetMyMemberships(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<List<Membership>>> GetMyMemberships()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -38,13 +36,31 @@ namespace Actime.Controllers
                 UserId = userId,
                 MembershipStatusId = 2, // Active/Approved status
                 IncludeOrganization = true,
-                Page = page,
-                PageSize = pageSize,
-                IncludeTotalCount = true
+                PageSize = int.MaxValue
             };
 
             var result = await _service.GetAsync(search);
-            return Ok(result);
+            return Ok(result.Items);
+        }
+
+        /// <summary>
+        /// Get all memberships for a specific organization
+        /// </summary>
+        [HttpGet("organization/{organizationId}")]
+        public async Task<ActionResult<List<Membership>>> GetOrganizationMemberships(
+            int organizationId,
+            [FromQuery] int? statusId = null)
+        {
+            var search = new MembershipSearchObject
+            {
+                OrganizationId = organizationId,
+                MembershipStatusId = statusId,
+                IncludeUser = true,
+                PageSize = int.MaxValue // Return all memberships
+            };
+
+            var result = await _service.GetAsync(search);
+            return Ok(result.Items);
         }
 
         /// <summary>

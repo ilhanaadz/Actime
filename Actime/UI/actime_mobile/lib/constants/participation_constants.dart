@@ -93,8 +93,8 @@ class PaymentMethod {
   PaymentMethod._();
 
   static const int cash = 1;
-  static const int creditCard = 2;
-  static const int bankTransfer = 3;
+  static const int bankTransfer = 2;
+  static const int creditCard = 3;
   static const int payPal = 4;
   static const int invoice = 5;
   static const int other = 6;

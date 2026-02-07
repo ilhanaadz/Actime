@@ -3,6 +3,7 @@ import '../../constants/constants.dart';
 import '../../models/notification.dart';
 import '../../services/notification_service.dart';
 import '../../services/signalr_service.dart';
+import '../../components/notification_badge.dart';
 import 'dart:async';
 
 class NotificationsScreen extends StatefulWidget {
@@ -147,6 +148,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           );
         }
       });
+
+      notificationBadgeKey.currentState?.refreshCount();
     }
   }
 
@@ -154,7 +157,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final unreadNotifications = _notifications.where((n) => !n.isRead).toList();
     if (unreadNotifications.isEmpty) return;
 
-    // Mark all as read locally first for better UX
     setState(() {
       for (var i = 0; i < _notifications.length; i++) {
         if (!_notifications[i].isRead) {
@@ -171,10 +173,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
     });
 
-    // Then update on server
     for (var notification in unreadNotifications) {
       await _notificationService.markAsRead(notification.id);
     }
+
+    notificationBadgeKey.currentState?.refreshCount();
   }
 
   Future<void> _deleteNotification(AppNotification notification) async {

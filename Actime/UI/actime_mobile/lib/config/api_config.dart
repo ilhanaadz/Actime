@@ -40,6 +40,7 @@ class ApiConfig {
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
   static const String changePassword = '/change-password';
+  static const String deleteMyAccount = '/delete-my-account';
 
   // User endpoints (backend: UserController)
   static const String user = '/User';
