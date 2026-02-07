@@ -39,6 +39,29 @@ class UserGrowthData {
   }
 }
 
+class OrganizationUserData {
+  final String organizationName;
+  final int memberCount;
+  final int eventParticipantCount;
+  final int totalUsers;
+
+  OrganizationUserData({
+    required this.organizationName,
+    required this.memberCount,
+    required this.eventParticipantCount,
+    required this.totalUsers,
+  });
+
+  factory OrganizationUserData.fromJson(Map<String, dynamic> json) {
+    return OrganizationUserData(
+      organizationName: json['OrganizationName'] ?? json['organizationName'] ?? '',
+      memberCount: json['MemberCount'] ?? json['memberCount'] ?? 0,
+      eventParticipantCount: json['EventParticipantCount'] ?? json['eventParticipantCount'] ?? 0,
+      totalUsers: json['TotalUsers'] ?? json['totalUsers'] ?? 0,
+    );
+  }
+}
+
 class DashboardService {
   static final DashboardService _instance = DashboardService._internal();
   factory DashboardService() => _instance;
@@ -67,29 +90,23 @@ class DashboardService {
     }
   }
 
-  Future<ApiResponse<List<UserGrowthData>>> getUserGrowth({
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+  Future<ApiResponse<List<OrganizationUserData>>> getUsersPerOrganization() async {
     if (ApiConfig.useMockApi) {
-      return await _mockService.getUserGrowth();
+      // Return mock data for now
+      return ApiResponse(
+        success: true,
+        data: [],
+        message: 'Mock data',
+        statusCode: 200,
+      );
     }
 
     try {
-      final queryParams = <String, String>{};
-      if (startDate != null) {
-        queryParams['startDate'] = startDate.toIso8601String();
-      }
-      if (endDate != null) {
-        queryParams['endDate'] = endDate.toIso8601String();
-      }
-
-      final response = await _apiService.get<List<UserGrowthData>>(
-        '/Dashboard/user-growth',
-        queryParams: queryParams,
+      final response = await _apiService.get<List<OrganizationUserData>>(
+        '/Dashboard/users-per-organization',
         fromJson: (json) {
           if (json is List) {
-            return json.map((item) => UserGrowthData.fromJson(item)).toList();
+            return json.map((item) => OrganizationUserData.fromJson(item)).toList();
           }
           return [];
         },
@@ -98,7 +115,7 @@ class DashboardService {
     } catch (e) {
       return ApiResponse(
         success: false,
-        message: 'Failed to fetch user growth data: $e',
+        message: 'Failed to fetch users per organization: $e',
         statusCode: 500,
       );
     }

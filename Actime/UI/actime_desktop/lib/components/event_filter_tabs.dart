@@ -12,25 +12,20 @@ class EventFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 16),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 8,
+        runSpacing: 8,
         children: [
           _buildFilterTab('All'),
-          const SizedBox(width: 8),
           _buildFilterTab('Pending'),
-          const SizedBox(width: 8),
           _buildFilterTab('Upcoming'),
-          const SizedBox(width: 8),
           _buildFilterTab('In Progress'),
-          const SizedBox(width: 8),
           _buildFilterTab('Completed'),
-          const SizedBox(width: 8),
           _buildFilterTab('Cancelled'),
-          const SizedBox(width: 8),
           _buildFilterTab('Postponed'),
-          const SizedBox(width: 8),
           _buildFilterTab('Rescheduled'),
         ],
       ),

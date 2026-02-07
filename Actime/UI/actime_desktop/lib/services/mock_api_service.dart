@@ -240,29 +240,6 @@ class MockApiService {
     );
   }
 
-  Future<ApiResponse<List<UserGrowthData>>> getUserGrowth() async {
-    await _simulateDelay();
-
-    return ApiResponse(
-      success: true,
-      data: [
-        UserGrowthData(month: 'Jan', count: 120),
-        UserGrowthData(month: 'Feb', count: 150),
-        UserGrowthData(month: 'Mar', count: 180),
-        UserGrowthData(month: 'Apr', count: 220),
-        UserGrowthData(month: 'May', count: 280),
-        UserGrowthData(month: 'Jun', count: 350),
-        UserGrowthData(month: 'Jul', count: 410),
-        UserGrowthData(month: 'Aug', count: 480),
-        UserGrowthData(month: 'Sep', count: 520),
-        UserGrowthData(month: 'Oct', count: 590),
-        UserGrowthData(month: 'Nov', count: 650),
-        UserGrowthData(month: 'Dec', count: 720),
-      ],
-      statusCode: 200,
-    );
-  }
-
   // USERS
   Future<ApiResponse<PaginatedResponse<User>>> getUsers({
     int page = 1,

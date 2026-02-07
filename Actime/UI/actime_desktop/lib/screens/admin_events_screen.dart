@@ -351,7 +351,8 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Organization and Status
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (event.organizationName != null)
                       Text(
@@ -362,12 +363,12 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                           color: Colors.black87,
                         ),
                       ),
-                    const SizedBox(width: 8),
+                    const SizedBox(height: 6),
                     _buildStatusBadge(event.status),
                   ],
                 ),
 
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
 
                 if (event.createdAt != null)
                   Text(
@@ -407,24 +408,22 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                 const SizedBox(height: 16),
 
                 // Event Details
-                Row(
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 8,
                   children: [
                     if (event.startDate != null)
                       _buildEventDetail(
                         Icons.calendar_today,
                         '${event.startDate!.day} ${_getMonthName(event.startDate!.month)}',
                       ),
-                    if (event.startDate != null) const SizedBox(width: 24),
                     if (event.startDate != null)
                       _buildEventDetail(
                         Icons.access_time,
                         '${event.startDate!.hour}:${event.startDate!.minute.toString().padLeft(2, '0')}',
                       ),
-                    if (event.location != null) ...[
-                      const SizedBox(width: 24),
+                    if (event.location != null)
                       _buildEventDetail(Icons.location_on, event.location!),
-                    ],
-                    const SizedBox(width: 24),
                     _buildEventDetail(
                       Icons.people,
                       '${event.participantsCount} participants',
