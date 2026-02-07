@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Actime.Controllers
 {
     [Authorize(Roles = "Admin")]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase
     {

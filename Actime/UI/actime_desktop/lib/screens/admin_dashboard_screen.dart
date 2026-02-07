@@ -92,6 +92,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             padding: const EdgeInsets.all(24),
             color: Colors.white,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
@@ -1125,75 +1126,89 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Date Range Filter
-          Icon(Icons.date_range, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 8),
-          Text(
-            'Date Range:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
-            ),
+          Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Icon(Icons.date_range, size: 20, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Text(
+                'Date Range:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                ),
+              ),
+              _buildDateButton(
+                DateFormat('MMM d, yyyy').format(_startDate),
+                () => _selectDate(isStart: true),
+              ),
+              Icon(Icons.arrow_forward, size: 16, color: Colors.grey[600]),
+              _buildDateButton(
+                DateFormat('MMM d, yyyy').format(_endDate),
+                () => _selectDate(isStart: false),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          _buildDateButton(
-            DateFormat('MMM d, yyyy').format(_startDate),
-            () => _selectDate(isStart: true),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(Icons.arrow_forward, size: 16, color: Colors.grey[600]),
-          ),
-          _buildDateButton(
-            DateFormat('MMM d, yyyy').format(_endDate),
-            () => _selectDate(isStart: false),
-          ),
-          const SizedBox(width: 24),
+
+          const SizedBox(height: 12),
 
           // Chart Type Selector
-          Icon(Icons.show_chart, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 8),
-          Text(
-            'Chart Type:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
-            ),
+          Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Icon(Icons.show_chart, size: 20, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Text(
+                'Chart Type:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                ),
+              ),
+              _buildChartTypeButton('Line', 'line', Icons.show_chart),
+              _buildChartTypeButton('Area', 'area', Icons.area_chart),
+              _buildChartTypeButton('Bar', 'bar', Icons.bar_chart),
+            ],
           ),
-          const SizedBox(width: 12),
-          _buildChartTypeButton('Line', 'line', Icons.show_chart),
-          const SizedBox(width: 8),
-          _buildChartTypeButton('Area', 'area', Icons.area_chart),
-          const SizedBox(width: 8),
-          _buildChartTypeButton('Bar', 'bar', Icons.bar_chart),
 
-          const Spacer(),
+          const SizedBox(height: 12),
 
           // Export Buttons
-          ElevatedButton.icon(
-            onPressed: _exportToPNG,
-            icon: const Icon(Icons.image, size: 18),
-            label: const Text('Export PNG'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0D7C8C),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: _exportToPDF,
-            icon: const Icon(Icons.picture_as_pdf, size: 18),
-            label: const Text('Export PDF'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
+          Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.start,
+            children: [
+              ElevatedButton.icon(
+                onPressed: _exportToPNG,
+                icon: const Icon(Icons.image, size: 18),
+                label: const Text('Export PNG'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0D7C8C),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _exportToPDF,
+                icon: const Icon(Icons.picture_as_pdf, size: 18),
+                label: const Text('Export PDF'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1206,8 +1221,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         side: BorderSide(color: Colors.grey[300]!),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,

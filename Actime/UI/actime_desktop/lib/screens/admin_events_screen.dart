@@ -197,7 +197,10 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
                       ),
                       deleteIcon: const Icon(Icons.close, size: 16),
                       onDeleted: () {
-                        setState(() => _filterDate = null);
+                        setState(() {
+                          _filterDate = null;
+                          _currentPage = 1;
+                        });
                         _loadEvents();
                       },
                     ),
@@ -216,7 +219,10 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
           EventFilterTabs(
             selectedFilter: _selectedFilter,
             onFilterChanged: (filter) {
-              setState(() => _selectedFilter = filter);
+              setState(() {
+                _selectedFilter = filter;
+                _currentPage = 1;
+              });
               _loadEvents();
             },
           ),
@@ -556,7 +562,10 @@ class _AdminEventsScreenState extends State<AdminEventsScreen> {
     );
 
     if (picked != null && mounted) {
-      setState(() => _filterDate = picked);
+      setState(() {
+        _filterDate = picked;
+        _currentPage = 1;
+      });
       _loadEvents();
     }
   }

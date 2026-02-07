@@ -31,5 +31,11 @@ namespace Actime.Controllers
         {
             return base.GetById(id);
         }
+
+        [Authorize(Roles = "Admin")]
+        public override Task<bool> Delete(int id)
+        {
+            return base.Delete(id);
+        }
     }
 }
