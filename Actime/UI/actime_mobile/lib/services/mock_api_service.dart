@@ -661,7 +661,7 @@ class MockApiService {
   // ==================== AUTH API ====================
 
   /// Login
-  Future<ApiResponse<AuthResponse>> login(String email, String password) async {
+  Future<ApiResponse<AuthResponse>> login(String emailOrUsername, String password) async {
     await _simulateDelay();
 
     // Simulate password check (any password works for mock)
@@ -669,19 +669,19 @@ class MockApiService {
       return ApiResponse.error('Unesite lozinku', statusCode: 400);
     }
 
-    // Check if logging in as organization
+    // Check if logging in as organization (by email or username)
     final org = _mockOrganizations.firstWhere(
-      (o) => o.email == email,
+      (o) => o.email == emailOrUsername,
       orElse: () => _mockOrganizations.first,
     );
 
-    final isOrgLogin = _mockOrganizations.any((o) => o.email == email);
+    final isOrgLogin = _mockOrganizations.any((o) => o.email == emailOrUsername);
 
     if (isOrgLogin) {
       // Login as organization
       final authResponse = AuthResponse(
         id: org.userId?.toString() ?? '1',
-        email: email,
+        email: emailOrUsername,
         firstName: org.name.split(' ').first,
         lastName: org.name.split(' ').length > 1 ? org.name.split(' ').last : null,
         accessToken: 'mock_access_token_org_${DateTime.now().millisecondsSinceEpoch}',
@@ -696,7 +696,7 @@ class MockApiService {
       // Login as regular user
       final authResponse = AuthResponse(
         id: '1',
-        email: email,
+        email: emailOrUsername,
         firstName: 'Amar',
         lastName: 'Hadžić',
         accessToken: 'mock_access_token_1_${DateTime.now().millisecondsSinceEpoch}',

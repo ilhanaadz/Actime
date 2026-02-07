@@ -72,15 +72,15 @@ class AuthService {
 
   bool get isOrganization => _currentAuth?.isOrganization ?? false;
 
-  Future<ApiResponse<AuthResponse>> login(String email, String password) async {
+  Future<ApiResponse<AuthResponse>> login(String emailOrUsername, String password) async {
     ApiResponse<AuthResponse> response;
 
     if (ApiConfig.useMockApi) {
-      response = await _mockService.login(email, password);
+      response = await _mockService.login(emailOrUsername, password);
     } else {
       response = await _apiService.post<AuthResponse>(
         ApiConfig.login,
-        body: {'Email': email, 'Password': password},
+        body: {'EmailOrUsername': emailOrUsername, 'Password': password},
         fromJson: (json) => AuthResponse.fromJson(json),
       );
     }

@@ -22,7 +22,7 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
@@ -30,7 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _emailOrUsernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -46,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     try {
       final response = await _authService.login(
-        _emailController.text.trim(),
+        _emailOrUsernameController.text.trim(),
         _passwordController.text,
       );
 
@@ -55,6 +55,18 @@ class _SignInScreenState extends State<SignInScreen> {
       if (response.success && response.data != null) {
         final authResponse = response.data!;
         final user = authResponse.user;
+
+        if (authResponse.isAdmin) {
+          await _authService.logout();
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Admin korisnici ne mogu pristupiti mobilnoj aplikaciji'),
+              backgroundColor: AppColors.red,
+            ),
+          );
+          return;
+        }
 
         if (user.role == UserRole.organization) {
           if (authResponse.requiresOrganizationSetup) {
@@ -138,16 +150,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Column(
                       children: [
                         ActimeTextFormField(
-                          controller: _emailController,
-                          labelText: 'Email',
-                          hintText: 'Unesite email adresu',
-                          keyboardType: TextInputType.emailAddress,
+                          controller: _emailOrUsernameController,
+                          labelText: 'Email ili korisničko ime',
+                          hintText: 'Unesite email ili korisničko ime',
+                          keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
-                          validator: Validators.compose([
-                            Validators.requiredField('Email'),
-                            Validators.email,
-                          ]),
-                          errorText: _fieldErrors['email'],
+                          validator: Validators.requiredField('Email ili korisničko ime'),
+                          errorText: _fieldErrors['emailOrUsername'],
                         ),
                         const SizedBox(height: AppDimensions.spacingLarge),
                         ActimeTextFormField(
