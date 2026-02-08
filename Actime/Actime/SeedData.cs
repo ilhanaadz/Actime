@@ -160,27 +160,93 @@ namespace Actime
 
             if (!context.Users.Any())
             {
-                var admin = new User
+                var desktopUser = new User
                 {
-                    UserName = "john.doe",
-                    Email = "admin@actime.com",
-                    FirstName = "John",
-                    LastName = "Doe",
+                    UserName = "desktop",
+                    Email = "desktop@actime.com",
+                    FirstName = "Desktop",
+                    LastName = "Admin",
                     EmailConfirmed = true,
                     PhoneNumberConfirmed = true,
                     DateOfBirth = new DateTime(1990, 1, 1)
                 };
-
-                var result = await userManager.CreateAsync(admin, "Admin123!");
-                if (result.Succeeded)
+                var desktopResult = await userManager.CreateAsync(desktopUser, "test");
+                if (desktopResult.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(desktopUser, "Admin");
                 }
 
-                string[] firstNames = { "Jane", "Mia", "Joe", "Jack", "Michael", "Lea", "Sara", "Dino", "Ema", "Una" };
-                string[] lastNames = { "Khan", "Connor", "Garcia", "Tanaka", "Popov", "Muller", "Zahra", "Silva", "Patel", "Andersson" };
+                var mobileUser = new User
+                {
+                    UserName = "mobile",
+                    Email = "mobile@actime.com",
+                    FirstName = "Mobile",
+                    LastName = "User",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    DateOfBirth = new DateTime(1995, 6, 15)
+                };
+                var mobileResult = await userManager.CreateAsync(mobileUser, "test");
+                if (mobileResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(mobileUser, "User");
+                }
 
-                for (int i = 0; i < 10; i++)
+                var adminUser = new User
+                {
+                    UserName = "admin",
+                    Email = "admin@actime.com",
+                    FirstName = "Admin",
+                    LastName = "Administrator",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    DateOfBirth = new DateTime(1988, 3, 20)
+                };
+                var adminResult = await userManager.CreateAsync(adminUser, "test");
+                if (adminResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+
+
+                var regularUser = new User
+                {
+                    UserName = "user",
+                    Email = "user@actime.com",
+                    FirstName = "Regular",
+                    LastName = "User",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    DateOfBirth = new DateTime(1992, 9, 10)
+                };
+                var regularResult = await userManager.CreateAsync(regularUser, "test");
+                if (regularResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(regularUser, "User");
+                }
+
+                var orgUser = new User
+                {
+                    UserName = "organization",
+                    Email = "organization@actime.com",
+                    FirstName = "Organization",
+                    LastName = "Manager",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    DateOfBirth = new DateTime(1985, 12, 5)
+                };
+                var orgResult = await userManager.CreateAsync(orgUser, "test");
+                if (orgResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(orgUser, "Organization");
+                }
+
+                string[] firstNames = { "Jane", "Mia", "Joe", "Jack", "Michael", "Lea", "Sara", "Dino", "Ema", "Una",
+                                       "David", "Emma", "Oliver", "Sophia", "Liam", "Ava", "Noah", "Isabella", "Ethan", "Mila" };
+                string[] lastNames = { "Khan", "Connor", "Garcia", "Tanaka", "Popov", "Muller", "Zahra", "Silva", "Patel", "Andersson",
+                                      "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Martinez", "Wilson", "Anderson" };
+
+                for (int i = 0; i < 20; i++)
                 {
                     var user = new User
                     {
@@ -190,10 +256,10 @@ namespace Actime
                         LastName = lastNames[i],
                         EmailConfirmed = true,
                         PhoneNumberConfirmed = true,
-                        DateOfBirth = new DateTime(1995 + i % 5, 1, (i % 28) + 1)
+                        DateOfBirth = new DateTime(1990 + i % 15, (i % 12) + 1, (i % 28) + 1)
                     };
 
-                    var userResult = await userManager.CreateAsync(user, "Actime123!");
+                    var userResult = await userManager.CreateAsync(user, "test");
                     if (userResult.Succeeded)
                     {
                         await userManager.AddToRoleAsync(user, "User");
@@ -239,38 +305,80 @@ namespace Actime
                 {
                     UserName = "globalhiking",
                     Email = "info@globalhiking.com",
+                    FirstName = "Global Hiking",
+                    LastName = "Club",
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(organizationUserA, "Org123!");
+                await userManager.CreateAsync(organizationUserA, "test");
                 await userManager.AddToRoleAsync(organizationUserA, "Organization");
 
                 var organizationUserB = new User
                 {
                     UserName = "sportforall",
                     Email = "contact@sportforall.org",
+                    FirstName = "Sport For All",
+                    LastName = "Association",
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(organizationUserB, "Org123!");
+                await userManager.CreateAsync(organizationUserB, "test");
                 await userManager.AddToRoleAsync(organizationUserB, "Organization");
 
                 var organizationUserC = new User
                 {
                     UserName = "fitlifegym",
                     Email = "contact@fitlifegym.com",
+                    FirstName = "FitLife",
+                    LastName = "Gym",
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(organizationUserC, "Org123!");
+                await userManager.CreateAsync(organizationUserC, "test");
                 await userManager.AddToRoleAsync(organizationUserC, "Organization");
+
+                var organizationUserD = new User
+                {
+                    UserName = "mountaineers",
+                    Email = "info@mountaineers.com",
+                    FirstName = "Mountaineers",
+                    LastName = "Association",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserD, "test");
+                await userManager.AddToRoleAsync(organizationUserD, "Organization");
+
+                var organizationUserE = new User
+                {
+                    UserName = "cityrunners",
+                    Email = "contact@cityrunners.com",
+                    FirstName = "City",
+                    LastName = "Runners",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserE, "test");
+                await userManager.AddToRoleAsync(organizationUserE, "Organization");
+
+                var organizationUserF = new User
+                {
+                    UserName = "tennisacademy",
+                    Email = "info@tennisacademy.com",
+                    FirstName = "Tennis",
+                    LastName = "Academy",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(organizationUserF, "test");
+                await userManager.AddToRoleAsync(organizationUserF, "Organization");
+
+                // Get the organization test user (UserId = 5)
+                var organizationTestUser = await userManager.FindByNameAsync("organization");
 
                 context.Organizations.AddRange(
                     new Organization
                     {
                         Name = "Global Hiking Club",
                         Email = "info@globalhiking.com",
-                        Description = "A community of nature lovers and adventure seekers.",
-                        LogoUrl = "globalhiking.png",
-                        PhoneNumber = "+12345678901",
-                        CategoryId = 1,
+                        Description = "A community of nature lovers and adventure seekers exploring the most beautiful trails in the region.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38761234567",
+                        CategoryId = 1,  // Hiking
                         AddressId = 1,
                         UserId = organizationUserA.Id
                     },
@@ -278,10 +386,10 @@ namespace Actime
                     {
                         Name = "Sport for All Association",
                         Email = "contact@sportforall.org",
-                        Description = "Promoting sports and healthy lifestyles worldwide.",
-                        LogoUrl = "sportforall.png",
-                        PhoneNumber = "+19876543210",
-                        CategoryId = 2,
+                        Description = "Promoting sports and healthy lifestyles for all ages and skill levels. Join our community of sport enthusiasts!",
+                        LogoUrl = null,
+                        PhoneNumber = "+38762345678",
+                        CategoryId = 2,  // Football
                         AddressId = 2,
                         UserId = organizationUserB.Id
                     },
@@ -289,12 +397,56 @@ namespace Actime
                     {
                         Name = "FitLife Gym",
                         Email = "contact@fitlifegym.com",
-                        Description = "Fitness center welcoming all ages and levels.",
-                        LogoUrl = "fitlife.png",
-                        PhoneNumber = "+10987654321",
-                        CategoryId = 3,
+                        Description = "Modern fitness center with state-of-the-art equipment, professional trainers, and diverse group classes.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38763456789",
+                        CategoryId = 4,  // Fitness
                         AddressId = 3,
                         UserId = organizationUserC.Id
+                    },
+                    new Organization
+                    {
+                        Name = "Mountaineers Association",
+                        Email = "info@mountaineers.com",
+                        Description = "Professional mountaineering club offering alpine climbing, winter expeditions, and safety training courses.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38764567890",
+                        CategoryId = 7,  // Alpinism
+                        AddressId = 4,
+                        UserId = organizationUserD.Id
+                    },
+                    new Organization
+                    {
+                        Name = "City Runners Club",
+                        Email = "contact@cityrunners.com",
+                        Description = "Running club for all levels - from beginners to marathon runners. Weekly group runs and training plans.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38765678901",
+                        CategoryId = 9,  // Running
+                        AddressId = 5,
+                        UserId = organizationUserE.Id
+                    },
+                    new Organization
+                    {
+                        Name = "Tennis Academy Pro",
+                        Email = "info@tennisacademy.com",
+                        Description = "Professional tennis academy with certified coaches, youth programs, and competitive training.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38766789012",
+                        CategoryId = 6,  // Tennis
+                        AddressId = 6,
+                        UserId = organizationUserF.Id
+                    },
+                    new Organization
+                    {
+                        Name = "Active Life Sports Club",
+                        Email = "organization@actime.com",
+                        Description = "Multi-sport organization offering basketball, volleyball, and fitness programs for all ages and skill levels.",
+                        LogoUrl = null,
+                        PhoneNumber = "+38767890123",
+                        CategoryId = 5,  // Basketball
+                        AddressId = 7,
+                        UserId = organizationTestUser!.Id
                     }
                 );
 
@@ -736,6 +888,121 @@ namespace Actime
                         Price = 80,
                         EventStatusId = 4,
                         ActivityTypeId = 3
+                    },
+
+                    // Active Life Sports Club events (OrganizationId = 7)
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Basketball Training for Beginners",
+                        Description = "Learn the fundamentals of basketball with our experienced coaches. Perfect for those starting out!",
+                        Start = DateTime.Now.AddDays(3),
+                        End = DateTime.Now.AddDays(3).AddHours(2),
+                        LocationId = 7,
+                        MaxParticipants = 25,
+                        IsFree = false,
+                        Price = 15,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3  // Training
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Basketball League Match",
+                        Description = "Weekly league match. Come support our team!",
+                        Start = DateTime.Now.AddDays(5),
+                        End = DateTime.Now.AddDays(5).AddHours(2),
+                        LocationId = 5,
+                        MaxParticipants = 100,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 4  // Match
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Volleyball Tournament",
+                        Description = "Monthly volleyball tournament for all members. Teams of 6 players.",
+                        Start = DateTime.Now.AddDays(8),
+                        End = DateTime.Now.AddDays(8).AddHours(4),
+                        LocationId = 7,
+                        MaxParticipants = 48,
+                        IsFree = false,
+                        Price = 10,
+                        EventStatusId = 2,
+                        ActivityTypeId = 11  // Competition
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Community Sports Day",
+                        Description = "Free community event with various sports activities, games, and prizes for all ages!",
+                        Start = DateTime.Now.AddDays(15),
+                        End = DateTime.Now.AddDays(15).AddHours(6),
+                        LocationId = 5,
+                        MaxParticipants = 200,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 12  // Celebration
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Fitness Bootcamp",
+                        Description = "High-intensity fitness bootcamp to improve strength and endurance.",
+                        Start = DateTime.Now.AddDays(6),
+                        End = DateTime.Now.AddDays(6).AddHours(1.5),
+                        LocationId = 3,
+                        MaxParticipants = 30,
+                        IsFree = false,
+                        Price = 20,
+                        EventStatusId = 2,
+                        ActivityTypeId = 3
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Youth Basketball Camp",
+                        Description = "Week-long basketball camp for youth ages 10-16. Includes coaching, drills, and scrimmages.",
+                        Start = DateTime.Now.AddDays(20),
+                        End = DateTime.Now.AddDays(25),
+                        LocationId = 7,
+                        MaxParticipants = 40,
+                        IsFree = false,
+                        Price = 150,
+                        EventStatusId = 2,
+                        ActivityTypeId = 15  // Camp
+                    },
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Sports Equipment Donation Drive",
+                        Description = "Volunteer event to collect and distribute sports equipment to local schools.",
+                        Start = DateTime.Now.AddDays(10),
+                        End = DateTime.Now.AddDays(10).AddHours(4),
+                        LocationId = 6,
+                        MaxParticipants = 50,
+                        IsFree = true,
+                        Price = 0,
+                        EventStatusId = 2,
+                        ActivityTypeId = 6  // Volunteering
+                    },
+                    // Past event for Active Life Sports Club
+                    new Event
+                    {
+                        OrganizationId = 7,
+                        Title = "Basketball Skills Workshop",
+                        Description = "Workshop focused on improving shooting and dribbling techniques.",
+                        Start = DateTime.Now.AddDays(-10),
+                        End = DateTime.Now.AddDays(-10).AddHours(3),
+                        LocationId = 7,
+                        MaxParticipants = 30,
+                        IsFree = false,
+                        Price = 25,
+                        EventStatusId = 4,  // Completed
+                        ActivityTypeId = 13  // Workshop
                     }
                 };
 
@@ -747,31 +1014,71 @@ namespace Actime
             {
                 var memberships = new List<Membership>
                 {
+                    // Mobile and regular test users as members
                     // Global Hiking Club members (OrganizationId = 1)
-                    new Membership { UserId = 2, OrganizationId = 1, MembershipStatusId = 2 },  // jane.khan - Active
-                    new Membership { UserId = 3, OrganizationId = 1, MembershipStatusId = 2 },  // mia.connor - Active
-                    new Membership { UserId = 4, OrganizationId = 1, MembershipStatusId = 2 },  // joe.garcia - Active
-                    new Membership { UserId = 5, OrganizationId = 1, MembershipStatusId = 1 },  // jack.tanaka - Pending
-                    new Membership { UserId = 6, OrganizationId = 1, MembershipStatusId = 2 },  // michael.popov - Active
-                    new Membership { UserId = 7, OrganizationId = 1, MembershipStatusId = 3 },  // lea.muller - Suspended
+                    new Membership { UserId = 2, OrganizationId = 1, MembershipStatusId = 2 },  // mobile - Active
+                    new Membership { UserId = 4, OrganizationId = 1, MembershipStatusId = 2 },  // user - Active
+                    new Membership { UserId = 11, OrganizationId = 1, MembershipStatusId = 2 }, // jane.khan - Active
+                    new Membership { UserId = 12, OrganizationId = 1, MembershipStatusId = 2 }, // mia.connor - Active
+                    new Membership { UserId = 13, OrganizationId = 1, MembershipStatusId = 2 }, // joe.garcia - Active
+                    new Membership { UserId = 14, OrganizationId = 1, MembershipStatusId = 1 }, // jack.tanaka - Pending
+                    new Membership { UserId = 15, OrganizationId = 1, MembershipStatusId = 2 }, // michael.popov - Active
+                    new Membership { UserId = 16, OrganizationId = 1, MembershipStatusId = 3 }, // lea.muller - Suspended
 
                     // Sport for All Association members (OrganizationId = 2)
-                    new Membership { UserId = 2, OrganizationId = 2, MembershipStatusId = 2 },  // jane.khan - Active
-                    new Membership { UserId = 4, OrganizationId = 2, MembershipStatusId = 2 },  // joe.garcia - Active
-                    new Membership { UserId = 5, OrganizationId = 2, MembershipStatusId = 2 },  // jack.tanaka - Active
-                    new Membership { UserId = 8, OrganizationId = 2, MembershipStatusId = 2 },  // sara.zahra - Active
-                    new Membership { UserId = 9, OrganizationId = 2, MembershipStatusId = 2 },  // dino.silva - Active
-                    new Membership { UserId = 10, OrganizationId = 2, MembershipStatusId = 1 }, // ema.patel - Pending
-                    new Membership { UserId = 11, OrganizationId = 2, MembershipStatusId = 2 }, // una.andersson - Active
+                    new Membership { UserId = 2, OrganizationId = 2, MembershipStatusId = 2 },  // mobile - Active
+                    new Membership { UserId = 4, OrganizationId = 2, MembershipStatusId = 2 },  // user - Active
+                    new Membership { UserId = 11, OrganizationId = 2, MembershipStatusId = 2 }, // jane.khan - Active
+                    new Membership { UserId = 13, OrganizationId = 2, MembershipStatusId = 2 }, // joe.garcia - Active
+                    new Membership { UserId = 14, OrganizationId = 2, MembershipStatusId = 2 }, // jack.tanaka - Active
+                    new Membership { UserId = 17, OrganizationId = 2, MembershipStatusId = 2 }, // sara.zahra - Active
+                    new Membership { UserId = 18, OrganizationId = 2, MembershipStatusId = 2 }, // dino.silva - Active
+                    new Membership { UserId = 19, OrganizationId = 2, MembershipStatusId = 1 }, // ema.patel - Pending
+                    new Membership { UserId = 20, OrganizationId = 2, MembershipStatusId = 2 }, // una.andersson - Active
 
                     // FitLife Gym members (OrganizationId = 3)
-                    new Membership { UserId = 3, OrganizationId = 3, MembershipStatusId = 2 },  // mia.connor - Active
-                    new Membership { UserId = 6, OrganizationId = 3, MembershipStatusId = 2 },  // michael.popov - Active
-                    new Membership { UserId = 7, OrganizationId = 3, MembershipStatusId = 2 },  // lea.muller - Active
-                    new Membership { UserId = 8, OrganizationId = 3, MembershipStatusId = 2 },  // sara.zahra - Active
-                    new Membership { UserId = 9, OrganizationId = 3, MembershipStatusId = 1 },  // dino.silva - Pending
-                    new Membership { UserId = 10, OrganizationId = 3, MembershipStatusId = 2 }, // ema.patel - Active
-                    new Membership { UserId = 11, OrganizationId = 3, MembershipStatusId = 5 }  // una.andersson - Expired
+                    new Membership { UserId = 2, OrganizationId = 3, MembershipStatusId = 2 },  // mobile - Active
+                    new Membership { UserId = 4, OrganizationId = 3, MembershipStatusId = 2 },  // user - Active
+                    new Membership { UserId = 12, OrganizationId = 3, MembershipStatusId = 2 }, // mia.connor - Active
+                    new Membership { UserId = 15, OrganizationId = 3, MembershipStatusId = 2 }, // michael.popov - Active
+                    new Membership { UserId = 16, OrganizationId = 3, MembershipStatusId = 2 }, // lea.muller - Active
+                    new Membership { UserId = 17, OrganizationId = 3, MembershipStatusId = 2 }, // sara.zahra - Active
+                    new Membership { UserId = 18, OrganizationId = 3, MembershipStatusId = 1 }, // dino.silva - Pending
+                    new Membership { UserId = 19, OrganizationId = 3, MembershipStatusId = 2 }, // ema.patel - Active
+                    new Membership { UserId = 20, OrganizationId = 3, MembershipStatusId = 5 }, // una.andersson - Expired
+
+                    // Mountaineers Association members (OrganizationId = 4)
+                    new Membership { UserId = 11, OrganizationId = 4, MembershipStatusId = 2 }, // jane.khan - Active
+                    new Membership { UserId = 13, OrganizationId = 4, MembershipStatusId = 2 }, // joe.garcia - Active
+                    new Membership { UserId = 15, OrganizationId = 4, MembershipStatusId = 2 }, // michael.popov - Active
+                    new Membership { UserId = 21, OrganizationId = 4, MembershipStatusId = 2 }, // david.smith - Active
+                    new Membership { UserId = 22, OrganizationId = 4, MembershipStatusId = 1 }, // emma.johnson - Pending
+
+                    // City Runners Club members (OrganizationId = 5)
+                    new Membership { UserId = 12, OrganizationId = 5, MembershipStatusId = 2 }, // mia.connor - Active
+                    new Membership { UserId = 17, OrganizationId = 5, MembershipStatusId = 2 }, // sara.zahra - Active
+                    new Membership { UserId = 23, OrganizationId = 5, MembershipStatusId = 2 }, // oliver.williams - Active
+                    new Membership { UserId = 24, OrganizationId = 5, MembershipStatusId = 2 }, // sophia.brown - Active
+                    new Membership { UserId = 25, OrganizationId = 5, MembershipStatusId = 2 }, // liam.jones - Active
+
+                    // Tennis Academy Pro members (OrganizationId = 6)
+                    new Membership { UserId = 14, OrganizationId = 6, MembershipStatusId = 2 }, // jack.tanaka - Active
+                    new Membership { UserId = 16, OrganizationId = 6, MembershipStatusId = 2 }, // lea.muller - Active
+                    new Membership { UserId = 26, OrganizationId = 6, MembershipStatusId = 2 }, // ava.miller - Active
+                    new Membership { UserId = 27, OrganizationId = 6, MembershipStatusId = 2 }, // noah.davis - Active
+                    new Membership { UserId = 28, OrganizationId = 6, MembershipStatusId = 1 }, // isabella.martinez - Pending
+
+                    // Active Life Sports Club members (OrganizationId = 7)
+                    new Membership { UserId = 2, OrganizationId = 7, MembershipStatusId = 2 },  // mobile - Active
+                    new Membership { UserId = 4, OrganizationId = 7, MembershipStatusId = 2 },  // user - Active
+                    new Membership { UserId = 13, OrganizationId = 7, MembershipStatusId = 2 }, // joe.garcia - Active
+                    new Membership { UserId = 15, OrganizationId = 7, MembershipStatusId = 2 }, // michael.popov - Active
+                    new Membership { UserId = 18, OrganizationId = 7, MembershipStatusId = 2 }, // dino.silva - Active
+                    new Membership { UserId = 21, OrganizationId = 7, MembershipStatusId = 2 }, // david.smith - Active
+                    new Membership { UserId = 23, OrganizationId = 7, MembershipStatusId = 2 }, // oliver.williams - Active
+                    new Membership { UserId = 25, OrganizationId = 7, MembershipStatusId = 2 }, // liam.jones - Active
+                    new Membership { UserId = 29, OrganizationId = 7, MembershipStatusId = 1 }, // ethan.wilson - Pending
+                    new Membership { UserId = 30, OrganizationId = 7, MembershipStatusId = 2 }  // mila.anderson - Active
                 };
 
                 await context.Memberships.AddRangeAsync(memberships);
@@ -783,160 +1090,233 @@ namespace Actime
                 var participations = new List<Participation>
                 {
                     // Annual Hiking Trip (EventId = 1)
-                    new Participation { UserId = 2, EventId = 1, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 3, EventId = 1, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 4, EventId = 1, AttendanceStatusId = 3 },  // joe.garcia - Maybe
-                    new Participation { UserId = 6, EventId = 1, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 2, EventId = 1, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 4, EventId = 1, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 11, EventId = 1, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 12, EventId = 1, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 13, EventId = 1, AttendanceStatusId = 3 }, // joe.garcia - Maybe
+                    new Participation { UserId = 15, EventId = 1, AttendanceStatusId = 2 }, // michael.popov - Going
 
                     // Weekend Mountain Adventure (EventId = 2)
-                    new Participation { UserId = 2, EventId = 2, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 3, EventId = 2, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 6, EventId = 2, AttendanceStatusId = 2 },  // michael.popov - Going
+                    new Participation { UserId = 11, EventId = 2, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 12, EventId = 2, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 15, EventId = 2, AttendanceStatusId = 2 }, // michael.popov - Going
 
                     // Beginner's Nature Walk (EventId = 3)
-                    new Participation { UserId = 5, EventId = 3, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 7, EventId = 3, AttendanceStatusId = 2 },  // lea.muller - Going
-                    new Participation { UserId = 8, EventId = 3, AttendanceStatusId = 3 },  // sara.zahra - Maybe
+                    new Participation { UserId = 2, EventId = 3, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 14, EventId = 3, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 16, EventId = 3, AttendanceStatusId = 2 }, // lea.muller - Going
+                    new Participation { UserId = 17, EventId = 3, AttendanceStatusId = 3 }, // sara.zahra - Maybe
 
                     // Night Hike Under the Stars (EventId = 4)
-                    new Participation { UserId = 2, EventId = 4, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 4, EventId = 4, AttendanceStatusId = 2 },  // joe.garcia - Going
+                    new Participation { UserId = 11, EventId = 4, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 13, EventId = 4, AttendanceStatusId = 2 }, // joe.garcia - Going
 
                     // Summer Camp Adventure (EventId = 5)
-                    new Participation { UserId = 2, EventId = 5, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 3, EventId = 5, AttendanceStatusId = 3 },  // mia.connor - Maybe
-                    new Participation { UserId = 6, EventId = 5, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 4, EventId = 5, AttendanceStatusId = 1 },  // joe.garcia - PendingResponse
+                    new Participation { UserId = 4, EventId = 5, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 11, EventId = 5, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 12, EventId = 5, AttendanceStatusId = 3 }, // mia.connor - Maybe
+                    new Participation { UserId = 15, EventId = 5, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 13, EventId = 5, AttendanceStatusId = 1 }, // joe.garcia - PendingResponse
 
                     // Photography Hike (EventId = 6)
-                    new Participation { UserId = 3, EventId = 6, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 7, EventId = 6, AttendanceStatusId = 2 },  // lea.muller - Going
+                    new Participation { UserId = 12, EventId = 6, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 16, EventId = 6, AttendanceStatusId = 2 }, // lea.muller - Going
 
                     // Trail Maintenance Volunteering (EventId = 7)
-                    new Participation { UserId = 2, EventId = 7, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 4, EventId = 7, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 6, EventId = 7, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 5, EventId = 7, AttendanceStatusId = 3 },  // jack.tanaka - Maybe
+                    new Participation { UserId = 2, EventId = 7, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 11, EventId = 7, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 13, EventId = 7, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 15, EventId = 7, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 14, EventId = 7, AttendanceStatusId = 3 }, // jack.tanaka - Maybe
 
                     // Past events participations
                     // Spring Forest Exploration (EventId = 8)
-                    new Participation { UserId = 2, EventId = 8, AttendanceStatusId = 5 },  // jane.khan - Attended
-                    new Participation { UserId = 3, EventId = 8, AttendanceStatusId = 5 },  // mia.connor - Attended
-                    new Participation { UserId = 4, EventId = 8, AttendanceStatusId = 6 },  // joe.garcia - Missed
+                    new Participation { UserId = 11, EventId = 8, AttendanceStatusId = 5 }, // jane.khan - Attended
+                    new Participation { UserId = 12, EventId = 8, AttendanceStatusId = 5 }, // mia.connor - Attended
+                    new Participation { UserId = 13, EventId = 8, AttendanceStatusId = 6 }, // joe.garcia - Missed
 
                     // Winter Hiking Challenge (EventId = 9)
-                    new Participation { UserId = 2, EventId = 9, AttendanceStatusId = 5 },  // jane.khan - Attended
-                    new Participation { UserId = 6, EventId = 9, AttendanceStatusId = 5 },  // michael.popov - Attended
+                    new Participation { UserId = 11, EventId = 9, AttendanceStatusId = 5 }, // jane.khan - Attended
+                    new Participation { UserId = 15, EventId = 9, AttendanceStatusId = 5 }, // michael.popov - Attended
 
                     // Weekly Football Training (EventId = 10)
-                    new Participation { UserId = 4, EventId = 10, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 5, EventId = 10, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 8, EventId = 10, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 9, EventId = 10, AttendanceStatusId = 2 },  // dino.silva - Going
-                    new Participation { UserId = 11, EventId = 10, AttendanceStatusId = 3 }, // una.andersson - Maybe
+                    new Participation { UserId = 2, EventId = 10, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 4, EventId = 10, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 13, EventId = 10, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 14, EventId = 10, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 17, EventId = 10, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 18, EventId = 10, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 20, EventId = 10, AttendanceStatusId = 3 }, // una.andersson - Maybe
 
                     // Inter-Club Football Match (EventId = 11)
-                    new Participation { UserId = 4, EventId = 11, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 5, EventId = 11, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 8, EventId = 11, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 9, EventId = 11, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 13, EventId = 11, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 14, EventId = 11, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 17, EventId = 11, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 18, EventId = 11, AttendanceStatusId = 2 }, // dino.silva - Going
 
                     // Youth Football Tournament (EventId = 12)
-                    new Participation { UserId = 5, EventId = 12, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 9, EventId = 12, AttendanceStatusId = 2 },  // dino.silva - Going
-                    new Participation { UserId = 11, EventId = 12, AttendanceStatusId = 2 }, // una.andersson - Going
+                    new Participation { UserId = 14, EventId = 12, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 18, EventId = 12, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 20, EventId = 12, AttendanceStatusId = 2 }, // una.andersson - Going
 
                     // Sports Day Celebration (EventId = 13)
-                    new Participation { UserId = 2, EventId = 13, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 4, EventId = 13, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 5, EventId = 13, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 8, EventId = 13, AttendanceStatusId = 3 },  // sara.zahra - Maybe
-                    new Participation { UserId = 9, EventId = 13, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 2, EventId = 13, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 11, EventId = 13, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 13, EventId = 13, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 14, EventId = 13, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 17, EventId = 13, AttendanceStatusId = 3 }, // sara.zahra - Maybe
+                    new Participation { UserId = 18, EventId = 13, AttendanceStatusId = 2 }, // dino.silva - Going
 
                     // Coaching Workshop (EventId = 14)
-                    new Participation { UserId = 4, EventId = 14, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 11, EventId = 14, AttendanceStatusId = 2 }, // una.andersson - Going
+                    new Participation { UserId = 4, EventId = 14, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 13, EventId = 14, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 20, EventId = 14, AttendanceStatusId = 2 }, // una.andersson - Going
 
                     // Team Building Sports Day (EventId = 15)
-                    new Participation { UserId = 5, EventId = 15, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 8, EventId = 15, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 9, EventId = 15, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 14, EventId = 15, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 17, EventId = 15, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 18, EventId = 15, AttendanceStatusId = 2 }, // dino.silva - Going
 
                     // Charity Football Match (EventId = 16)
-                    new Participation { UserId = 2, EventId = 16, AttendanceStatusId = 2 },  // jane.khan - Going
-                    new Participation { UserId = 4, EventId = 16, AttendanceStatusId = 2 },  // joe.garcia - Going
-                    new Participation { UserId = 5, EventId = 16, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 9, EventId = 16, AttendanceStatusId = 2 },  // dino.silva - Going
-                    new Participation { UserId = 11, EventId = 16, AttendanceStatusId = 3 }, // una.andersson - Maybe
+                    new Participation { UserId = 2, EventId = 16, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 11, EventId = 16, AttendanceStatusId = 2 }, // jane.khan - Going
+                    new Participation { UserId = 13, EventId = 16, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 14, EventId = 16, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 18, EventId = 16, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 20, EventId = 16, AttendanceStatusId = 3 }, // una.andersson - Maybe
 
                     // New Member Recruitment Day (EventId = 17)
-                    new Participation { UserId = 10, EventId = 17, AttendanceStatusId = 2 }, // ema.patel - Going
+                    new Participation { UserId = 19, EventId = 17, AttendanceStatusId = 2 }, // ema.patel - Going
 
                     // Past Sport for All events
                     // Spring Football League Finals (EventId = 18)
-                    new Participation { UserId = 4, EventId = 18, AttendanceStatusId = 5 },  // joe.garcia - Attended
-                    new Participation { UserId = 5, EventId = 18, AttendanceStatusId = 5 },  // jack.tanaka - Attended
-                    new Participation { UserId = 9, EventId = 18, AttendanceStatusId = 5 },  // dino.silva - Attended
+                    new Participation { UserId = 13, EventId = 18, AttendanceStatusId = 5 }, // joe.garcia - Attended
+                    new Participation { UserId = 14, EventId = 18, AttendanceStatusId = 5 }, // jack.tanaka - Attended
+                    new Participation { UserId = 18, EventId = 18, AttendanceStatusId = 5 }, // dino.silva - Attended
 
                     // Monthly Members Meeting (EventId = 19)
-                    new Participation { UserId = 2, EventId = 19, AttendanceStatusId = 5 },  // jane.khan - Attended
-                    new Participation { UserId = 4, EventId = 19, AttendanceStatusId = 5 },  // joe.garcia - Attended
-                    new Participation { UserId = 8, EventId = 19, AttendanceStatusId = 6 },  // sara.zahra - Missed
+                    new Participation { UserId = 11, EventId = 19, AttendanceStatusId = 5 }, // jane.khan - Attended
+                    new Participation { UserId = 13, EventId = 19, AttendanceStatusId = 5 }, // joe.garcia - Attended
+                    new Participation { UserId = 17, EventId = 19, AttendanceStatusId = 6 }, // sara.zahra - Missed
 
                     // FitLife Gym events
                     // Morning Yoga Session (EventId = 20)
-                    new Participation { UserId = 3, EventId = 20, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 7, EventId = 20, AttendanceStatusId = 2 },  // lea.muller - Going
-                    new Participation { UserId = 8, EventId = 20, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 10, EventId = 20, AttendanceStatusId = 3 }, // ema.patel - Maybe
+                    new Participation { UserId = 2, EventId = 20, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 12, EventId = 20, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 16, EventId = 20, AttendanceStatusId = 2 }, // lea.muller - Going
+                    new Participation { UserId = 17, EventId = 20, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 19, EventId = 20, AttendanceStatusId = 3 }, // ema.patel - Maybe
 
                     // HIIT Bootcamp (EventId = 21)
-                    new Participation { UserId = 3, EventId = 21, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 6, EventId = 21, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 8, EventId = 21, AttendanceStatusId = 2 },  // sara.zahra - Going
+                    new Participation { UserId = 4, EventId = 21, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 12, EventId = 21, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 15, EventId = 21, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 17, EventId = 21, AttendanceStatusId = 2 }, // sara.zahra - Going
 
                     // Volleyball Tournament (EventId = 22)
-                    new Participation { UserId = 3, EventId = 22, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 6, EventId = 22, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 7, EventId = 22, AttendanceStatusId = 2 },  // lea.muller - Going
-                    new Participation { UserId = 8, EventId = 22, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 10, EventId = 22, AttendanceStatusId = 2 }, // ema.patel - Going
+                    new Participation { UserId = 12, EventId = 22, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 15, EventId = 22, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 16, EventId = 22, AttendanceStatusId = 2 }, // lea.muller - Going
+                    new Participation { UserId = 17, EventId = 22, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 19, EventId = 22, AttendanceStatusId = 2 }, // ema.patel - Going
 
                     // Nutrition Workshop (EventId = 23)
-                    new Participation { UserId = 3, EventId = 23, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 7, EventId = 23, AttendanceStatusId = 2 },  // lea.muller - Going
-                    new Participation { UserId = 10, EventId = 23, AttendanceStatusId = 2 }, // ema.patel - Going
+                    new Participation { UserId = 12, EventId = 23, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 16, EventId = 23, AttendanceStatusId = 2 }, // lea.muller - Going
+                    new Participation { UserId = 19, EventId = 23, AttendanceStatusId = 2 }, // ema.patel - Going
 
                     // Boxing Basics (EventId = 24)
-                    new Participation { UserId = 6, EventId = 24, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 9, EventId = 24, AttendanceStatusId = 2 },  // dino.silva - Going
+                    new Participation { UserId = 15, EventId = 24, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 18, EventId = 24, AttendanceStatusId = 2 }, // dino.silva - Going
 
                     // Gym Open Day (EventId = 25)
-                    new Participation { UserId = 2, EventId = 25, AttendanceStatusId = 3 },  // jane.khan - Maybe
-                    new Participation { UserId = 5, EventId = 25, AttendanceStatusId = 2 },  // jack.tanaka - Going
-                    new Participation { UserId = 11, EventId = 25, AttendanceStatusId = 2 }, // una.andersson - Going
+                    new Participation { UserId = 2, EventId = 25, AttendanceStatusId = 3 },  // mobile - Maybe
+                    new Participation { UserId = 11, EventId = 25, AttendanceStatusId = 3 }, // jane.khan - Maybe
+                    new Participation { UserId = 14, EventId = 25, AttendanceStatusId = 2 }, // jack.tanaka - Going
+                    new Participation { UserId = 20, EventId = 25, AttendanceStatusId = 2 }, // una.andersson - Going
 
                     // Personal Training Session (EventId = 26)
-                    new Participation { UserId = 6, EventId = 26, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 10, EventId = 26, AttendanceStatusId = 2 }, // ema.patel - Going
+                    new Participation { UserId = 4, EventId = 26, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 15, EventId = 26, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 19, EventId = 26, AttendanceStatusId = 2 }, // ema.patel - Going
 
                     // Fitness Challenge Month Kickoff (EventId = 27)
-                    new Participation { UserId = 3, EventId = 27, AttendanceStatusId = 2 },  // mia.connor - Going
-                    new Participation { UserId = 6, EventId = 27, AttendanceStatusId = 2 },  // michael.popov - Going
-                    new Participation { UserId = 7, EventId = 27, AttendanceStatusId = 2 },  // lea.muller - Going
-                    new Participation { UserId = 8, EventId = 27, AttendanceStatusId = 2 },  // sara.zahra - Going
-                    new Participation { UserId = 10, EventId = 27, AttendanceStatusId = 2 }, // ema.patel - Going
+                    new Participation { UserId = 2, EventId = 27, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 12, EventId = 27, AttendanceStatusId = 2 }, // mia.connor - Going
+                    new Participation { UserId = 15, EventId = 27, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 16, EventId = 27, AttendanceStatusId = 2 }, // lea.muller - Going
+                    new Participation { UserId = 17, EventId = 27, AttendanceStatusId = 2 }, // sara.zahra - Going
+                    new Participation { UserId = 19, EventId = 27, AttendanceStatusId = 2 }, // ema.patel - Going
 
                     // Past FitLife Gym events
                     // Weight Loss Challenge Finale (EventId = 28)
-                    new Participation { UserId = 3, EventId = 28, AttendanceStatusId = 5 },  // mia.connor - Attended
-                    new Participation { UserId = 7, EventId = 28, AttendanceStatusId = 5 },  // lea.muller - Attended
-                    new Participation { UserId = 8, EventId = 28, AttendanceStatusId = 5 },  // sara.zahra - Attended
-                    new Participation { UserId = 10, EventId = 28, AttendanceStatusId = 6 }, // ema.patel - Missed
+                    new Participation { UserId = 12, EventId = 28, AttendanceStatusId = 5 }, // mia.connor - Attended
+                    new Participation { UserId = 16, EventId = 28, AttendanceStatusId = 5 }, // lea.muller - Attended
+                    new Participation { UserId = 17, EventId = 28, AttendanceStatusId = 5 }, // sara.zahra - Attended
+                    new Participation { UserId = 19, EventId = 28, AttendanceStatusId = 6 }, // ema.patel - Missed
 
                     // Marathon Training Program Start (EventId = 29)
-                    new Participation { UserId = 6, EventId = 29, AttendanceStatusId = 5 },  // michael.popov - Attended
-                    new Participation { UserId = 8, EventId = 29, AttendanceStatusId = 5 }   // sara.zahra - Attended
+                    new Participation { UserId = 15, EventId = 29, AttendanceStatusId = 5 }, // michael.popov - Attended
+                    new Participation { UserId = 17, EventId = 29, AttendanceStatusId = 5 }, // sara.zahra - Attended
+
+                    // Active Life Sports Club events
+                    // Basketball Training for Beginners (EventId = 30)
+                    new Participation { UserId = 2, EventId = 30, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 4, EventId = 30, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 13, EventId = 30, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 21, EventId = 30, AttendanceStatusId = 2 }, // david.smith - Going
+                    new Participation { UserId = 23, EventId = 30, AttendanceStatusId = 3 }, // oliver.williams - Maybe
+
+                    // Basketball League Match (EventId = 31)
+                    new Participation { UserId = 2, EventId = 31, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 13, EventId = 31, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 15, EventId = 31, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 18, EventId = 31, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 21, EventId = 31, AttendanceStatusId = 2 }, // david.smith - Going
+                    new Participation { UserId = 25, EventId = 31, AttendanceStatusId = 2 }, // liam.jones - Going
+
+                    // Volleyball Tournament (EventId = 32)
+                    new Participation { UserId = 4, EventId = 32, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 13, EventId = 32, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 15, EventId = 32, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 18, EventId = 32, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 23, EventId = 32, AttendanceStatusId = 2 }, // oliver.williams - Going
+                    new Participation { UserId = 30, EventId = 32, AttendanceStatusId = 2 }, // mila.anderson - Going
+
+                    // Community Sports Day (EventId = 33)
+                    new Participation { UserId = 2, EventId = 33, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 4, EventId = 33, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 13, EventId = 33, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 15, EventId = 33, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 18, EventId = 33, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 21, EventId = 33, AttendanceStatusId = 2 }, // david.smith - Going
+                    new Participation { UserId = 25, EventId = 33, AttendanceStatusId = 3 }, // liam.jones - Maybe
+                    new Participation { UserId = 30, EventId = 33, AttendanceStatusId = 2 }, // mila.anderson - Going
+
+                    // Fitness Bootcamp (EventId = 34)
+                    new Participation { UserId = 2, EventId = 34, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 15, EventId = 34, AttendanceStatusId = 2 }, // michael.popov - Going
+                    new Participation { UserId = 21, EventId = 34, AttendanceStatusId = 2 }, // david.smith - Going
+                    new Participation { UserId = 23, EventId = 34, AttendanceStatusId = 2 }, // oliver.williams - Going
+
+                    // Youth Basketball Camp (EventId = 35)
+                    new Participation { UserId = 13, EventId = 35, AttendanceStatusId = 2 }, // joe.garcia - Going
+                    new Participation { UserId = 21, EventId = 35, AttendanceStatusId = 2 }, // david.smith - Going
+                    new Participation { UserId = 25, EventId = 35, AttendanceStatusId = 1 }, // liam.jones - PendingResponse
+
+                    // Sports Equipment Donation Drive (EventId = 36)
+                    new Participation { UserId = 2, EventId = 36, AttendanceStatusId = 2 },  // mobile - Going
+                    new Participation { UserId = 4, EventId = 36, AttendanceStatusId = 2 },  // user - Going
+                    new Participation { UserId = 18, EventId = 36, AttendanceStatusId = 2 }, // dino.silva - Going
+                    new Participation { UserId = 23, EventId = 36, AttendanceStatusId = 2 }, // oliver.williams - Going
+                    new Participation { UserId = 30, EventId = 36, AttendanceStatusId = 2 }, // mila.anderson - Going
+
+                    // Basketball Skills Workshop (EventId = 37 - Past event)
+                    new Participation { UserId = 13, EventId = 37, AttendanceStatusId = 5 }, // joe.garcia - Attended
+                    new Participation { UserId = 15, EventId = 37, AttendanceStatusId = 5 }, // michael.popov - Attended
+                    new Participation { UserId = 21, EventId = 37, AttendanceStatusId = 5 }, // david.smith - Attended
+                    new Participation { UserId = 25, EventId = 37, AttendanceStatusId = 6 }  // liam.jones - Missed
                 };
 
                 await context.Participations.AddRangeAsync(participations);
@@ -958,7 +1338,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 3,
+                        UserId = 11,
                         OrganizationId = 1,
                         Score = 5,
                         Text = "Best hiking club in the region! I've made so many friends here.",
@@ -966,7 +1346,15 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 4,
+                        UserId = 12,
+                        OrganizationId = 1,
+                        Score = 5,
+                        Text = "The trails are beautiful and the group is very friendly. Highly recommend!",
+                        CreatedAt = DateTime.Now.AddDays(-22)
+                    },
+                    new Review
+                    {
+                        UserId = 13,
                         OrganizationId = 1,
                         Score = 4,
                         Text = "Very well organized events. Would love to see more beginner-friendly options.",
@@ -974,7 +1362,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 6,
+                        UserId = 15,
                         OrganizationId = 1,
                         Score = 5,
                         Text = "The annual hiking trip was unforgettable! Can't wait for next year.",
@@ -1000,15 +1388,31 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 5,
+                        UserId = 11,
                         OrganizationId = 2,
                         Score = 5,
-                        Text = "The youth tournament was perfectly organized. My kids loved it!",
+                        Text = "The best sports association I've ever joined. Everyone is so welcoming!",
+                        CreatedAt = DateTime.Now.AddDays(-19)
+                    },
+                    new Review
+                    {
+                        UserId = 13,
+                        OrganizationId = 2,
+                        Score = 5,
+                        Text = "Professional training and great team spirit. Love the competitive atmosphere!",
                         CreatedAt = DateTime.Now.AddDays(-18)
                     },
                     new Review
                     {
-                        UserId = 8,
+                        UserId = 14,
+                        OrganizationId = 2,
+                        Score = 5,
+                        Text = "The youth tournament was perfectly organized. My kids loved it!",
+                        CreatedAt = DateTime.Now.AddDays(-14)
+                    },
+                    new Review
+                    {
+                        UserId = 17,
                         OrganizationId = 2,
                         Score = 4,
                         Text = "Good variety of events. The charity matches are a wonderful initiative.",
@@ -1016,7 +1420,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 9,
+                        UserId = 18,
                         OrganizationId = 2,
                         Score = 5,
                         Text = "Best sports club I've ever been part of! Friendly atmosphere and professional training.",
@@ -1024,7 +1428,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 11,
+                        UserId = 20,
                         OrganizationId = 2,
                         Score = 4,
                         Text = "Great facilities and well-maintained equipment. Would recommend to anyone.",
@@ -1034,7 +1438,7 @@ namespace Actime
                     // Reviews for FitLife Gym (OrganizationId = 3)
                     new Review
                     {
-                        UserId = 3,
+                        UserId = 2,
                         OrganizationId = 3,
                         Score = 5,
                         Text = "Excellent gym with modern equipment. The trainers are very supportive!",
@@ -1042,15 +1446,31 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 6,
+                        UserId = 4,
                         OrganizationId = 3,
-                        Score = 4,
-                        Text = "Good variety of classes. The HIIT bootcamp is intense but effective!",
+                        Score = 5,
+                        Text = "The personal training sessions are amazing. I've seen great results!",
+                        CreatedAt = DateTime.Now.AddDays(-23)
+                    },
+                    new Review
+                    {
+                        UserId = 12,
+                        OrganizationId = 3,
+                        Score = 5,
+                        Text = "Love this gym! Clean, modern, and the staff is incredibly helpful.",
                         CreatedAt = DateTime.Now.AddDays(-21)
                     },
                     new Review
                     {
-                        UserId = 7,
+                        UserId = 15,
+                        OrganizationId = 3,
+                        Score = 4,
+                        Text = "Good variety of classes. The HIIT bootcamp is intense but effective!",
+                        CreatedAt = DateTime.Now.AddDays(-17)
+                    },
+                    new Review
+                    {
+                        UserId = 16,
                         OrganizationId = 3,
                         Score = 5,
                         Text = "Love the yoga sessions! Perfect way to start my mornings.",
@@ -1058,7 +1478,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 8,
+                        UserId = 17,
                         OrganizationId = 3,
                         Score = 5,
                         Text = "The nutrition workshop changed my approach to fitness. Highly valuable!",
@@ -1066,7 +1486,7 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 10,
+                        UserId = 19,
                         OrganizationId = 3,
                         Score = 4,
                         Text = "Clean facilities and friendly staff. The personal training is worth the price.",
@@ -1074,10 +1494,138 @@ namespace Actime
                     },
                     new Review
                     {
-                        UserId = 11,
+                        UserId = 20,
                         OrganizationId = 3,
                         Score = 3,
                         Text = "Good gym overall. Sometimes it gets too crowded during peak hours.",
+                        CreatedAt = DateTime.Now.AddDays(-3)
+                    },
+
+                    // Reviews for Mountaineers Association (OrganizationId = 4)
+                    new Review
+                    {
+                        UserId = 11,
+                        OrganizationId = 4,
+                        Score = 5,
+                        Text = "Professional mountaineering club with excellent safety standards!",
+                        CreatedAt = DateTime.Now.AddDays(-20)
+                    },
+                    new Review
+                    {
+                        UserId = 13,
+                        OrganizationId = 4,
+                        Score = 5,
+                        Text = "The alpine climbing courses are top-notch. Learned so much!",
+                        CreatedAt = DateTime.Now.AddDays(-15)
+                    },
+                    new Review
+                    {
+                        UserId = 21,
+                        OrganizationId = 4,
+                        Score = 4,
+                        Text = "Great club for serious mountaineers. The expeditions are challenging and rewarding.",
+                        CreatedAt = DateTime.Now.AddDays(-12)
+                    },
+
+                    // Reviews for City Runners Club (OrganizationId = 5)
+                    new Review
+                    {
+                        UserId = 12,
+                        OrganizationId = 5,
+                        Score = 5,
+                        Text = "Perfect for runners of all levels! The training plans are excellent.",
+                        CreatedAt = DateTime.Now.AddDays(-18)
+                    },
+                    new Review
+                    {
+                        UserId = 17,
+                        OrganizationId = 5,
+                        Score = 5,
+                        Text = "Great running community! The weekly group runs are so motivating.",
+                        CreatedAt = DateTime.Now.AddDays(-14)
+                    },
+                    new Review
+                    {
+                        UserId = 23,
+                        OrganizationId = 5,
+                        Score = 4,
+                        Text = "Helped me prepare for my first marathon. Supportive and knowledgeable coaches!",
+                        CreatedAt = DateTime.Now.AddDays(-9)
+                    },
+
+                    // Reviews for Tennis Academy Pro (OrganizationId = 6)
+                    new Review
+                    {
+                        UserId = 14,
+                        OrganizationId = 6,
+                        Score = 5,
+                        Text = "Excellent tennis academy! My skills have improved dramatically.",
+                        CreatedAt = DateTime.Now.AddDays(-16)
+                    },
+                    new Review
+                    {
+                        UserId = 16,
+                        OrganizationId = 6,
+                        Score = 5,
+                        Text = "Professional coaches and great facilities. Highly recommend for competitive players!",
+                        CreatedAt = DateTime.Now.AddDays(-11)
+                    },
+                    new Review
+                    {
+                        UserId = 26,
+                        OrganizationId = 6,
+                        Score = 4,
+                        Text = "Good tennis academy with structured programs. Worth the investment!",
+                        CreatedAt = DateTime.Now.AddDays(-7)
+                    },
+
+                    // Reviews for Active Life Sports Club (OrganizationId = 7)
+                    new Review
+                    {
+                        UserId = 2,
+                        OrganizationId = 7,
+                        Score = 5,
+                        Text = "Great multi-sport club! The basketball training is excellent and the coaches are very supportive.",
+                        CreatedAt = DateTime.Now.AddDays(-15)
+                    },
+                    new Review
+                    {
+                        UserId = 4,
+                        OrganizationId = 7,
+                        Score = 5,
+                        Text = "Best sports club in the area! Diverse activities and friendly atmosphere.",
+                        CreatedAt = DateTime.Now.AddDays(-12)
+                    },
+                    new Review
+                    {
+                        UserId = 13,
+                        OrganizationId = 7,
+                        Score = 4,
+                        Text = "Really enjoying the basketball league. Good competition and well organized.",
+                        CreatedAt = DateTime.Now.AddDays(-10)
+                    },
+                    new Review
+                    {
+                        UserId = 15,
+                        OrganizationId = 7,
+                        Score = 5,
+                        Text = "The fitness bootcamp is challenging but very effective! Highly recommend.",
+                        CreatedAt = DateTime.Now.AddDays(-8)
+                    },
+                    new Review
+                    {
+                        UserId = 21,
+                        OrganizationId = 7,
+                        Score = 5,
+                        Text = "Excellent facilities and professional staff. The volleyball tournaments are always fun!",
+                        CreatedAt = DateTime.Now.AddDays(-5)
+                    },
+                    new Review
+                    {
+                        UserId = 23,
+                        OrganizationId = 7,
+                        Score = 4,
+                        Text = "Good variety of sports activities. The community events are great for families.",
                         CreatedAt = DateTime.Now.AddDays(-3)
                     }
                 };
