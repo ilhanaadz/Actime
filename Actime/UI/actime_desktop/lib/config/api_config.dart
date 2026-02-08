@@ -2,8 +2,16 @@
 ///
 /// This class contains all API-related configuration settings.
 class ApiConfig {
-  // Base URL for the API - Update this to match your backend server
-  static const String baseUrl = 'http://localhost:5171';
+  // Base URL for the API - Can be overridden at compile time
+  // Default: http://localhost:8080 (Docker)
+  // For local development: flutter run --dart-define=BASE_URL=http://localhost:5171
+  //
+  // To override at compile/run time, use:
+  // flutter run --dart-define=BASE_URL=http://your-api-url:port
+  static const String baseUrl = String.fromEnvironment(
+    'BASE_URL',
+    defaultValue: 'http://localhost:8080',
+  );
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);

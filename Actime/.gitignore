@@ -30,13 +30,15 @@ artifacts/
 # ============================================
 # Environment & Secrets
 # ============================================
-.env
+# .env - Allowed in order to make testing easier (faculty project requirement)
+# .env
 .env.local
 .env.*.local
 !.env.example
+
 appsettings.*.json
 !appsettings.json
-!appsettings.Development.json
+!appsettings.Development.json.example
 
 # ============================================
 # Docker

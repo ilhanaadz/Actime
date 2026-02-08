@@ -1,0 +1,150 @@
+services:
+  # ============================================
+  # SQL Server Database
+  # ============================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: actime-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - actime-network
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${DB_PASSWORD}" -C -Q "SELECT 1" || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    
+  # ============================================
+  # RabbitMQ
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: actime-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    networks:
+      - actime-network
+    restart: unless-stopped
+
+  # ============================================
+  # MailHog (Development SMTP Server)
+  # ============================================
+  mailhog:
+    image: mailhog/mailhog
+    container_name: actime-mailhog
+    ports:
+      - "1025:1025"     # SMTP
+      - "8025:8025"     # Web UI
+    networks:
+      - actime-network
+    restart: unless-stopped
+
+  # ============================================
+  # ASP.NET Core Web API
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: actime-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Actime;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;Encrypt=False;
+      - JwtSettings__SecretKey=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER:-Actime}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-ActimeApp}
+      - JwtSettings__AccessTokenExpirationMinutes=${JWT_ACCESS_EXPIRATION:-15}
+      - JwtSettings__RefreshTokenExpirationDays=${JWT_REFRESH_EXPIRATION:-7}
+      - EmailSettings__SmtpHost=${SMTP_HOST:-mailhog}
+      - EmailSettings__SmtpPort=${SMTP_PORT:-1025}
+      - EmailSettings__SmtpUsername=${SMTP_USERNAME:-}
+      - EmailSettings__SmtpPassword=${SMTP_PASSWORD:-}
+      - EmailSettings__FromEmail=${SMTP_FROM_EMAIL:-noreply@actime.com}
+      - EmailSettings__FromName=${SMTP_FROM_NAME:-Actime}
+      - EmailSettings__EnableSsl=${SMTP_ENABLE_SSL:-false}
+      - EmailSettings__FrontendBaseUrl=${FRONTEND_URL:-http://localhost:3000}
+      - AdminSettings__Email=${ADMIN_EMAIL:-admin@actime.com}
+      - AdminSettings__Password=${ADMIN_PASSWORD:-Admin123!}
+      - RabbitMqSettings__Host=${RABBITMQ_HOST:-rabbitmq}
+      - RabbitMqSettings__Port=${RABBITMQ_PORT:-5672}
+      - RabbitMqSettings__Username=${RABBITMQ_USERNAME:-guest}
+      - RabbitMqSettings__Password=${RABBITMQ_PASSWORD:-guest}
+      - StripeSettings__SecretKey=${STRIPE_SECRET_KEY}
+      - StripeSettings__WebhookSecret=${STRIPE_WEBHOOK_SECRET}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    networks:
+      - actime-network
+    restart: unless-stopped
+
+  # ============================================
+  # Subscriber Service
+  # ============================================
+  subscriber:
+    build:
+      context: .
+      dockerfile: Actime.Subscriber/Dockerfile
+    container_name: actime-subscriber
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Actime;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;Encrypt=False;
+      - RabbitMqSettings__Host=${RABBITMQ_HOST:-rabbitmq}
+      - RabbitMqSettings__Port=${RABBITMQ_PORT:-5672}
+      - RabbitMqSettings__Username=${RABBITMQ_USERNAME:-guest}
+      - RabbitMqSettings__Password=${RABBITMQ_PASSWORD:-guest}
+      - SignalR__HubUrl=${SIGNALR_HUB_URL:-http://api:8080/notificationHub}
+      - EmailSettings__SmtpHost=mailhog
+      - EmailSettings__SmtpPort=1025
+      - EmailSettings__SmtpUsername=
+      - EmailSettings__SmtpPassword=
+      - EmailSettings__FromEmail=noreply@actime.com
+      - EmailSettings__FromName=Actime
+      - EmailSettings__EnableSsl=false
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      api:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    networks:
+      - actime-network
+    restart: unless-stopped
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  actime-network:
+    driver: bridge
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  sqlserver_data:
+    driver: local

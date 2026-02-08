@@ -1,4 +1,5 @@
 ﻿using Actime.Model.Entities;
+using Actime.Model.Settings;
 using Actime.Services.Interfaces;
 using EasyNetQ;
 using Microsoft.Extensions.Logging;
@@ -99,17 +100,5 @@ namespace Actime.Services.Services
                 _logger.LogError(ex, "Failed to queue email for {Email}", to);
             }
         }
-    }
-
-    public class EmailSettings
-    {
-        public string SmtpHost { get; set; } = null!;
-        public int SmtpPort { get; set; }
-        public string SmtpUsername { get; set; } = null!;
-        public string SmtpPassword { get; set; } = null!;
-        public string FromEmail { get; set; } = null!;
-        public string FromName { get; set; } = null!;
-        public bool EnableSsl { get; set; } = true;
-        public string FrontendBaseUrl { get; set; } = null!; // Za linkove u emailovima
     }
 }

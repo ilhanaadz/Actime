@@ -8,7 +8,7 @@ class ApiConfig {
   static const bool useMockApi = false;
 
   // Base URL for the API - Can be overridden at compile time
-  // Default: http://10.0.2.2:5171 (Android emulator)
+  // Default: http://10.0.2.2:8080 (Android emulator - Docker)
   // For Android emulator use: http://10.0.2.2:8080
   // For iOS simulator use: http://localhost:8080
   // For physical device use your computer's IP: http://192.168.x.x:8080
@@ -18,7 +18,7 @@ class ApiConfig {
   // flutter build apk --dart-define=BASE_URL=http://your-api-url:port
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://10.0.2.2:5171',
+    defaultValue: 'http://10.0.2.2:8080',
   );
 
   // SignalR Hub URL for real-time notifications

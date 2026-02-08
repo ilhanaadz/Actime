@@ -12,6 +12,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+// Load .env file if exists (for local development)
+// Try multiple possible locations for .env file
+var possibleEnvPaths = new[]
+{
+    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".env"),  // From bin/Debug/net8.0
+    Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"),              // From Actime folder
+    Path.Combine(Directory.GetCurrentDirectory(), ".env")                      // Current directory
+};
+
+foreach (var envPath in possibleEnvPaths)
+{
+    var fullPath = Path.GetFullPath(envPath);
+    if (File.Exists(fullPath))
+    {
+        DotNetEnv.Env.Load(fullPath);
+        Console.WriteLine($"Loaded .env from: {fullPath}");
+        break;
+    }
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 //NOTE: Explore lifetimes: https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes
@@ -47,10 +67,11 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMqSettings"));
 
-// RabbitMQ configuration
-var rabbitMqSettings = builder.Configuration.GetSection("RabbitMqSettings").Get<RabbitMqSettings>()
-    ?? new RabbitMqSettings();
-builder.Services.AddEasyNetQ(rabbitMqSettings.GetConnectionString());
+var rabbitMqSettings = builder.Configuration
+    .GetSection("RabbitMqSettings")
+    .Get<RabbitMqSettings>();
+
+builder.Services.AddEasyNetQ(rabbitMqSettings!.GetConnectionString());
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -100,6 +121,16 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 .AddDefaultTokenProviders();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+
+// Validate required configuration
+if (string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey is not configured. " +
+        "Please set JwtSettings__SecretKey environment variable or add it to .env file. " +
+        "Example: JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtLeast32CharactersLong!");
+}
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 builder.Services.AddAuthentication(options =>
