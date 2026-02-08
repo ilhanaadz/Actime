@@ -12,10 +12,12 @@ namespace Actime.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IWebHostEnvironment _env;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IWebHostEnvironment env)
         {
             _authService = authService;
+            _env = env;
         }
 
         [HttpPost("login")]
@@ -89,17 +91,42 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Confirm email address
+        /// Confirm email address (API - JSON)
         /// </summary>
-        /// <remarks>
-        /// This is called when the user clicks the link in the email.
-        /// The frontend needs to parse userId and token from the URL.
-        /// </remarks>
         [HttpPost("confirm-email")]
         public async Task<ActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
         {
             await _authService.ConfirmEmailAsync(request);
             return Ok(new { message = "Email confirmed successfully. You can now log in." });
+        }
+
+        /// <summary>
+        /// Confirm email address (Browser - HTML)
+        /// </summary>
+        /// <remarks>
+        /// This is the link the user clicks from the confirmation email.
+        /// </remarks>
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmailFromLink([FromQuery] int userId, [FromQuery] string token)
+        {
+            try
+            {
+                await _authService.ConfirmEmailAsync(new ConfirmEmailRequest
+                {
+                    UserId = userId,
+                    Token = token
+                });
+
+                return PhysicalFile(
+                    Path.Combine(_env.WebRootPath, "email-pages", "confirm-success.html"),
+                    "text/html");
+            }
+            catch
+            {
+                return PhysicalFile(
+                    Path.Combine(_env.WebRootPath, "email-pages", "confirm-error.html"),
+                    "text/html");
+            }
         }
 
         /// <summary>
@@ -127,17 +154,28 @@ namespace Actime.Controllers
         }
 
         /// <summary>
-        /// Reset password with token
+        /// Reset password with token (API - JSON)
         /// </summary>
-        /// <remarks>
-        /// This is called when the user fills out the new password form.
-        /// The token comes from the URL (email link).
-        /// </remarks>
         [HttpPost("reset-password")]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             await _authService.ResetPasswordAsync(request);
             return Ok(new { message = "Password has been reset successfully. You can now log in with your new password." });
+        }
+
+        /// <summary>
+        /// Reset password form (Browser - HTML)
+        /// </summary>
+        /// <remarks>
+        /// This is the link the user clicks from the password reset email.
+        /// The static HTML reads email/token from URL query params via JavaScript.
+        /// </remarks>
+        [HttpGet("reset-password")]
+        public IActionResult ResetPasswordForm()
+        {
+            return PhysicalFile(
+                Path.Combine(_env.WebRootPath, "email-pages", "reset-password.html"),
+                "text/html");
         }
 
         /// <summary>
@@ -207,5 +245,6 @@ namespace Actime.Controllers
 
             return userId;
         }
+
     }
 }

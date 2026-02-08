@@ -89,7 +89,15 @@ namespace Actime.Services.Services
             {
                 using var client = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort);
                 client.EnableSsl = _settings.EnableSsl;
-                client.Credentials = new NetworkCredential(_settings.SmtpUsername, _settings.SmtpPassword);
+
+                if (!string.IsNullOrEmpty(_settings.SmtpUsername))
+                {
+                    client.Credentials = new NetworkCredential(_settings.SmtpUsername, _settings.SmtpPassword);
+                }
+                else
+                {
+                    client.UseDefaultCredentials = false;
+                }
 
                 var message = new MailMessage
                 {

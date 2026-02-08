@@ -34,17 +34,10 @@ builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IGalleryImageService, GalleryImageService>();
 builder.Services.AddTransient<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddSingleton<IEventRecommenderService, EventRecommenderService>();
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddScoped<IEmailService, DummyEmailService>();
-}
-else
-{
-    builder.Services.AddScoped<IEmailService, EmailService>();
-}
 
 builder.Services.AddHostedService<EventRecommenderBackgroundService>();
 
@@ -87,6 +80,14 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.User.RequireUniqueEmail = true;
+
+    // Relaxed password requirements for easier testing/development
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 4;
+    options.Password.RequiredUniqueChars = 1;
 })
 .AddEntityFrameworkStores<ActimeContext>()
 .AddDefaultTokenProviders();
@@ -224,7 +225,8 @@ app.UseStaticFiles();
 
 app.UseCors("SignalRPolicy");
 
-app.UseHttpsRedirection();
+// HTTPS redirection disabled for development (using HTTP only to avoid self-signed certificate issues)
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

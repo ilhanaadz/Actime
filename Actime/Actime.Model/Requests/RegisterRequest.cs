@@ -10,7 +10,7 @@ namespace Actime.Model.Requests
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Korisničko ime je obavezno")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Korisničko ime mora imati između 3 i 50 znakova")]
-        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Korisničko ime može sadržavati samo slova, brojeve i donju crtu")]
+        [RegularExpression(@"^[a-zA-Z0-9_.]+$", ErrorMessage = "Korisničko ime može sadržavati samo slova, brojeve, donju crtu i tačku")]
         public required string Username { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Email je obavezan")]
