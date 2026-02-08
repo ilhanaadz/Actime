@@ -579,7 +579,7 @@ class _EditOrganizationProfileScreenState
 
             // Category dropdown
             DropdownButtonFormField<String>(
-              value: _selectedCategoryId,
+              initialValue: _selectedCategoryId,
               decoration: InputDecoration(
                 labelText: 'Category',
                 enabledBorder: UnderlineInputBorder(

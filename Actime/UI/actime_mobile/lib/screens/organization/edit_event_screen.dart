@@ -112,7 +112,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
     _eventNameController.text = _event!.name;
     _descriptionController.text = _event!.description ?? '';
-    _priceController.text = _event!.price?.toString() ?? '';
+    _priceController.text = _event!.price.toString() ?? '';
     _maxParticipantsController.text = _event!.maxParticipants?.toString() ?? '';
 
     _selectedDate = _event!.startDate;

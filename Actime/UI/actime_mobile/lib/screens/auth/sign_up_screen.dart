@@ -7,7 +7,6 @@ import '../../models/models.dart';
 import '../../utils/validators.dart';
 import '../../utils/form_error_handler.dart';
 import '../organization/complete_signup_screen.dart';
-import '../landing/landing_logged_screen.dart';
 import '../landing/landing_not_logged_screen.dart';
 import 'email_confirmation_screen.dart';
 

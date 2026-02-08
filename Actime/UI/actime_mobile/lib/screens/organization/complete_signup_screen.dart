@@ -620,7 +620,7 @@ class _CompleteSignUpScreenState extends State<CompleteSignUpScreen> {
                         ),
                       )
                     : DropdownButtonFormField<String>(
-                        value: _selectedCategoryId,
+                        initialValue: _selectedCategoryId,
                         decoration: InputDecoration(
                           labelText: 'Category',
                           hintText: 'Odaberi kategoriju',

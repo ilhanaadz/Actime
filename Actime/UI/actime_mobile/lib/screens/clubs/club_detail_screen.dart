@@ -285,11 +285,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             if (_organization!.phone != null &&
                 _organization!.phone!.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
-            if (_organization!.email != null &&
-                _organization!.email!.isNotEmpty)
-              InfoRow(icon: Icons.email_outlined, text: _organization!.email!),
-            if (_organization!.email != null &&
-                _organization!.email!.isNotEmpty)
+            if (_organization!.email.isNotEmpty)
+              InfoRow(icon: Icons.email_outlined, text: _organization!.email),
+            if (_organization!.email.isNotEmpty)
               const SizedBox(height: AppDimensions.spacingMedium),
             if (_organization!.address != null &&
                 _organization!.address!.isNotEmpty)

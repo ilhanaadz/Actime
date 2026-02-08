@@ -2,15 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../components/info_row.dart';
-import '../../components/circle_icon_container.dart';
-import '../../components/notification_badge.dart';
 import '../../components/actime_button.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import 'edit_organization_profile_screen.dart';
 import '../../components/bottom_nav_org.dart';
 import '../auth/sign_in_screen.dart';
-import '../notifications/notifications_screen.dart';
 import '../user/change_password_screen.dart';
 
 class OrganizationProfileScreen extends StatefulWidget {
