@@ -20,11 +20,19 @@ class AppNotification {
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
+    final String? titleFromJson = json['Title'] as String? ?? json['title'] as String?;
+    final String? messageFromJson = json['Message'] as String? ?? json['message'] as String?;
+
+    // If Title is missing, use Message as title
+    final String effectiveTitle = titleFromJson?.isNotEmpty == true
+        ? titleFromJson!
+        : (messageFromJson ?? '');
+
     return AppNotification(
       id: _parseInt(json['Id'] ?? json['id']) ?? 0,
       userId: _parseInt(json['UserId'] ?? json['userId']) ?? 0,
-      title: json['Title'] as String? ?? json['title'] as String? ?? '',
-      message: json['Message'] as String? ?? json['message'] as String?,
+      title: effectiveTitle,
+      message: messageFromJson,
       isRead: json['IsRead'] as bool? ?? json['isRead'] as bool? ?? false,
       createdAt: _parseDateTime(json['CreatedAt'] ?? json['createdAt']) ?? DateTime.now(),
       readAt: _parseDateTime(json['ReadAt'] ?? json['readAt']),

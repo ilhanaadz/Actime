@@ -2,15 +2,21 @@
 using Actime.Model.SearchObjects;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
+using EasyNetQ;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using MembershipNotificationMessage = Actime.Model.Entities.MembershipNotificationMessage;
 
 namespace Actime.Services.Services
 {
     public class MembershipService : BaseCrudService<Model.Entities.Membership,MembershipSearchObject, Database.Membership, MembershipInsertRequest, MembershipUpdateRequest>, IMembershipService
     {
-        public MembershipService(ActimeContext context, IMapper mapper) : base(context, mapper)
+        private readonly IBus _bus;
+        private int _previousMembershipStatusId;
+
+        public MembershipService(ActimeContext context, IMapper mapper, IBus bus) : base(context, mapper)
         {
+            _bus = bus ?? throw new ArgumentNullException(nameof(bus));
         }
 
         protected override IQueryable<Membership> ApplyFilter(IQueryable<Membership> query, MembershipSearchObject search)
@@ -89,6 +95,48 @@ namespace Actime.Services.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        protected override Task OnUpdating(Membership entity, MembershipUpdateRequest request)
+        {
+            _previousMembershipStatusId = entity.MembershipStatusId;
+            return Task.CompletedTask;
+        }
+
+        protected override async Task OnUpdated(Membership entity)
+        {
+            // Check if enrollment status changed from Pending to Approved or Rejected
+            if (_previousMembershipStatusId == 1 && entity.MembershipStatusId != 1)
+            {
+                await PublishMembershipNotificationAsync(entity);
+            }
+        }
+
+        private async Task PublishMembershipNotificationAsync(Membership entity)
+        {
+            // Only notify for approved (2) or rejected (3) status
+            if (entity.MembershipStatusId != 2 && entity.MembershipStatusId != 3)
+                return;
+
+            var organization = await _context.Set<Database.Organization>()
+                .Where(o => o.Id == entity.OrganizationId)
+                .Select(o => new { o.Name })
+                .FirstOrDefaultAsync();
+
+            if (organization == null)
+                return;
+
+            var message = new MembershipNotificationMessage
+            {
+                UserId = entity.UserId,
+                OrganizationId = entity.OrganizationId,
+                OrganizationName = organization.Name,
+                MembershipStatusId = entity.MembershipStatusId,
+                Timestamp = DateTime.Now
+            };
+
+            await _bus.PubSub.PublishAsync(message);
+            Console.WriteLine($"[RabbitMQ] Published membership notification: User {entity.UserId}, Org '{organization.Name}', Status {entity.MembershipStatusId}");
         }
 
         public async Task<bool> CancelMembershipByOrganizationAsync(int userId, int organizationId)

@@ -9,9 +9,6 @@ namespace Actime.Services.Services
 {
     public class NotificationService : BaseCrudService<Model.Entities.Notification, NotificationSearchObject, Database.Notification, NotificationInsertRequest, NotificationUpdateRequest>, INotificationService
     {
-        // Optional callback for sending real-time notifications
-        public static Func<int, string, Task>? OnNotificationCreated { get; set; }
-
         public NotificationService(Database.ActimeContext context, IMapper mapper) : base(context, mapper)
         {
         }
@@ -68,22 +65,6 @@ namespace Actime.Services.Services
         {
             entity.CreatedAt = DateTime.Now;
             return Task.CompletedTask;
-        }
-
-        protected override async Task OnCreated(Notification entity)
-        {
-            // Trigger optional callback for real-time notifications
-            if (OnNotificationCreated != null)
-            {
-                try
-                {
-                    await OnNotificationCreated(entity.UserId, entity.Message);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Notification] Failed to send real-time notification: {ex.Message}");
-                }
-            }
         }
 
         public async Task<bool> MarkAsReadAsync(int id)

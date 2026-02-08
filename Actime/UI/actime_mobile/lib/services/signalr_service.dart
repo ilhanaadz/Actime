@@ -51,6 +51,10 @@ class SignalRService {
   final StreamController<SignalRNotification> _notificationController =
       StreamController<SignalRNotification>.broadcast();
 
+  // Track recently received notifications to prevent duplicates
+  final Map<String, DateTime> _recentNotifications = {};
+  static const _duplicateWindowSeconds = 5;
+
   /// Stream of incoming notifications
   Stream<SignalRNotification> get notificationStream => _notificationController.stream;
 
@@ -100,6 +104,27 @@ class SignalRService {
         try {
           final data = arguments[0] as Map<String, dynamic>;
           final notification = SignalRNotification.fromJson(data);
+
+          // Create unique key for deduplication (type + eventId/orgId + message)
+          final notificationKey = '${notification.type}_${notification.eventId ?? notification.organizationId}_${notification.message}';
+
+          // Check if we received this notification recently (within duplicate window)
+          final now = DateTime.now();
+          if (_recentNotifications.containsKey(notificationKey)) {
+            final lastReceived = _recentNotifications[notificationKey]!;
+            if (now.difference(lastReceived).inSeconds < _duplicateWindowSeconds) {
+              debugPrint('[SignalR] Duplicate notification filtered: ${notification.title}');
+              return; // Skip duplicate
+            }
+          }
+
+          // Mark this notification as received
+          _recentNotifications[notificationKey] = now;
+
+          // Clean up old entries (older than duplicate window)
+          _recentNotifications.removeWhere((key, timestamp) =>
+            now.difference(timestamp).inSeconds > _duplicateWindowSeconds
+          );
 
           debugPrint('[SignalR] Received: ${notification.title} - ${notification.message}');
           _notificationController.add(notification);
