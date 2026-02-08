@@ -30,8 +30,7 @@ artifacts/
 # ============================================
 # Environment & Secrets
 # ============================================
-# .env - Allowed in order to make testing easier (faculty project requirement)
-# .env
+.env
 .env.local
 .env.*.local
 !.env.example
