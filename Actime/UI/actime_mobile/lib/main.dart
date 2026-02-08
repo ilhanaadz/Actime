@@ -12,18 +12,10 @@ import 'services/navigation_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load .env for BASE_URL or fallback
-  await dotenv.load(fileName: ".env");
-
-  // Stripe publishable key: try dart-define first, fallback to .env, fallback to dummy
-  final stripeKeyFromDefine = const String.fromEnvironment(
+   final stripeKey = const String.fromEnvironment(
     'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: '',
+    defaultValue: 'pk_test_51SyLLCDc2k6A8w1dWAv9YOOlcmg8f4XSj8IdO5KKY7wZB18SYwRSuwF4Oj3bIlWLxQOmP2s4o03RTRD8sOnmqrzs00eEWkNW1J',
   );
-
-  final stripeKey = stripeKeyFromDefine.isNotEmpty
-      ? stripeKeyFromDefine
-      : dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? 'pk_test_YOUR_KEY_HERE';
 
   Stripe.publishableKey = stripeKey;
 
