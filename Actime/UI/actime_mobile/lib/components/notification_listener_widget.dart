@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../screens/events/event_detail_screen.dart';
+import '../screens/notifications/notifications_screen.dart';
 import '../services/signalr_service.dart';
 
 /// Widget that listens for real-time SignalR notifications
@@ -16,17 +16,21 @@ class NotificationListenerWidget extends StatefulWidget {
   });
 
   @override
-  State<NotificationListenerWidget> createState() => _NotificationListenerWidgetState();
+  State<NotificationListenerWidget> createState() =>
+      _NotificationListenerWidgetState();
 }
 
-class _NotificationListenerWidgetState extends State<NotificationListenerWidget> {
+class _NotificationListenerWidgetState
+    extends State<NotificationListenerWidget> {
   final SignalRService _signalRService = SignalRService();
   StreamSubscription<SignalRNotification>? _subscription;
 
   @override
   void initState() {
     super.initState();
-    _subscription = _signalRService.notificationStream.listen(_handleNotification);
+    _subscription = _signalRService.notificationStream.listen(
+      _handleNotification,
+    );
   }
 
   @override
@@ -36,10 +40,8 @@ class _NotificationListenerWidgetState extends State<NotificationListenerWidget>
   }
 
   void _handleNotification(SignalRNotification notification) {
-    // Call custom handler if provided
     widget.onNotification?.call(notification);
 
-    // Show snackbar notification
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -55,10 +57,7 @@ class _NotificationListenerWidgetState extends State<NotificationListenerWidget>
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                notification.message,
-                style: const TextStyle(fontSize: 12),
-              ),
+              Text(notification.message, style: const TextStyle(fontSize: 12)),
             ],
           ),
           backgroundColor: const Color(0xFF0D7C8C),
@@ -80,16 +79,10 @@ class _NotificationListenerWidgetState extends State<NotificationListenerWidget>
   }
 
   void _navigateToNotification(SignalRNotification notification) {
-    if (notification.eventId != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => EventDetailScreen(
-            eventId: notification.eventId.toString(),
-          ),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => NotificationsScreen()),
+    );
   }
 
   @override
