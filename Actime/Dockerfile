@@ -9,6 +9,9 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # ============================================
 # Stage 2: Build
 # ============================================
