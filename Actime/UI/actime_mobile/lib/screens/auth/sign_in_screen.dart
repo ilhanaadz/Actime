@@ -61,7 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Admin korisnici ne mogu pristupiti mobilnoj aplikaciji'),
+              content: Text('Korisnički račun nije podržan u mobilnoj aplikaciji'),
               backgroundColor: AppColors.red,
             ),
           );

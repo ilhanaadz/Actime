@@ -10,7 +10,7 @@ class Validators {
   );
 
   static final RegExp _usernameRegex = RegExp(
-    r'^[a-zA-Z0-9_]+$',
+    r'^[a-zA-Z0-9_.]+$',
   );
 
   /// Validira da polje nije prazno
@@ -30,7 +30,7 @@ class Validators {
     return null;
   }
 
-  /// Validira username format (samo slova, brojevi i donja crta)
+  /// Validira username format (samo slova, brojevi, donja crta i tačka)
   static String? username(String? value) {
     if (value == null || value.isEmpty) return null; // Let required handle empty
     if (value.length < 3) {
@@ -40,7 +40,7 @@ class Validators {
       return 'Korisničko ime može imati maksimalno 50 znakova';
     }
     if (!_usernameRegex.hasMatch(value.trim())) {
-      return 'Korisničko ime može sadržavati samo slova, brojeve i donju crtu';
+      return 'Korisničko ime može sadržavati samo slova, brojeve, tačku i donju crtu';
     }
     return null;
   }

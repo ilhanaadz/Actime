@@ -3,6 +3,7 @@ using Actime.Model.Responses;
 using Actime.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Security.Claims;
 
 namespace Actime.Controllers
@@ -111,10 +112,11 @@ namespace Actime.Controllers
         {
             try
             {
+                // Re-encode: ASP.NET auto-decodes query params, but ConfirmEmailAsync expects URL-encoded token
                 await _authService.ConfirmEmailAsync(new ConfirmEmailRequest
                 {
                     UserId = userId,
-                    Token = token
+                    Token = WebUtility.UrlEncode(token)
                 });
 
                 return PhysicalFile(
