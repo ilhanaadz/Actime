@@ -194,35 +194,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Setup SignalR callback for real-time notifications
-NotificationService.OnNotificationCreated = async (userId, message) =>
-{
-    using var scope = app.Services.CreateScope();
-    var hubContext = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub>>();
-
-    try
-    {
-        var notificationData = new
-        {
-            Type = "notification",
-            Title = "Nova notifikacija",
-            Message = message,
-            Timestamp = DateTime.Now
-        };
-
-        await Microsoft.AspNetCore.SignalR.ClientProxyExtensions.SendAsync(
-            hubContext.Clients.Group($"user_{userId}"),
-            "ReceiveNotification",
-            notificationData);
-
-        Console.WriteLine($"[SignalR] Sent notification to user_{userId}");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[SignalR] Failed to send notification: {ex.Message}");
-    }
-};
-
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

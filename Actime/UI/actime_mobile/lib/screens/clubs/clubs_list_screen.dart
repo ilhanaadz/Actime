@@ -102,7 +102,7 @@ class _ClubsListScreenState extends State<ClubsListScreen> {
     try {
       final response = await _organizationService.getOrganizations(
         page: 1,
-        perPage: 20,
+        perPage: 10000,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
         sortBy: _sortBy,
         sortDescending: _sortDescending,

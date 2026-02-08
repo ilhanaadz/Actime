@@ -4,7 +4,7 @@ import '../../models/notification.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/signalr_service.dart';
-import '../../components/notification_badge.dart';
+import '../../services/notification_badge_controller.dart';
 import 'dart:async';
 
 class NotificationsScreen extends StatefulWidget {
@@ -18,6 +18,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   final AuthService _authService = AuthService();
   final NotificationService _notificationService = NotificationService();
   final SignalRService _signalRService = SignalRService();
+  final NotificationBadgeController _badgeController = NotificationBadgeController();
 
   List<AppNotification> _notifications = [];
   bool _isLoading = true;
@@ -159,7 +160,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         }
       });
 
-      notificationBadgeKey.currentState?.refreshCount();
+      _badgeController.refresh();
     }
   }
 
@@ -187,7 +188,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       await _notificationService.markAsRead(notification.id);
     }
 
-    notificationBadgeKey.currentState?.refreshCount();
+    _badgeController.refresh();
   }
 
   Future<void> _deleteNotification(AppNotification notification) async {

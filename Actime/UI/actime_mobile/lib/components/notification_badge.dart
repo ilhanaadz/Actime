@@ -4,6 +4,7 @@ import '../constants/constants.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/signalr_service.dart';
+import '../services/notification_badge_controller.dart';
 
 /// Notification bell icon with badge showing unread count
 /// Automatically updates when new notifications arrive via SignalR
@@ -28,9 +29,11 @@ class _NotificationBadgeState extends State<NotificationBadge>
   final NotificationService _notificationService = NotificationService();
   final SignalRService _signalRService = SignalRService();
   final AuthService _authService = AuthService();
+  final NotificationBadgeController _badgeController = NotificationBadgeController();
 
   int _unreadCount = 0;
   StreamSubscription<SignalRNotification>? _signalRSubscription;
+  StreamSubscription<void>? _refreshSubscription;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -40,11 +43,13 @@ class _NotificationBadgeState extends State<NotificationBadge>
     _setupAnimations();
     _loadUnreadCount();
     _setupSignalRListener();
+    _setupRefreshListener();
   }
 
   @override
   void dispose() {
     _signalRSubscription?.cancel();
+    _refreshSubscription?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -72,6 +77,12 @@ class _NotificationBadgeState extends State<NotificationBadge>
     });
   }
 
+  void _setupRefreshListener() {
+    _refreshSubscription = _badgeController.refreshStream.listen((_) {
+      _loadUnreadCount();
+    });
+  }
+
   void _playBounceAnimation() {
     _animationController.forward().then((_) {
       _animationController.reverse();
@@ -92,11 +103,6 @@ class _NotificationBadgeState extends State<NotificationBadge>
     } catch (e) {
       debugPrint('Error loading unread count: $e');
     }
-  }
-
-  /// Call this to refresh the unread count (e.g., after viewing notifications)
-  void refreshCount() {
-    _loadUnreadCount();
   }
 
   @override
@@ -150,8 +156,3 @@ class _NotificationBadgeState extends State<NotificationBadge>
     );
   }
 }
-
-/// Global key to access NotificationBadge state from anywhere
-/// Usage: notificationBadgeKey.currentState?.refreshCount();
-final GlobalKey<_NotificationBadgeState> notificationBadgeKey =
-    GlobalKey<_NotificationBadgeState>();

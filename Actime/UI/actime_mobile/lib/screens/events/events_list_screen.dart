@@ -108,7 +108,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
     try {
       final response = await _eventService.getEvents(
         page: _currentPage,
-        perPage: 10,
+        perPage: 10000,
         search: _searchController.text.isNotEmpty ? _searchController.text : null,
         status: _selectedStatus,
         sortBy: 'Start',

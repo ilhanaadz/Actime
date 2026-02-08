@@ -12,6 +12,7 @@ export 'category_service.dart';
 export 'participation_service.dart';
 export 'review_service.dart';
 export 'notification_service.dart';
+export 'notification_badge_controller.dart';
 export 'membership_service.dart';
 export 'location_service.dart';
 export 'address_service.dart';
