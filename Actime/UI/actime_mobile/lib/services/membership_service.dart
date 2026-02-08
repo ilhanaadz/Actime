@@ -19,10 +19,6 @@ class MembershipService {
     int pageSize = 10,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Membership>>(
       ApiConfig.membership,
       queryParams: {
@@ -36,10 +32,6 @@ class MembershipService {
 
   /// Get membership by ID
   Future<ApiResponse<Membership>> getMembershipById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Membership>(
       ApiConfig.membershipById(id),
       fromJson: (json) => Membership.fromJson(json),
@@ -54,10 +46,6 @@ class MembershipService {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<Membership>(
       ApiConfig.membership,
       body: {
@@ -78,10 +66,6 @@ class MembershipService {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.put<Membership>(
       ApiConfig.membershipById(id),
       body: {
@@ -95,10 +79,6 @@ class MembershipService {
 
   /// Delete membership
   Future<ApiResponse<void>> deleteMembership(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.membershipById(id));
   }
 }

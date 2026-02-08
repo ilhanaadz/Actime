@@ -1,7 +1,6 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
 
 class EventService {
   static final EventService _instance = EventService._internal();
@@ -9,7 +8,6 @@ class EventService {
   EventService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<PaginatedResponse<Event>>> getEvents({
     int page = 1,
@@ -55,16 +53,6 @@ class EventService {
           break;
       }
     }
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getEvents(
-        page: page,
-        pageSize: effectivePageSize,
-        search: search,
-        sortBy: sortBy,
-        eventStatusId: effectiveStatusId,
-        startDate: startDate,
-      );
-    }
 
     final queryParams = <String, String>{
       'Page': page.toString(),
@@ -102,10 +90,6 @@ class EventService {
   }
 
   Future<ApiResponse<Event>> getEventById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getEventById(id);
-    }
-
     return await _apiService.get<Event>(
       ApiConfig.eventById(id),
       fromJson: (json) => Event.fromJson(json),
@@ -177,10 +161,6 @@ class EventService {
   }
 
   Future<ApiResponse<void>> deleteEvent(int id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.deleteEvent(id);
-    }
-
     return await _apiService.delete<void>(
       ApiConfig.eventById(id),
     );

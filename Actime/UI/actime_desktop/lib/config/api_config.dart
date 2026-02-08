@@ -1,12 +1,7 @@
 /// API Configuration for Actime Desktop (Admin Panel)
 ///
 /// This class contains all API-related configuration settings.
-/// Toggle [useMockApi] to switch between mock and real API.
 class ApiConfig {
-  // Toggle this to switch between mock and real API
-  // Set to false to use real backend API
-  static const bool useMockApi = false;
-
   // Base URL for the API - Update this to match your backend server
   static const String baseUrl = 'http://localhost:5171';
 

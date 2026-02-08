@@ -2,7 +2,6 @@
 library;
 
 export 'api_service.dart';
-export 'mock_api_service.dart';
 export 'token_service.dart';
 export 'navigation_service.dart';
 export 'auth_service.dart';

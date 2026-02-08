@@ -2,7 +2,6 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
-import 'mock_api_service.dart';
 
 /// Enrollment service for managing club membership applications
 /// Uses /Membership endpoint on backend
@@ -12,7 +11,6 @@ class EnrollmentService {
   EnrollmentService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
   final AuthService _authService = AuthService();
 
   // MembershipStatus IDs from backend
@@ -29,24 +27,6 @@ class EnrollmentService {
     required String organizationId,
     String? message,
   }) async {
-    if (ApiConfig.useMockApi) {
-      final mockResponse = await _mockService.createEnrollment(
-        organizationId: organizationId,
-        message: message,
-      );
-      // Convert mock Enrollment to Membership
-      if (mockResponse.success && mockResponse.data != null) {
-        return ApiResponse.success(Membership(
-          id: int.tryParse(mockResponse.data!.id) ?? 0,
-          userId: int.tryParse(mockResponse.data!.userId) ?? 0,
-          organizationId: int.tryParse(mockResponse.data!.organizationId) ?? 0,
-          membershipStatusId: statusPending,
-          createdAt: mockResponse.data!.createdAt,
-        ));
-      }
-      return ApiResponse.error(mockResponse.message ?? 'Greška');
-    }
-
     final userId = _authService.currentUserId;
     if (userId == null) {
       return ApiResponse.error('Morate biti prijavljeni');
@@ -66,10 +46,6 @@ class EnrollmentService {
 
   /// Cancel enrollment (delete membership)
   Future<ApiResponse<void>> cancelEnrollment(String id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null, message: 'Prijava je uspješno otkazana');
-    }
-
     return await _apiService.delete('${ApiConfig.membership}/$id');
   }
 
@@ -79,16 +55,6 @@ class EnrollmentService {
     int pageSize = 10,
     EnrollmentStatus? status,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(
-        data: [],
-        currentPage: page,
-        lastPage: 1,
-        perPage: pageSize,
-        total: 0,
-      ));
-    }
-
     final userId = _authService.currentUserId;
     if (userId == null) {
       return ApiResponse.error('Morate biti prijavljeni');

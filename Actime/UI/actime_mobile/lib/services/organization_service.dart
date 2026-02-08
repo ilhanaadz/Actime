@@ -2,7 +2,6 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'enrollment_service.dart';
-import 'mock_api_service.dart';
 
 /// Organization (club) service
 /// Communicates with backend OrganizationController
@@ -12,7 +11,6 @@ class OrganizationService {
   OrganizationService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
 
   /// Get organizations (paginated)
   /// Backend uses OrganizationSearchObject for filtering
@@ -29,15 +27,6 @@ class OrganizationService {
   }) async {
     final effectivePageSize = perPage ?? pageSize;
     final effectiveSearch = search ?? text;
-
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getOrganizations(
-        page: page,
-        perPage: effectivePageSize,
-        search: effectiveSearch,
-        sortBy: sortBy,
-      );
-    }
 
     return await _apiService.get<PaginatedResponse<Organization>>(
       ApiConfig.organization,
@@ -56,10 +45,6 @@ class OrganizationService {
 
   /// Get organization by ID
   Future<ApiResponse<Organization>> getOrganizationById(String id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getOrganizationById(id);
-    }
-
     return await _apiService.get<Organization>(
       '${ApiConfig.organization}/$id',
       fromJson: (json) => Organization.fromJson(json),
@@ -68,10 +53,6 @@ class OrganizationService {
 
   /// Update my organization (for organization role)
   Future<ApiResponse<Organization>> updateMyOrganization(Map<String, dynamic> data) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.updateOrganization('1', data);
-    }
-
     if (data.containsKey('LogoUrl')) {
       final path = data['LogoUrl'] as String?;
       if (path != null && !path.startsWith(RegExp(r'https?:\/\/'))) {
@@ -91,10 +72,6 @@ class OrganizationService {
     String id,
     Map<String, dynamic> data,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.updateOrganization(id, data);
-    }
-
     return await _apiService.put<Organization>(
       '${ApiConfig.organization}/$id',
       body: data,
@@ -104,18 +81,10 @@ class OrganizationService {
 
   /// Delete organization by ID (admin only)
   Future<ApiResponse<void>> deleteOrganization(String id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null, message: 'Organizacija je uspješno obrisana');
-    }
-
     return await _apiService.delete('${ApiConfig.organization}/$id');
   }
 
   Future<ApiResponse<void>> deleteMyOrganization() async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null, message: 'Organizacija je uspješno obrisana');
-    }
-
     return await _apiService.delete(ApiConfig.organizationMy());
   }
 
@@ -123,25 +92,6 @@ class OrganizationService {
     String organizationId, {
     EnrollmentStatus? status,
   }) async {
-    if (ApiConfig.useMockApi) {
-      final mockResponse = await _mockService.getOrganizationEnrollments(
-        organizationId,
-        status: status,
-      );
-      // Convert mock Enrollments to Memberships
-      if (mockResponse.success && mockResponse.data != null) {
-        final memberships = mockResponse.data!.data.map((e) => Membership(
-          id: int.tryParse(e.id) ?? 0,
-          userId: int.tryParse(e.userId) ?? 0,
-          organizationId: int.tryParse(e.organizationId) ?? 0,
-          membershipStatusId: _mapEnrollmentStatusToMembershipStatusId(e.status),
-          createdAt: e.createdAt,
-        )).toList();
-        return ApiResponse.success(memberships);
-      }
-      return ApiResponse.error(mockResponse.message ?? 'Greška');
-    }
-
     // Map EnrollmentStatus to MembershipStatusId
     int? membershipStatusId;
     if (status != null) {
@@ -165,20 +115,6 @@ class OrganizationService {
   /// Approve enrollment (set MembershipStatusId to Active)
   /// Uses PUT /Membership/{id}
   Future<ApiResponse<Membership>> approveEnrollment(String membershipId) async {
-    if (ApiConfig.useMockApi) {
-      final mockResponse = await _mockService.approveEnrollment(membershipId);
-      if (mockResponse.success && mockResponse.data != null) {
-        return ApiResponse.success(Membership(
-          id: int.tryParse(mockResponse.data!.id) ?? 0,
-          userId: int.tryParse(mockResponse.data!.userId) ?? 0,
-          organizationId: int.tryParse(mockResponse.data!.organizationId) ?? 0,
-          membershipStatusId: EnrollmentService.statusActive,
-          createdAt: mockResponse.data!.createdAt,
-        ));
-      }
-      return ApiResponse.error(mockResponse.message ?? 'Greška');
-    }
-
     return await _apiService.put<Membership>(
       '${ApiConfig.membership}/$membershipId',
       body: {
@@ -192,20 +128,6 @@ class OrganizationService {
   /// Reject enrollment (set MembershipStatusId to Rejected)
   /// Uses PUT /Membership/{id}
   Future<ApiResponse<Membership>> rejectEnrollment(String membershipId, {String? reason}) async {
-    if (ApiConfig.useMockApi) {
-      final mockResponse = await _mockService.rejectEnrollment(membershipId, reason: reason);
-      if (mockResponse.success && mockResponse.data != null) {
-        return ApiResponse.success(Membership(
-          id: int.tryParse(mockResponse.data!.id) ?? 0,
-          userId: int.tryParse(mockResponse.data!.userId) ?? 0,
-          organizationId: int.tryParse(mockResponse.data!.organizationId) ?? 0,
-          membershipStatusId: EnrollmentService.statusRejected,
-          createdAt: mockResponse.data!.createdAt,
-        ));
-      }
-      return ApiResponse.error(mockResponse.message ?? 'Greška');
-    }
-
     return await _apiService.put<Membership>(
       '${ApiConfig.membership}/$membershipId',
       body: {
@@ -234,18 +156,6 @@ class OrganizationService {
   Future<ApiResponse<List<EventParticipation>>> getOrganizationParticipations(
     String organizationId,
   ) async {
-    if (ApiConfig.useMockApi) {
-      final mockResponse = await _mockService.getOrganizationParticipations(
-        organizationId,
-        page: 1,
-        perPage: 999999,
-      );
-      if (mockResponse.success && mockResponse.data != null) {
-        return ApiResponse.success(mockResponse.data!.data);
-      }
-      return ApiResponse.error(mockResponse.message ?? 'Greška');
-    }
-
     return await _apiService.get<List<EventParticipation>>(
       '${ApiConfig.organization}/$organizationId/participations',
       fromJson: (json) => (json as List).map((item) => EventParticipation.fromJson(item)).toList(),

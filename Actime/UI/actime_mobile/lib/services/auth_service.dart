@@ -1,7 +1,6 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
 import 'signalr_service.dart';
 import 'token_service.dart';
 import 'navigation_service.dart';
@@ -16,7 +15,6 @@ class AuthService {
   }
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
   final TokenService _tokenService = TokenService();
   final SignalRService _signalRService = SignalRService();
   final NavigationService _navigationService = NavigationService();
@@ -73,17 +71,11 @@ class AuthService {
   bool get isOrganization => _currentAuth?.isOrganization ?? false;
 
   Future<ApiResponse<AuthResponse>> login(String emailOrUsername, String password) async {
-    ApiResponse<AuthResponse> response;
-
-    if (ApiConfig.useMockApi) {
-      response = await _mockService.login(emailOrUsername, password);
-    } else {
-      response = await _apiService.post<AuthResponse>(
-        ApiConfig.login,
-        body: {'EmailOrUsername': emailOrUsername, 'Password': password},
-        fromJson: (json) => AuthResponse.fromJson(json),
-      );
-    }
+    final response = await _apiService.post<AuthResponse>(
+      ApiConfig.login,
+      body: {'EmailOrUsername': emailOrUsername, 'Password': password},
+      fromJson: (json) => AuthResponse.fromJson(json),
+    );
 
     if (response.success && response.data != null) {
       _currentAuth = response.data;
@@ -101,17 +93,11 @@ class AuthService {
   }
 
   Future<ApiResponse<AuthResponse>> register(RegisterRequest request) async {
-    ApiResponse<AuthResponse> response;
-
-    if (ApiConfig.useMockApi) {
-      response = await _mockService.register(request);
-    } else {
-      response = await _apiService.post<AuthResponse>(
-        ApiConfig.register,
-        body: request.toJson(),
-        fromJson: (json) => AuthResponse.fromJson(json),
-      );
-    }
+    final response = await _apiService.post<AuthResponse>(
+      ApiConfig.register,
+      body: request.toJson(),
+      fromJson: (json) => AuthResponse.fromJson(json),
+    );
 
     if (response.success && response.data != null) {
       _currentAuth = response.data;
@@ -129,21 +115,16 @@ class AuthService {
     // Disconnect from SignalR
     await _signalRService.disconnect();
 
-    if (!ApiConfig.useMockApi) {
-      await _apiService.post<Map<String, dynamic>>(
-        ApiConfig.logout,
-        fromJson: (json) => json,
-      );
-    }
+    await _apiService.post<Map<String, dynamic>>(
+      ApiConfig.logout,
+      fromJson: (json) => json,
+    );
+
     _currentAuth = null;
     await _tokenService.clearTokens();
   }
 
   Future<ApiResponse<AuthResponse>> refreshToken() async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock API ne podržava refresh token');
-    }
-
     final response = await _apiService.post<AuthResponse>(
       ApiConfig.refreshToken,
       fromJson: (json) => AuthResponse.fromJson(json),
@@ -162,10 +143,6 @@ class AuthService {
   }
 
   Future<ApiResponse<AuthResponse>> getCurrentUser() async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCurrentUserAuth();
-    }
-
     final response = await _apiService.get<AuthResponse>(
       ApiConfig.me,
       fromJson: (json) => AuthResponse.fromJson(json),
@@ -195,10 +172,6 @@ class AuthService {
   Future<ApiResponse<AuthResponse>> completeOrganization(
     CompleteOrganizationRequest request,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock API ne podržava ovu funkciju');
-    }
-
     final requestData = request.toJson();
     if (requestData.containsKey('LogoUrl')) {
       final path = requestData['LogoUrl'] as String?;
@@ -223,10 +196,6 @@ class AuthService {
   Future<ApiResponse<Map<String, dynamic>>> changePassword(
     ChangePasswordRequest request,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success({'message': 'Lozinka je uspješno promijenjena'});
-    }
-
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.changePassword,
       body: request.toJson(),
@@ -235,10 +204,6 @@ class AuthService {
   }
 
   Future<ApiResponse<Map<String, dynamic>>> forgotPassword(String email) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success({'message': 'Email za resetiranje lozinke je poslan'});
-    }
-
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.forgotPassword,
       body: {'Email': email},
@@ -249,10 +214,6 @@ class AuthService {
   Future<ApiResponse<Map<String, dynamic>>> resetPassword(
     ResetPasswordRequest request,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success({'message': 'Lozinka je uspješno resetirana'});
-    }
-
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.resetPassword,
       body: request.toJson(),
@@ -263,10 +224,6 @@ class AuthService {
   Future<ApiResponse<Map<String, dynamic>>> confirmEmail(
     ConfirmEmailRequest request,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success({'message': 'Email je uspješno potvrđen'});
-    }
-
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.confirmEmail,
       body: request.toJson(),
@@ -277,10 +234,6 @@ class AuthService {
   Future<ApiResponse<Map<String, dynamic>>> resendConfirmationEmail(
     String email,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success({'message': 'Email za potvrdu je ponovo poslan'});
-    }
-
     return await _apiService.post<Map<String, dynamic>>(
       ApiConfig.resendConfirmationEmail,
       body: {'Email': email},
@@ -289,12 +242,6 @@ class AuthService {
   }
 
   Future<ApiResponse<void>> deleteMyAccount({bool hardDelete = false}) async {
-    if (ApiConfig.useMockApi) {
-      _currentAuth = null;
-      await _tokenService.clearTokens();
-      return ApiResponse.success(null);
-    }
-
     final endpoint = hardDelete
         ? '${ApiConfig.deleteMyAccount}?hardDelete=true'
         : ApiConfig.deleteMyAccount;

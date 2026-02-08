@@ -6,7 +6,6 @@ export 'organization_service.dart';
 export 'event_service.dart';
 export 'category_service.dart';
 export 'dashboard_service.dart';
-export 'mock_api_service.dart';
 export 'location_service.dart';
 export 'membership_service.dart';
 export 'participation_service.dart';

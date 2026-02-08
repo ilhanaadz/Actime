@@ -1,7 +1,6 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
 
 /// Category service
 /// Communicates with backend CategoryController
@@ -11,7 +10,6 @@ class CategoryService {
   CategoryService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
 
   /// Get all categories (paginated)
   /// Backend uses TextSearchObject for filtering
@@ -23,14 +21,6 @@ class CategoryService {
     bool sortDescending = false,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCategories(
-        page: page,
-        perPage: pageSize,
-        search: text,
-      );
-    }
-
     return await _apiService.get<PaginatedResponse<Category>>(
       ApiConfig.category,
       queryParams: {
@@ -47,10 +37,6 @@ class CategoryService {
 
   /// Get category by ID
   Future<ApiResponse<Category>> getCategoryById(String id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCategoryById(id);
-    }
-
     return await _apiService.get<Category>(
       '${ApiConfig.category}/$id',
       fromJson: (json) => Category.fromJson(json),
@@ -62,14 +48,6 @@ class CategoryService {
     required String name,
     String? description,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(Category(
-        id: '100',
-        name: name,
-        description: description,
-      ));
-    }
-
     return await _apiService.post<Category>(
       ApiConfig.category,
       body: {
@@ -86,14 +64,6 @@ class CategoryService {
     String? name,
     String? description,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(Category(
-        id: id,
-        name: name ?? 'Updated',
-        description: description,
-      ));
-    }
-
     return await _apiService.put<Category>(
       '${ApiConfig.category}/$id',
       body: {
@@ -106,10 +76,6 @@ class CategoryService {
 
   /// Delete category
   Future<ApiResponse<void>> deleteCategory(String id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null, message: 'Kategorija je obrisana');
-    }
-
     return await _apiService.delete('${ApiConfig.category}/$id');
   }
 

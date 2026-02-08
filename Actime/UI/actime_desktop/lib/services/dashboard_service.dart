@@ -1,6 +1,4 @@
-import '../config/api_config.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
 
 class DashboardStats {
   final int totalUsers;
@@ -68,13 +66,8 @@ class DashboardService {
   DashboardService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<DashboardStats>> getStats() async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getDashboardStats();
-    }
-
     try {
       final response = await _apiService.get<DashboardStats>(
         '/Dashboard/stats',
@@ -91,16 +84,6 @@ class DashboardService {
   }
 
   Future<ApiResponse<List<OrganizationUserData>>> getUsersPerOrganization() async {
-    if (ApiConfig.useMockApi) {
-      // Return mock data for now
-      return ApiResponse(
-        success: true,
-        data: [],
-        message: 'Mock data',
-        statusCode: 200,
-      );
-    }
-
     try {
       final response = await _apiService.get<List<OrganizationUserData>>(
         '/Dashboard/users-per-organization',

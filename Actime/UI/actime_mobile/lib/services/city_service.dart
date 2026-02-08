@@ -20,10 +20,6 @@ class CityService {
     String? text,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<City>>(
       ApiConfig.city,
       queryParams: {
@@ -38,10 +34,6 @@ class CityService {
 
   /// Get city by ID - public endpoint
   Future<ApiResponse<City>> getCityById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<City>(
       ApiConfig.cityById(id),
       fromJson: (json) => City.fromJson(json),
@@ -53,10 +45,6 @@ class CityService {
     required String name,
     required int countryId,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<City>(
       ApiConfig.city,
       body: {

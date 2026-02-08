@@ -20,10 +20,6 @@ class LocationService {
     String? text,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Location>>(
       ApiConfig.location,
       queryParams: {
@@ -38,10 +34,6 @@ class LocationService {
 
   /// Get location by ID - public endpoint
   Future<ApiResponse<Location>> getLocationById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Location>(
       ApiConfig.locationById(id),
       fromJson: (json) => Location.fromJson(json),
@@ -56,10 +48,6 @@ class LocationService {
     String? description,
     String? contactInfo,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<Location>(
       ApiConfig.location,
       body: {
@@ -82,10 +70,6 @@ class LocationService {
     String? description,
     String? contactInfo,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.put<Location>(
       ApiConfig.locationById(id),
       body: {
@@ -101,10 +85,6 @@ class LocationService {
 
   /// Delete location
   Future<ApiResponse<void>> deleteLocation(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.locationById(id));
   }
 

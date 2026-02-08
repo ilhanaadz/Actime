@@ -1,7 +1,6 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
 
 class CategoryService {
   static final CategoryService _instance = CategoryService._internal();
@@ -9,7 +8,6 @@ class CategoryService {
   CategoryService._internal();
 
   final ApiService _apiService = ApiService();
-  final MockApiService _mockService = MockApiService();
 
   Future<ApiResponse<PaginatedResponse<Category>>> getCategories({
     int page = 1,
@@ -21,15 +19,6 @@ class CategoryService {
   }) async {
     // Use perPage if provided, otherwise use pageSize
     final effectivePageSize = perPage ?? pageSize;
-
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCategories(
-        page: page,
-        pageSize: effectivePageSize,
-        search: search,
-        sortBy: sortBy,
-      );
-    }
 
     final queryParams = <String, String>{
       'Page': page.toString(),
@@ -55,22 +44,6 @@ class CategoryService {
   }
 
   Future<ApiResponse<List<Category>>> getAllCategories() async {
-    if (ApiConfig.useMockApi) {
-      final response = await _mockService.getCategories(pageSize: 100);
-      if (response.success && response.data != null) {
-        return ApiResponse(
-          success: true,
-          data: response.data!.items,
-          statusCode: response.statusCode,
-        );
-      }
-      return ApiResponse(
-        success: false,
-        message: response.message,
-        statusCode: response.statusCode,
-      );
-    }
-
     return await _apiService.get<List<Category>>(
       ApiConfig.category,
       queryParams: {'PageSize': '100'},
@@ -90,10 +63,6 @@ class CategoryService {
   }
 
   Future<ApiResponse<Category>> getCategoryById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCategoryById(id);
-    }
-
     return await _apiService.get<Category>(
       ApiConfig.categoryById(id),
       fromJson: (json) => Category.fromJson(json),
@@ -104,10 +73,6 @@ class CategoryService {
     required String name,
     String? description,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.createCategory(name, description);
-    }
-
     return await _apiService.post<Category>(
       ApiConfig.category,
       body: {
@@ -123,10 +88,6 @@ class CategoryService {
     String? name,
     String? description,
   }) async {
-    if (ApiConfig.useMockApi && name != null) {
-      return await _mockService.updateCategory(id, name, description);
-    }
-
     final body = <String, dynamic>{};
     if (name != null) body['Name'] = name;
     if (description != null) body['Description'] = description;
@@ -139,10 +100,6 @@ class CategoryService {
   }
 
   Future<ApiResponse<void>> deleteCategory(int id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.deleteCategory(id);
-    }
-
     return await _apiService.delete<void>(
       ApiConfig.categoryById(id),
     );

@@ -208,7 +208,6 @@ namespace Actime
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
 
-
                 var regularUser = new User
                 {
                     UserName = "user",

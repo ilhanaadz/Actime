@@ -2,7 +2,6 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
-import 'mock_api_service.dart';
 
 /// User service for user-related operations
 /// Communicates with backend UserController
@@ -13,14 +12,9 @@ class UserService {
 
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
-  final MockApiService _mockService = MockApiService();
 
   /// Get user by ID
   Future<ApiResponse<User>> getUserById(String id) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getUserById(id);
-    }
-
     return await _apiService.get<User>(
       '${ApiConfig.user}/$id',
       fromJson: (json) => User.fromJson(json),
@@ -30,10 +24,6 @@ class UserService {
   /// Get current user profile
   /// Uses /me endpoint via AuthService and converts AuthResponse to User
   Future<ApiResponse<User>> getCurrentUser() async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getCurrentUser();
-    }
-
     // Call /me endpoint which returns AuthResponse
     final authResponse = await _authService.getCurrentUser();
 
@@ -51,10 +41,6 @@ class UserService {
 
   /// Update user profile (own profile)
   Future<ApiResponse<User>> updateProfile(Map<String, dynamic> data) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.updateUser('1', data);
-    }
-
     if (data.containsKey('ProfileImageUrl')) {
       final path = data['ProfileImageUrl'] as String?;
       if (path != null && !path.startsWith(RegExp(r'https?:\/\/'))) {
@@ -74,10 +60,6 @@ class UserService {
     String id,
     Map<String, dynamic> data,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.updateUser(id, data);
-    }
-
     return await _apiService.put<User>(
       '${ApiConfig.user}/$id',
       body: data,
@@ -87,10 +69,6 @@ class UserService {
 
   /// Delete user (admin only)
   Future<ApiResponse<void>> deleteUser(String id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null, message: 'Korisnik je obrisan');
-    }
-
     return await _apiService.delete('${ApiConfig.user}/$id');
   }
 
@@ -104,15 +82,6 @@ class UserService {
     bool sortDescending = false,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.getUsers(
-        page: page,
-        perPage: pageSize,
-        search: text,
-        sortBy: sortBy,
-      );
-    }
-
     return await _apiService.get<PaginatedResponse<User>>(
       ApiConfig.user,
       queryParams: {
@@ -128,14 +97,6 @@ class UserService {
   }
 
   Future<ApiResponse<List<Enrollment>>> getUserMemberships() async {
-    if (ApiConfig.useMockApi) {
-      final response = await _mockService.getUserMemberships('1');
-      if (response.success && response.data != null) {
-        return ApiResponse.success(response.data!.data);
-      }
-      return ApiResponse.error(response.message ?? 'Greška');
-    }
-
     return await _apiService.get<List<Enrollment>>(
       '${ApiConfig.membership}/my',
       fromJson: (json) {
@@ -149,10 +110,6 @@ class UserService {
 
   /// Cancel membership (leave organization) by enrollment ID
   Future<ApiResponse<void>> cancelMembership(String enrollmentId) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.cancelMembership(enrollmentId);
-    }
-
     return await _apiService.delete('${ApiConfig.membership}/$enrollmentId');
   }
 
@@ -160,10 +117,6 @@ class UserService {
   Future<ApiResponse<void>> cancelMembershipByOrganization(
     String organizationId,
   ) async {
-    if (ApiConfig.useMockApi) {
-      return await _mockService.cancelMembership(organizationId);
-    }
-
     return await _apiService.delete(
       ApiConfig.membershipByOrganization(int.parse(organizationId)),
     );
@@ -174,28 +127,6 @@ class UserService {
     int page = 1,
     int perPage = 10,
   }) async {
-    if (ApiConfig.useMockApi) {
-      // Return mock events filtered as past events
-      final eventsResponse = await _mockService.getEvents(
-        page: page,
-        perPage: perPage,
-      );
-      if (eventsResponse.success && eventsResponse.data != null) {
-        final pastEvents = eventsResponse.data!.items
-            .where((e) => e.status == EventStatus.completed)
-            .toList();
-        return ApiResponse.success(
-          PaginatedResponse<Event>(
-            items: pastEvents,
-            totalCount: pastEvents.length,
-            page: page,
-            pageSize: perPage,
-          ),
-        );
-      }
-      return eventsResponse;
-    }
-
     return await _apiService.get<PaginatedResponse<Event>>(
       '${ApiConfig.participation}/my/history',
       queryParams: {'page': page.toString(), 'perPage': perPage.toString()},
@@ -208,28 +139,6 @@ class UserService {
     int page = 1,
     int perPage = 10,
   }) async {
-    if (ApiConfig.useMockApi) {
-      // Return mock events filtered as upcoming
-      final eventsResponse = await _mockService.getEvents(
-        page: page,
-        perPage: perPage,
-      );
-      if (eventsResponse.success && eventsResponse.data != null) {
-        final upcomingEvents = eventsResponse.data!.items
-            .where((e) => e.status == EventStatus.upcoming)
-            .toList();
-        return ApiResponse.success(
-          PaginatedResponse<Event>(
-            items: upcomingEvents,
-            totalCount: upcomingEvents.length,
-            page: page,
-            pageSize: perPage,
-          ),
-        );
-      }
-      return eventsResponse;
-    }
-
     return await _apiService.get<PaginatedResponse<Event>>(
       '${ApiConfig.participation}/my',
       queryParams: {'page': page.toString(), 'perPage': perPage.toString()},

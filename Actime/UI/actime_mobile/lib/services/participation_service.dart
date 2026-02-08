@@ -20,10 +20,6 @@ class ParticipationService {
     int pageSize = 10,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Participation>>(
       ApiConfig.participation,
       queryParams: {
@@ -37,10 +33,6 @@ class ParticipationService {
 
   /// Get participation by ID
   Future<ApiResponse<Participation>> getParticipationById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Participation>(
       ApiConfig.participationById(id),
       fromJson: (json) => Participation.fromJson(json),
@@ -55,10 +47,6 @@ class ParticipationService {
     required int paymentStatusId,
     int? paymentMethodId,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<Participation>(
       ApiConfig.participation,
       body: {
@@ -74,10 +62,6 @@ class ParticipationService {
 
   /// Update attendance status
   Future<ApiResponse<bool>> updateAttendanceStatus(int id, int statusId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(true);
-    }
-
     return await _apiService.put<bool>(
       ApiConfig.participationAttendanceStatus(id, statusId),
       fromJson: (_) => true,
@@ -86,10 +70,6 @@ class ParticipationService {
 
   /// Update payment status
   Future<ApiResponse<bool>> updatePaymentStatus(int id, int statusId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(true);
-    }
-
     return await _apiService.put<bool>(
       ApiConfig.participationPaymentStatus(id, statusId),
       fromJson: (_) => true,
@@ -98,10 +78,6 @@ class ParticipationService {
 
   /// Get participation count for event
   Future<ApiResponse<int>> getEventParticipationCount(int eventId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(0);
-    }
-
     return await _apiService.get<int>(
       ApiConfig.participationEventCount(eventId),
       fromJson: (json) => json['count'] as int? ?? 0,
@@ -110,10 +86,6 @@ class ParticipationService {
 
   /// Get participations by user
   Future<ApiResponse<List<Participation>>> getParticipationsByUser(int userId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success([]);
-    }
-
     return await _apiService.get<List<Participation>>(
       ApiConfig.participationByUser(userId),
       fromJson: (json) {
@@ -126,10 +98,6 @@ class ParticipationService {
   /// Get user participated events (returns list of events user has participated in)
   /// Uses the new endpoint: GET /api/Participation/event/{userId}
   Future<ApiResponse<List<Event>>> getParticipatedEvents(int userId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success([]);
-    }
-
     return await _apiService.get<List<Event>>(
       ApiConfig.participationEventByUser(userId),
       fromJson: (json) => parseListResponse(json, Event.fromJson),
@@ -138,10 +106,6 @@ class ParticipationService {
 
   /// Delete participation
   Future<ApiResponse<void>> deleteParticipation(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.participationById(id));
   }
 }

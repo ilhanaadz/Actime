@@ -20,10 +20,6 @@ class CountryService {
     String? text,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Country>>(
       ApiConfig.country,
       queryParams: {
@@ -38,10 +34,6 @@ class CountryService {
 
   /// Get country by ID - public endpoint
   Future<ApiResponse<Country>> getCountryById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Country>(
       ApiConfig.countryById(id),
       fromJson: (json) => Country.fromJson(json),

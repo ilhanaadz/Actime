@@ -24,10 +24,6 @@ class ReviewService {
     int pageSize = 10,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Review>>(
       ApiConfig.review,
       queryParams: {
@@ -41,10 +37,6 @@ class ReviewService {
 
   /// Get review by ID
   Future<ApiResponse<Review>> getReviewById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Review>(
       ApiConfig.reviewById(id),
       fromJson: (json) => Review.fromJson(json),
@@ -58,10 +50,6 @@ class ReviewService {
     required int rating,
     String? comment,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<Review>(
       ApiConfig.review,
       body: {
@@ -76,10 +64,6 @@ class ReviewService {
 
   /// Update review
   Future<ApiResponse<Review>> updateReview(int id, {int? rating, String? comment}) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.put<Review>(
       ApiConfig.reviewById(id),
       body: {
@@ -92,20 +76,12 @@ class ReviewService {
 
   /// Delete review
   Future<ApiResponse<void>> deleteReview(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.reviewById(id));
   }
 
   /// Get reviews by organization (public endpoint)
   /// Uses raw HTTP because backend returns a plain JSON array, not a Map.
   Future<ApiResponse<List<Review>>> getReviewsByOrganization(int organizationId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success([]);
-    }
-
     try {
       final uri = Uri.parse('${ApiConfig.fullUrl}${ApiConfig.reviewByOrganization(organizationId)}');
       final headers = await _buildHeaders();
@@ -126,10 +102,6 @@ class ReviewService {
   /// Get organization average rating (public endpoint)
   /// Uses raw HTTP because backend returns a plain double, not a Map.
   Future<ApiResponse<double>> getOrganizationAverageRating(int organizationId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(0.0);
-    }
-
     try {
       final uri = Uri.parse('${ApiConfig.fullUrl}${ApiConfig.reviewOrganizationAverage(organizationId)}');
       final headers = await _buildHeaders();
@@ -148,10 +120,6 @@ class ReviewService {
   /// Get reviews by user
   /// Uses raw HTTP because backend returns a plain JSON array, not a Map.
   Future<ApiResponse<List<Review>>> getReviewsByUser(int userId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success([]);
-    }
-
     try {
       final uri = Uri.parse('${ApiConfig.fullUrl}${ApiConfig.reviewByUser(userId)}');
       final headers = await _buildHeaders();

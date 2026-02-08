@@ -19,10 +19,6 @@ class NotificationService {
     int pageSize = 10,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<AppNotification>>(
       ApiConfig.notification,
       queryParams: {
@@ -36,10 +32,6 @@ class NotificationService {
 
   /// Get notification by ID
   Future<ApiResponse<AppNotification>> getNotificationById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<AppNotification>(
       ApiConfig.notificationById(id),
       fromJson: (json) => AppNotification.fromJson(json),
@@ -52,10 +44,6 @@ class NotificationService {
     required String title,
     String? message,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<AppNotification>(
       ApiConfig.notification,
       body: {
@@ -69,10 +57,6 @@ class NotificationService {
 
   /// Mark notification as read
   Future<ApiResponse<bool>> markAsRead(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(true);
-    }
-
     return await _apiService.put<bool>(
       ApiConfig.notificationMarkAsRead(id),
       fromJson: (_) => true,
@@ -81,10 +65,6 @@ class NotificationService {
 
   /// Mark all notifications as read for user
   Future<ApiResponse<bool>> markAllAsRead(int userId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(true);
-    }
-
     return await _apiService.put<bool>(
       ApiConfig.notificationMarkAllAsRead(userId),
       fromJson: (_) => true,
@@ -93,10 +73,6 @@ class NotificationService {
 
   /// Get unread notification count
   Future<ApiResponse<int>> getUnreadCount(int userId) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(0);
-    }
-
     return await _apiService.get<int>(
       ApiConfig.notificationUnreadCount(userId),
       fromJson: (json) {
@@ -113,10 +89,6 @@ class NotificationService {
 
   /// Delete notification
   Future<ApiResponse<void>> deleteNotification(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.notificationById(id));
   }
 }

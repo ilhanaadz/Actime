@@ -20,10 +20,6 @@ class AddressService {
     String? text,
     bool includeTotalCount = true,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(PaginatedResponse(items: [], totalCount: 0));
-    }
-
     return await _apiService.get<PaginatedResponse<Address>>(
       ApiConfig.address,
       queryParams: {
@@ -38,10 +34,6 @@ class AddressService {
 
   /// Get address by ID - public endpoint
   Future<ApiResponse<Address>> getAddressById(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.get<Address>(
       ApiConfig.addressById(id),
       fromJson: (json) => Address.fromJson(json),
@@ -55,10 +47,6 @@ class AddressService {
     required int cityId,
     String? coordinates,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.post<Address>(
       ApiConfig.address,
       body: {
@@ -79,10 +67,6 @@ class AddressService {
     int? cityId,
     String? coordinates,
   }) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.error('Mock nije dostupan');
-    }
-
     return await _apiService.put<Address>(
       ApiConfig.addressById(id),
       body: {
@@ -97,10 +81,6 @@ class AddressService {
 
   /// Delete address
   Future<ApiResponse<void>> deleteAddress(int id) async {
-    if (ApiConfig.useMockApi) {
-      return ApiResponse.success(null);
-    }
-
     return await _apiService.delete(ApiConfig.addressById(id));
   }
 
