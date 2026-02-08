@@ -15,6 +15,7 @@ class NotificationService {
 
   /// Get notifications (paginated)
   Future<ApiResponse<PaginatedResponse<AppNotification>>> getNotifications({
+    int? userId,
     int page = 1,
     int pageSize = 10,
     bool includeTotalCount = true,
@@ -22,6 +23,7 @@ class NotificationService {
     return await _apiService.get<PaginatedResponse<AppNotification>>(
       ApiConfig.notification,
       queryParams: {
+        if (userId != null) 'UserId': userId.toString(),
         'Page': page.toString(),
         'PageSize': pageSize.toString(),
         'IncludeTotalCount': includeTotalCount.toString(),

@@ -15,6 +15,7 @@ class MembershipService {
 
   /// Get memberships (paginated)
   Future<ApiResponse<PaginatedResponse<Membership>>> getMemberships({
+    int? userId,
     int page = 1,
     int pageSize = 10,
     bool includeTotalCount = true,
@@ -22,6 +23,7 @@ class MembershipService {
     return await _apiService.get<PaginatedResponse<Membership>>(
       ApiConfig.membership,
       queryParams: {
+        if (userId != null) 'UserId': userId.toString(),
         'Page': page.toString(),
         'PageSize': pageSize.toString(),
         'IncludeTotalCount': includeTotalCount.toString(),

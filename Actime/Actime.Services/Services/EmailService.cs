@@ -1,19 +1,18 @@
-﻿using Actime.Services.Interfaces;
+﻿using Actime.Model.Entities;
+using Actime.Services.Interfaces;
+using EasyNetQ;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Net;
-using System.Net.Mail;
 
 namespace Actime.Services.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly EmailSettings _settings;
+        private readonly IBus _bus;
         private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger)
+        public EmailService(IBus bus, ILogger<EmailService> logger)
         {
-            _settings = settings.Value;
+            _bus = bus;
             _logger = logger;
         }
 
@@ -87,35 +86,17 @@ namespace Actime.Services.Services
         {
             try
             {
-                using var client = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort);
-                client.EnableSsl = _settings.EnableSsl;
-
-                if (!string.IsNullOrEmpty(_settings.SmtpUsername))
+                await _bus.PubSub.PublishAsync(new EmailMessage
                 {
-                    client.Credentials = new NetworkCredential(_settings.SmtpUsername, _settings.SmtpPassword);
-                }
-                else
-                {
-                    client.UseDefaultCredentials = false;
-                }
-
-                var message = new MailMessage
-                {
-                    From = new MailAddress(_settings.FromEmail, _settings.FromName),
+                    To = to,
                     Subject = subject,
-                    Body = htmlBody,
-                    IsBodyHtml = true
-                };
-
-                message.To.Add(to);
-
-                await client.SendMailAsync(message);
-                _logger.LogInformation("Email sent to {Email} with subject: {Subject}", to, subject);
+                    HtmlBody = htmlBody
+                });
+                _logger.LogInformation("Email queued for {Email} with subject: {Subject}", to, subject);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {Email}", to);
-                // Ne bacaj exception - email failure ne bi trebao blokirati flow
+                _logger.LogError(ex, "Failed to queue email for {Email}", to);
             }
         }
     }

@@ -1,10 +1,13 @@
 using Actime.Model.Entities;
+using Actime.Model.Settings;
 using Actime.Services.Database;
 using EasyNetQ;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Mail;
 using EventMessage = Actime.Model.Entities.Event;
 using DbNotification = Actime.Services.Database.Notification;
 
@@ -18,8 +21,10 @@ var services = new ServiceCollection();
 services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-var rabbitMqConnection = configuration.GetConnectionString("RabbitMQ") ?? "host=localhost";
-services.AddEasyNetQ(rabbitMqConnection);
+// RabbitMQ configuration
+var rabbitMqSettings = configuration.GetSection("RabbitMqSettings").Get<RabbitMqSettings>()
+    ?? new RabbitMqSettings();
+services.AddEasyNetQ(rabbitMqSettings.GetConnectionString());
 
 using var provider = services.BuildServiceProvider();
 
@@ -104,28 +109,39 @@ await bus.PubSub.SubscribeAsync<EventMessage>(
                     });
                 Console.WriteLine($"[SignalR] Notified owner (UserId: {organization.UserId})");
 
+                var memberIds = await context.Memberships
+                    .Where(m => m.OrganizationId == eventMessage.OrganizationId && !m.IsDeleted)
+                    .Select(m => m.UserId)
+                    .ToListAsync();
+
                 var followerIds = await context.Favorites
                     .Where(f => f.EntityType == "Organization" && f.EntityId == eventMessage.OrganizationId)
                     .Select(f => f.UserId)
-                    .Distinct()
                     .ToListAsync();
 
-                Console.WriteLine($"[Info] Found {followerIds.Count} followers for organization {organization.Name}");
+                var notificationRecipients = memberIds
+                    .Concat(followerIds)
+                    .Where(userId => userId != organization.UserId)
+                    .Distinct()
+                    .ToList();
 
-                foreach (var followerId in followerIds)
+                Console.WriteLine($"[Info] Found {memberIds.Count} members and {followerIds.Count} followers for organization {organization.Name}");
+                Console.WriteLine($"[Info] Total unique recipients (excluding owner): {notificationRecipients.Count}");
+
+                foreach (var recipientId in notificationRecipients)
                 {
-                    var followerNotification = new DbNotification
+                    var recipientNotification = new DbNotification
                     {
-                        UserId = followerId,
+                        UserId = recipientId,
                         Message = $"Nova aktivnost od {eventMessage.OrganizationName}: {eventMessage.Title}",
                         IsRead = false,
                         CreatedAt = DateTime.Now
                     };
-                    context.Notifications.Add(followerNotification);
+                    context.Notifications.Add(recipientNotification);
                 }
 
                 await context.SaveChangesAsync();
-                Console.WriteLine($"[DB] Created {followerIds.Count + 1} in-app notifications");
+                Console.WriteLine($"[DB] Created {notificationRecipients.Count + 1} in-app notifications (1 owner + {notificationRecipients.Count} members/followers)");
 
                 await hubConnection.InvokeAsync("SendToOrganizationFollowers",
                     eventMessage.OrganizationId,
@@ -154,11 +170,69 @@ await bus.PubSub.SubscribeAsync<EventMessage>(
     }
 );
 
+// Email Service - Subscribe to EmailMessage
+var emailSettings = configuration.GetSection("EmailSettings");
+var smtpHost = emailSettings["SmtpHost"] ?? "localhost";
+var smtpPort = int.Parse(emailSettings["SmtpPort"] ?? "1025");
+var smtpUsername = emailSettings["SmtpUsername"] ?? "";
+var smtpPassword = emailSettings["SmtpPassword"] ?? "";
+var fromEmail = emailSettings["FromEmail"] ?? "noreply@actime.com";
+var fromName = emailSettings["FromName"] ?? "Actime";
+var enableSsl = bool.Parse(emailSettings["EnableSsl"] ?? "false");
+
+await bus.PubSub.SubscribeAsync<EmailMessage>(
+    "email-service",
+    async emailMessage =>
+    {
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine($"\n[RabbitMQ] Received email request for: {emailMessage.To} - {emailMessage.Subject}");
+        Console.ResetColor();
+
+        try
+        {
+            using var client = new SmtpClient(smtpHost, smtpPort);
+            client.EnableSsl = enableSsl;
+
+            if (!string.IsNullOrEmpty(smtpUsername))
+            {
+                client.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+            }
+            else
+            {
+                client.UseDefaultCredentials = false;
+            }
+
+            var message = new MailMessage
+            {
+                From = new MailAddress(fromEmail, fromName),
+                Subject = emailMessage.Subject,
+                Body = emailMessage.HtmlBody,
+                IsBodyHtml = true
+            };
+            message.To.Add(emailMessage.To);
+
+            await client.SendMailAsync(message);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"[Email] Sent to {emailMessage.To}: {emailMessage.Subject}");
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[Email Error] Failed to send to {emailMessage.To}: {ex.Message}");
+            Console.ResetColor();
+        }
+    }
+);
+
 Console.ForegroundColor = ConsoleColor.Cyan;
 Console.WriteLine("\n========================================");
 Console.WriteLine("  Actime Notification Service Started");
 Console.WriteLine("========================================");
 Console.WriteLine("  Listening for RabbitMQ messages...");
+Console.WriteLine("  - Event notifications (notification-service)");
+Console.WriteLine("  - Email delivery (email-service)");
 Console.WriteLine("  Press [Enter] to exit.");
 Console.WriteLine("========================================\n");
 Console.ResetColor();

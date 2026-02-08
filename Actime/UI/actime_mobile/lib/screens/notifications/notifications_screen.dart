@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../models/notification.dart';
+import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/signalr_service.dart';
 import '../../components/notification_badge.dart';
@@ -14,6 +15,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final AuthService _authService = AuthService();
   final NotificationService _notificationService = NotificationService();
   final SignalRService _signalRService = SignalRService();
 
@@ -72,7 +74,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     });
 
     try {
+      final currentUser = _authService.currentAuth;
+      if (currentUser == null) return;
+
       final response = await _notificationService.getNotifications(
+        userId: currentUser.userId,
         page: _currentPage,
         pageSize: _pageSize,
       );
@@ -105,7 +111,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _currentPage++;
 
     try {
+      final currentUser = _authService.currentAuth;
+      if (currentUser == null) return;
+
       final response = await _notificationService.getNotifications(
+        userId: currentUser.userId,
         page: _currentPage,
         pageSize: _pageSize,
       );

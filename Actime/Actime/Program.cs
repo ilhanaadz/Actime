@@ -4,6 +4,7 @@ using Actime.Model.Settings;
 using Actime.Services.Database;
 using Actime.Services.Interfaces;
 using Actime.Services.Services;
+using EasyNetQ;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,12 @@ builder.Services.AddHostedService<EventRecommenderBackgroundService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMqSettings"));
+
+// RabbitMQ configuration
+var rabbitMqSettings = builder.Configuration.GetSection("RabbitMqSettings").Get<RabbitMqSettings>()
+    ?? new RabbitMqSettings();
+builder.Services.AddEasyNetQ(rabbitMqSettings.GetConnectionString());
 
 builder.Services.AddDbContext<ActimeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -186,6 +193,35 @@ builder.Services.AddCors(options =>
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
+
+// Setup SignalR callback for real-time notifications
+NotificationService.OnNotificationCreated = async (userId, message) =>
+{
+    using var scope = app.Services.CreateScope();
+    var hubContext = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub>>();
+
+    try
+    {
+        var notificationData = new
+        {
+            Type = "notification",
+            Title = "Nova notifikacija",
+            Message = message,
+            Timestamp = DateTime.Now
+        };
+
+        await Microsoft.AspNetCore.SignalR.ClientProxyExtensions.SendAsync(
+            hubContext.Clients.Group($"user_{userId}"),
+            "ReceiveNotification",
+            notificationData);
+
+        Console.WriteLine($"[SignalR] Sent notification to user_{userId}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[SignalR] Failed to send notification: {ex.Message}");
+    }
+};
 
 using (var scope = app.Services.CreateScope())
 {

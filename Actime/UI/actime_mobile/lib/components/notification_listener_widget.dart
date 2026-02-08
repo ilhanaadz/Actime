@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../screens/events/event_detail_screen.dart';
 import '../services/signalr_service.dart';
 
 /// Widget that listens for real-time SignalR notifications
@@ -79,13 +80,16 @@ class _NotificationListenerWidgetState extends State<NotificationListenerWidget>
   }
 
   void _navigateToNotification(SignalRNotification notification) {
-    // TODO: Implement navigation based on notification type
-    // Example:
-    // if (notification.eventId != null) {
-    //   Navigator.push(context, MaterialPageRoute(
-    //     builder: (_) => EventDetailScreen(eventId: notification.eventId!),
-    //   ));
-    // }
+    if (notification.eventId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EventDetailScreen(
+            eventId: notification.eventId.toString(),
+          ),
+        ),
+      );
+    }
   }
 
   @override

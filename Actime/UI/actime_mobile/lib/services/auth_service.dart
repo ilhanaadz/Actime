@@ -1,6 +1,7 @@
 import '../config/api_config.dart';
 import '../models/models.dart';
 import 'api_service.dart';
+import 'membership_service.dart';
 import 'signalr_service.dart';
 import 'token_service.dart';
 import 'navigation_service.dart';
@@ -18,6 +19,7 @@ class AuthService {
   final TokenService _tokenService = TokenService();
   final SignalRService _signalRService = SignalRService();
   final NavigationService _navigationService = NavigationService();
+  final MembershipService _membershipService = MembershipService();
 
   AuthResponse? _currentAuth;
 
@@ -87,6 +89,9 @@ class AuthService {
 
       // Connect to SignalR for real-time notifications
       await _signalRService.connect(response.data!.userId);
+
+      // Subscribe to organizations the user is a member of
+      await _subscribeToUserOrganizations(response.data!.userId);
     }
 
     return response;
@@ -153,6 +158,9 @@ class AuthService {
 
       // Connect to SignalR for real-time notifications
       await _signalRService.connect(response.data!.userId);
+
+      // Subscribe to organizations the user is a member of
+      await _subscribeToUserOrganizations(response.data!.userId);
     }
 
     return response;
@@ -255,5 +263,29 @@ class AuthService {
     }
 
     return response;
+  }
+
+  /// Subscribe to SignalR groups for organizations where user is a member
+  Future<void> _subscribeToUserOrganizations(int userId) async {
+    try {
+      final membershipsResponse = await _membershipService.getMemberships(
+        userId: userId,
+        pageSize: 100, // Get up to 100 memberships
+      );
+
+      if (membershipsResponse.success &&
+          membershipsResponse.data != null &&
+          membershipsResponse.data!.items.isNotEmpty) {
+
+        final organizationIds = membershipsResponse.data!.items
+            .map((membership) => membership.organizationId)
+            .toSet() // Remove duplicates
+            .toList();
+
+        await _signalRService.subscribeToOrganizations(organizationIds);
+      }
+    } catch (e) {
+      print('[AuthService] Failed to subscribe to organizations: $e');
+    }
   }
 }
